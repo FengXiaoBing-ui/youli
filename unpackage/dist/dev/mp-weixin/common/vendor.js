@@ -9481,9 +9481,9 @@ internalMixin(Vue);
 
 /***/ }),
 /* 26 */
-/*!******************************!*\
-  !*** D:/项目/youli/pages.json ***!
-  \******************************/
+/*!***************************!*\
+  !*** D:/youli/pages.json ***!
+  \***************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -9493,9 +9493,1136 @@ internalMixin(Vue);
 /* 27 */,
 /* 28 */,
 /* 29 */,
-/* 30 */,
-/* 31 */,
+/* 30 */
+/*!*******************************!*\
+  !*** D:/youli/common/chat.js ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 31));
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 33));
+var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ 23));
+var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ 24));
+var _api = _interopRequireDefault(__webpack_require__(/*! ../api/api.js */ 34));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+var chat = /*#__PURE__*/function () {
+  function chat(arg) {
+    (0, _classCallCheck2.default)(this, chat);
+    this.url = arg.url;
+    this.isOnline = false;
+    this.socket = null;
+    this.reconnectTime = 0;
+    this.isOpenReconnect = true;
+    // 获取当前用户相关信息
+    var user = uni.getStorageSync('userInfo');
+    this.user = user ? user : {};
+    // 初始化聊天对象
+    this.TO = false;
+    // 连接和监听
+    if (this.user.token) {
+      this.connectSocket();
+    }
+  }
+  // 断线重连
+  (0, _createClass2.default)(chat, [{
+    key: "reconnect",
+    value: function reconnect() {
+      if (this.isOnline) {
+        return;
+      }
+      if (this.reconnectTime >= 20) {
+        return this.reconnectConfirm();
+      }
+      this.reconnectTime += 1;
+      this.connectSocket();
+    }
+    // 连接socket
+  }, {
+    key: "connectSocket",
+    value: function connectSocket() {
+      var _this = this;
+      this.socket = uni.connectSocket({
+        url: this.url + "/" + this.user.userId,
+        complete: function complete() {}
+      });
+      // 监听连接成功
+      this.socket.onOpen(function () {
+        return _this.onOpen();
+      });
+      // 监听接收信息
+      this.socket.onMessage(function (res) {
+        return _this.onMessage(res);
+      });
+      // 监听断开
+      this.socket.onClose(function () {
+        return _this.onClose();
+      });
+      // 监听错误
+      this.socket.onError(function () {
+        return _this.onError();
+      });
+    }
+    // 监听打开
+  }, {
+    key: "onOpen",
+    value: function onOpen() {
+      // 用户上线
+      this.isOnline = true;
+      // console.log('socket连接成功')
+      this.isOpenReconnect = true;
+      // 获取用户离线消息
+      this.getMessage();
+    }
+    // 获取离线消息
+  }, {
+    key: "getMessage",
+    value: function getMessage() {
+      _api.default.chatLog();
+    }
+    // 监听关闭
+  }, {
+    key: "onClose",
+    value: function onClose() {
+      // 用户下线
+      this.isOnline = false;
+      this.socket = null;
+      if (this.isOpenReconnect) {
+        this.reconnect();
+      }
+      // console.log('socket连接关闭')
+    }
+    // 监听连接错误
+  }, {
+    key: "onError",
+    value: function onError() {
+      // 用户下线
+      this.isOnline = false;
+      this.socket = null;
+      if (this.isOpenReconnect) {
+        this.reconnect();
+      }
+      // console.log('socket连接错误')
+    }
+    // 监听接收消息
+  }, {
+    key: "onMessage",
+    value: function onMessage(data) {
+      var res = JSON.parse(data.data);
+      console.log(res);
+      // console.log('监听接收消息',res)
+      // 错误
+      switch (res.type) {
+        case -3:
+          uni.showToast({
+            title: res.date,
+            icon: 'none'
+          });
+          break;
+        // case 'moment': // 朋友圈更新
+        // 	this.handleMoment(res.data)
+        // 	break;
+        case 1:
+          // 朋友圈更新
+          this.handleOnMessage(res.data);
+          break;
+        default:
+          // 处理消息
+          // this.handleOnMessage(res.data)
+          break;
+      }
+    }
+    // 处理消息
+  }, {
+    key: "handleOnMessage",
+    value: function () {
+      var _handleOnMessage = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee(message) {
+        var _this$addChatDetail, data;
+        return _regenerator.default.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                // 添加消息记录到本地存储中
+                _this$addChatDetail = this.addChatDetail(message, false), data = _this$addChatDetail.data; // 更新会话列表
+                this.updateChatList(data, false);
+                // 全局通知
+                uni.$emit('onMessage', data);
+              case 3:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+      function handleOnMessage(_x) {
+        return _handleOnMessage.apply(this, arguments);
+      }
+      return handleOnMessage;
+    }() //发送消息
+  }, {
+    key: "send",
+    value: function send(message) {
+      var _this2 = this;
+      var onProgress = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      return new Promise( /*#__PURE__*/function () {
+        var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(result, reject) {
+          var _this2$addChatDetail, k, data;
+          return _regenerator.default.wrap(function _callee2$(_context2) {
+            while (1) {
+              switch (_context2.prev = _context2.next) {
+                case 0:
+                  // 添加消息历史记录
+                  _this2$addChatDetail = _this2.addChatDetail(message), k = _this2$addChatDetail.k; // 更新会话列表
+                  _this2.updateChatList(message);
+                  // 验证是否上线
+                  if (_this2.checkOnline()) {
+                    _context2.next = 4;
+                    break;
+                  }
+                  return _context2.abrupt("return", reject('未上线'));
+                case 4:
+                  // 提交到后端
+                  data = message.data;
+                  _api.default.sendMsg({
+                    to_id: message.to_id || _this2.TO.id,
+                    chat_type: message.chat_type || _this2.TO.chat_type,
+                    type: message.type,
+                    data: data,
+                    options: JSON.stringify(message.options)
+                  }).then(function (res) {
+                    // 发送成功
+                    message.id = res.id;
+                    message.sendStatus = 'success';
+                    if (message.type === 'video') {
+                      message.options = res.options;
+                    }
+
+                    // 更新指定历史记录
+                    // console.log('更新指定历史记录',message);
+                    _this2.updateChatDetail(message, k);
+                    result(res);
+                  }).catch(function (err) {
+                    // 发送失败
+                    message.sendStatus = 'fail';
+                    // 更新指定历史记录
+                    _this2.updateChatDetail(message, k);
+                    // 断线重连提示
+                    reject(err);
+                  });
+                case 6:
+                case "end":
+                  return _context2.stop();
+              }
+            }
+          }, _callee2);
+        }));
+        return function (_x2, _x3) {
+          return _ref.apply(this, arguments);
+        };
+      }());
+    }
+    // 添加聊天记录
+  }, {
+    key: "addChatDetail",
+    value: function addChatDetail(message) {
+      var isSend = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      // console.log('添加聊天记录');
+      // 获取对方id
+      var id = message.chat_type === 'user' ? isSend ? message.to_id : message.from_id : message.to_id;
+      // key值：chatDetail_当前用户id_会话类型_接收人/群id
+      var key = "chatDetail_".concat(this.user.id, "_").concat(message.chat_type, "_").concat(id);
+      // 获取原来的聊天记录
+      var list = this.getChatDetail(key);
+      // console.log('获取原来的聊天记录',list)
+      // 标识
+      message.k = 'k' + list.length;
+      list.push(message);
+      // 加入缓存
+      // console.log('加入缓存',key)
+      this.setStorage(key, list);
+      // 返回
+      return {
+        data: message,
+        k: message.k
+      };
+    }
+    // 更新会话列表
+  }, {
+    key: "updateChatList",
+    value: function updateChatList(message) {
+      var isSend = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      // 获取本地存储会话列表
+      var list = this.getChatList();
+      // 是否处于当前聊天中
+      var isCurrentChat = false;
+      // 接收人/群 id/头像/昵称
+      var id = 0;
+      var avatar = '';
+      var name = '';
+
+      // 判断私聊还是群聊
+      if (message.chat_type === 'user') {
+        // 私聊
+        // 聊天对象是否存在
+        isCurrentChat = this.TO ? isSend ? this.TO.id === message.to_id : this.TO.id === message.from_id : false;
+        id = isSend ? message.to_id : message.from_id;
+        avatar = isSend ? message.to_avatar : message.from_avatar;
+        name = isSend ? message.to_name : message.from_name;
+      } else {
+        // 群聊
+        isCurrentChat = this.TO && this.TO.id === message.to_id;
+        id = message.to_id;
+        avatar = message.to_avatar;
+        name = message.to_name;
+      }
+
+      // 会话是否存在
+      var index = list.findIndex(function (item) {
+        return item.chat_type === message.chat_type && item.id === id;
+      });
+      // 最后一条消息展现形式
+      // let data = isSend ? message.data : `${message.from_name}: ${message.data}`
+      var data = this.formatChatItemData(message, isSend);
+      // 会话不存在，创建会话
+      // 未读数是否 + 1
+      var noreadnum = isSend || isCurrentChat ? 0 : 1;
+      if (index === -1) {
+        var chatItem = {
+          id: id,
+          // 接收人/群 id
+          chat_type: message.chat_type,
+          // 接收类型 user单聊 group群聊
+          avatar: avatar,
+          // 接收人/群 头像
+          name: name,
+          // 接收人/群 昵称
+          update_time: new Date().getTime(),
+          // 最后一条消息的时间戳
+          data: data,
+          // 最后一条消息内容
+          type: message.type,
+          // 最后一条消息类型
+          noreadnum: noreadnum,
+          // 未读数
+          istop: false,
+          // 是否置顶
+          shownickname: false,
+          // 是否显示昵称
+          nowarn: false,
+          // 消息免打扰
+          strongwarn: false // 是否开启强提醒
+        };
+        // 群聊
+        if (message.chat_type === 'group' && message.group) {
+          chatItem.shownickname = true;
+          chatItem.name = name;
+          chatItem = _objectSpread(_objectSpread({}, chatItem), {}, {
+            user_id: message.group.user_id,
+            // 群管理员id
+            remark: "",
+            // 群公告
+            invite_confirm: 1 // 邀请确认
+          });
+        }
+
+        list.unshift(chatItem);
+      } else {
+        // 存在，更新会话
+        // 拿到当前会话
+        var item = list[index];
+        // 更新该会话最后一条消息时间，内容，类型
+        item.update_time = new Date().getTime();
+        item.name = name;
+        item.data = data;
+        item.type = message.type;
+        // 未读数更新
+        item.noreadnum += noreadnum;
+        // 置顶会话
+        list = this.listToFirst(list, index);
+      }
+      // 存储
+      var key = "chatlist_".concat(this.user.id);
+      this.setStorage(key, list);
+
+      // 更新未读数
+      // this.updateBadge(list)
+
+      // 通知更新vuex中的聊天会话列表
+      uni.$emit('onUpdateChatList', list);
+      return list;
+    }
+    // 验证是否上线
+  }, {
+    key: "checkOnline",
+    value: function checkOnline() {
+      if (!this.isOnline) {
+        // 断线重连提示
+        this.reconnectConfirm();
+        return false;
+      }
+      return true;
+    }
+    // 更新指定历史记录
+  }, {
+    key: "updateChatDetail",
+    value: function () {
+      var _updateChatDetail = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee3(message, k) {
+        var isSend,
+          id,
+          key,
+          list,
+          index,
+          _args3 = arguments;
+        return _regenerator.default.wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                isSend = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : true;
+                // 获取对方id
+                id = message.chat_type === 'user' ? isSend ? message.to_id : message.from_id : message.to_id; // key值：chatDetail_当前用户id_会话类型_接收人/群id
+                key = "chatDetail_".concat(this.user.id, "_").concat(message.chat_type, "_").concat(id); // console.log('key值',key)
+                // 获取原来的聊天记录
+                list = this.getChatDetail(key); // console.log('获取原来的聊天记录',list)
+                // 根据k查找对应聊天记录
+                index = list.findIndex(function (item) {
+                  return item.k === k;
+                }); // console.log('根据k查找对应聊天记录',index)
+                if (!(index === -1)) {
+                  _context3.next = 7;
+                  break;
+                }
+                return _context3.abrupt("return");
+              case 7:
+                list[index] = message;
+                // 存储
+                this.setStorage(key, list);
+              case 9:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3, this);
+      }));
+      function updateChatDetail(_x4, _x5) {
+        return _updateChatDetail.apply(this, arguments);
+      }
+      return updateChatDetail;
+    }() // 断线重连提示
+  }, {
+    key: "reconnectConfirm",
+    value: function reconnectConfirm() {
+      var _this3 = this;
+      this.reconnectTime = 0;
+      uni.showModal({
+        content: '你已经断线，是否重新连接？',
+        confirmText: "重新连接",
+        success: function success(res) {
+          if (res.confirm) {
+            _this3.connectSocket();
+          }
+        }
+      });
+    }
+    // 获取存储
+  }, {
+    key: "getStorage",
+    value: function getStorage(key) {
+      var list = uni.getStorageSync(key);
+      return list ? JSON.parse(list) : [];
+    }
+    // 设置存储
+  }, {
+    key: "setStorage",
+    value: function setStorage(key, value) {
+      return uni.setStorageSync(key, JSON.stringify(value));
+    }
+    // 获取聊天记录
+  }, {
+    key: "getChatDetail",
+    value: function getChatDetail() {
+      var key = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+      key = key ? key : "chatDetail_".concat(this.user.id, "_").concat(this.TO.chat_type, "_").concat(this.TO.id);
+      return this.getStorage(key);
+    }
+    // 格式化会话最后一条消息显示
+  }, {
+    key: "formatChatItemData",
+    value: function formatChatItemData(message, isSend) {
+      var data = message.data;
+      switch (message.type) {
+        case 'emoticon':
+          data = '[表情]';
+          break;
+        case 'image':
+          data = '[图片]';
+          break;
+        case 'audio':
+          data = '[语音]';
+          break;
+        case 'video':
+          data = '[视频]';
+          break;
+        case 'card':
+          data = '[名片]';
+          break;
+      }
+      data = isSend ? data : "".concat(message.from_name, ": ").concat(data);
+      return data;
+    }
+    // 数组置顶
+  }, {
+    key: "listToFirst",
+    value: function listToFirst(arr, index) {
+      if (index != 0) {
+        arr.unshift(arr.splice(index, 1)[0]);
+      }
+      return arr;
+    }
+    // 关闭连接
+  }, {
+    key: "close",
+    value: function close() {
+      if (this.socket) {
+        this.socket.close();
+      }
+      this.isOpenReconnect = false;
+      console.log('关闭成功');
+    }
+  }]);
+  return chat;
+}();
+var _default = chat;
+exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+/* 31 */
+/*!************************************************************************************************!*\
+  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
+  \************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+// TODO(Babel 8): Remove this file.
+
+var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime */ 32)();
+module.exports = runtime;
+
+/***/ }),
 /* 32 */
+/*!*******************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/regeneratorRuntime.js ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
+function _regeneratorRuntime() {
+  "use strict";
+
+  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+  module.exports = _regeneratorRuntime = function _regeneratorRuntime() {
+    return exports;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  var exports = {},
+    Op = Object.prototype,
+    hasOwn = Op.hasOwnProperty,
+    defineProperty = Object.defineProperty || function (obj, key, desc) {
+      obj[key] = desc.value;
+    },
+    $Symbol = "function" == typeof Symbol ? Symbol : {},
+    iteratorSymbol = $Symbol.iterator || "@@iterator",
+    asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
+    toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+  function define(obj, key, value) {
+    return Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: !0,
+      configurable: !0,
+      writable: !0
+    }), obj[key];
+  }
+  try {
+    define({}, "");
+  } catch (err) {
+    define = function define(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
+      generator = Object.create(protoGenerator.prototype),
+      context = new Context(tryLocsList || []);
+    return defineProperty(generator, "_invoke", {
+      value: makeInvokeMethod(innerFn, self, context)
+    }), generator;
+  }
+  function tryCatch(fn, obj, arg) {
+    try {
+      return {
+        type: "normal",
+        arg: fn.call(obj, arg)
+      };
+    } catch (err) {
+      return {
+        type: "throw",
+        arg: err
+      };
+    }
+  }
+  exports.wrap = wrap;
+  var ContinueSentinel = {};
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+  var getProto = Object.getPrototypeOf,
+    NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function (method) {
+      define(prototype, method, function (arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if ("throw" !== record.type) {
+        var result = record.arg,
+          value = result.value;
+        return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
+          invoke("next", value, resolve, reject);
+        }, function (err) {
+          invoke("throw", err, resolve, reject);
+        }) : PromiseImpl.resolve(value).then(function (unwrapped) {
+          result.value = unwrapped, resolve(result);
+        }, function (error) {
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+      reject(record.arg);
+    }
+    var previousPromise;
+    defineProperty(this, "_invoke", {
+      value: function value(method, arg) {
+        function callInvokeWithMethodAndArg() {
+          return new PromiseImpl(function (resolve, reject) {
+            invoke(method, arg, resolve, reject);
+          });
+        }
+        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+      }
+    });
+  }
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = "suspendedStart";
+    return function (method, arg) {
+      if ("executing" === state) throw new Error("Generator is already running");
+      if ("completed" === state) {
+        if ("throw" === method) throw arg;
+        return doneResult();
+      }
+      for (context.method = method, context.arg = arg;;) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+        if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
+          if ("suspendedStart" === state) throw state = "completed", context.arg;
+          context.dispatchException(context.arg);
+        } else "return" === context.method && context.abrupt("return", context.arg);
+        state = "executing";
+        var record = tryCatch(innerFn, self, context);
+        if ("normal" === record.type) {
+          if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
+          return {
+            value: record.arg,
+            done: context.done
+          };
+        }
+        "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+      }
+    };
+  }
+  function maybeInvokeDelegate(delegate, context) {
+    var methodName = context.method,
+      method = delegate.iterator[methodName];
+    if (undefined === method) return context.delegate = null, "throw" === methodName && delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
+    var record = tryCatch(method, delegate.iterator, context.arg);
+    if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+    var info = record.arg;
+    return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+  }
+  function pushTryEntry(locs) {
+    var entry = {
+      tryLoc: locs[0]
+    };
+    1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+  }
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal", delete record.arg, entry.completion = record;
+  }
+  function Context(tryLocsList) {
+    this.tryEntries = [{
+      tryLoc: "root"
+    }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
+  }
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) return iteratorMethod.call(iterable);
+      if ("function" == typeof iterable.next) return iterable;
+      if (!isNaN(iterable.length)) {
+        var i = -1,
+          next = function next() {
+            for (; ++i < iterable.length;) {
+              if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
+            }
+            return next.value = undefined, next.done = !0, next;
+          };
+        return next.next = next;
+      }
+    }
+    return {
+      next: doneResult
+    };
+  }
+  function doneResult() {
+    return {
+      value: undefined,
+      done: !0
+    };
+  }
+  return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty(Gp, "constructor", {
+    value: GeneratorFunctionPrototype,
+    configurable: !0
+  }), defineProperty(GeneratorFunctionPrototype, "constructor", {
+    value: GeneratorFunction,
+    configurable: !0
+  }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
+    var ctor = "function" == typeof genFun && genFun.constructor;
+    return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+  }, exports.mark = function (genFun) {
+    return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+  }, exports.awrap = function (arg) {
+    return {
+      __await: arg
+    };
+  }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    void 0 === PromiseImpl && (PromiseImpl = Promise);
+    var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
+    return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
+      return result.done ? result.value : iter.next();
+    });
+  }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
+    return this;
+  }), define(Gp, "toString", function () {
+    return "[object Generator]";
+  }), exports.keys = function (val) {
+    var object = Object(val),
+      keys = [];
+    for (var key in object) {
+      keys.push(key);
+    }
+    return keys.reverse(), function next() {
+      for (; keys.length;) {
+        var key = keys.pop();
+        if (key in object) return next.value = key, next.done = !1, next;
+      }
+      return next.done = !0, next;
+    };
+  }, exports.values = values, Context.prototype = {
+    constructor: Context,
+    reset: function reset(skipTempReset) {
+      if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) {
+        "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
+      }
+    },
+    stop: function stop() {
+      this.done = !0;
+      var rootRecord = this.tryEntries[0].completion;
+      if ("throw" === rootRecord.type) throw rootRecord.arg;
+      return this.rval;
+    },
+    dispatchException: function dispatchException(exception) {
+      if (this.done) throw exception;
+      var context = this;
+      function handle(loc, caught) {
+        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
+      }
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i],
+          record = entry.completion;
+        if ("root" === entry.tryLoc) return handle("end");
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc"),
+            hasFinally = hasOwn.call(entry, "finallyLoc");
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+          } else {
+            if (!hasFinally) throw new Error("try statement without catch or finally");
+            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+          }
+        }
+      }
+    },
+    abrupt: function abrupt(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+      var record = finallyEntry ? finallyEntry.completion : {};
+      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+    },
+    complete: function complete(record, afterLoc) {
+      if ("throw" === record.type) throw record.arg;
+      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+    },
+    finish: function finish(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+      }
+    },
+    "catch": function _catch(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if ("throw" === record.type) {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+      throw new Error("illegal catch attempt");
+    },
+    delegateYield: function delegateYield(iterable, resultName, nextLoc) {
+      return this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
+    }
+  }, exports;
+}
+module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 33 */
+/*!*****************************************************************!*\
+  !*** ./node_modules/@babel/runtime/helpers/asyncToGenerator.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+      args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+      _next(undefined);
+    });
+  };
+}
+module.exports = _asyncToGenerator, module.exports.__esModule = true, module.exports["default"] = module.exports;
+
+/***/ }),
+/* 34 */
+/*!***************************!*\
+  !*** D:/youli/api/api.js ***!
+  \***************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _request = _interopRequireDefault(__webpack_require__(/*! ./request.js */ 35));
+function login(data) {
+  return _request.default.post('/app/user/appletLogin', data);
+}
+function logout(data) {
+  return _request.default.get('/logout', data);
+}
+function sendMsg(data) {
+  return _request.default.post('/module/chat/startChat', data);
+}
+function chatLog(data) {
+  return _request.default.get('/module/chat/chatLog', data);
+}
+var _default = {
+  login: login,
+  //登录
+  logout: logout,
+  //退出登录
+  sendMsg: sendMsg,
+  //发送消息
+  chatLog: chatLog //聊天记录
+};
+exports.default = _default;
+
+/***/ }),
+/* 35 */
+/*!*******************************!*\
+  !*** D:/youli/api/request.js ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
+var _config = _interopRequireDefault(__webpack_require__(/*! ./config.js */ 36));
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+var _default = {
+  // 全局配置
+  common: {
+    baseUrl: _config.default.baseUrl,
+    header: {
+      'Content-Type': 'application/json;charset=UTF-8'
+    },
+    data: {},
+    method: 'GET',
+    dataType: 'json',
+    token: true
+  },
+  // 请求 返回promise
+  request: function request() {
+    var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    // 组织参数
+    options.url = this.common.baseUrl + options.url;
+    options.header = options.header || this.common.header;
+    options.data = options.data || this.common.data;
+    options.method = options.method || this.common.method;
+    options.dataType = options.dataType || this.common.dataType;
+    options.token = options.token === false ? false : this.common.token;
+
+    // 请求之前验证...
+    // token验证
+    // if (options.token) {
+    //     let token = uni.getStorageSync('token')
+    //     // 二次验证
+    //     if (!token) {
+    //         uni.showToast({ title: '请先登录', icon: 'none' });
+    //         // token不存在时跳转
+    //         return uni.reLaunch({
+    //             url: '/pages/index/index',
+    //         });
+    //     }
+    //     // 往header头中添加token
+    //     options.header.token = token
+    // }
+    // 请求
+    return new Promise(function (res, rej) {
+      // 请求中...
+      uni.request(_objectSpread(_objectSpread({}, options), {}, {
+        success: function success(result) {
+          // console.log(result);
+          // 返回原始数据
+          if (options.native) {
+            return res(result);
+          }
+          // 服务端失败
+          if (result.statusCode !== 200) {
+            if (options.toast !== false) {
+              uni.showToast({
+                title: result.data.data || '服务端失败',
+                icon: 'none'
+              });
+            }
+            // token不合法，直接退出登录
+            if (result.data.data === 'Token 令牌不合法!') {
+              console.log("需要退出登录");
+            }
+            return rej(result.data);
+          }
+          // 其他验证...
+          // 成功
+          var data = result.data.data;
+          res(data);
+        },
+        fail: function fail(error) {
+          uni.showToast({
+            title: error.errMsg || '请求失败',
+            icon: 'none'
+          });
+          return rej(error);
+        }
+      }));
+    });
+  },
+  // get请求
+  get: function get(url) {
+    var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    options.url = url;
+    options.data = data;
+    options.method = 'GET';
+    return this.request(options);
+  },
+  // post请求
+  post: function post(url) {
+    var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    options.url = url;
+    options.data = data;
+    options.method = 'POST';
+    options.header = {
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    };
+    return this.request(options);
+  },
+  // delete请求
+  del: function del(url) {
+    var data = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    options.url = url;
+    options.data = data;
+    options.method = 'DELETE';
+    return this.request(options);
+  },
+  // 上传文件
+  upload: function upload(url, data) {
+    var _this = this;
+    var onProgress = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+    return new Promise(function (result, reject) {
+      // 上传
+      var token = uni.getStorageSync('token');
+      if (!token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        });
+        // token不存在时跳转
+        return uni.reLaunch({
+          url: '/pages/common/login/login'
+        });
+      }
+      var uploadTask = uni.uploadFile({
+        url: _this.common.baseUrl + url,
+        filePath: data.filePath,
+        name: data.name || "files",
+        header: {
+          token: token
+        },
+        success: function success(res) {
+          if (res.statusCode !== 200) {
+            result(false);
+            return uni.showToast({
+              title: '上传失败',
+              icon: 'none'
+            });
+          }
+          var message = JSON.parse(res.data);
+          message.data = 'http://' + message.data;
+          result(message.data);
+        },
+        fail: function fail(err) {
+          console.log(err);
+          reject(err);
+        }
+      });
+      uploadTask.onProgressUpdate(function (res) {
+        if (typeof onProgress === 'function') {
+          onProgress(res.progress);
+        }
+      });
+    });
+  }
+};
+exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+/* 36 */
+/*!******************************!*\
+  !*** D:/youli/api/config.js ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  baseUrl: "http://192.168.3.20:30008",
+  scoketUrl: "ws://124.220.219.72:30002/webSocket"
+};
+exports.default = _default;
+
+/***/ }),
+/* 37 */,
+/* 38 */,
+/* 39 */
 /*!**********************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js ***!
   \**********************************************************************************************************/
@@ -9626,10 +10753,10 @@ function normalizeComponent (
 
 
 /***/ }),
-/* 33 */
-/*!********************************************!*\
-  !*** D:/项目/youli/uni.promisify.adaptor.js ***!
-  \********************************************/
+/* 40 */
+/*!*****************************************!*\
+  !*** D:/youli/uni.promisify.adaptor.js ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9649,10 +10776,10 @@ uni.addInterceptor({
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
-/* 34 */
-/*!*************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/index.js ***!
-  \*************************************************/
+/* 41 */
+/*!**********************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/index.js ***!
+  \**********************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9665,20 +10792,20 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _mixin = _interopRequireDefault(__webpack_require__(/*! ./libs/mixin/mixin.js */ 35));
-var _mpMixin = _interopRequireDefault(__webpack_require__(/*! ./libs/mixin/mpMixin.js */ 36));
-var _luchRequest = _interopRequireDefault(__webpack_require__(/*! ./libs/luch-request */ 37));
-var _route = _interopRequireDefault(__webpack_require__(/*! ./libs/util/route.js */ 55));
-var _colorGradient = _interopRequireDefault(__webpack_require__(/*! ./libs/function/colorGradient.js */ 59));
-var _test = _interopRequireDefault(__webpack_require__(/*! ./libs/function/test.js */ 60));
-var _debounce = _interopRequireDefault(__webpack_require__(/*! ./libs/function/debounce.js */ 61));
-var _throttle = _interopRequireDefault(__webpack_require__(/*! ./libs/function/throttle.js */ 62));
-var _index = _interopRequireDefault(__webpack_require__(/*! ./libs/function/index.js */ 63));
-var _config = _interopRequireDefault(__webpack_require__(/*! ./libs/config/config.js */ 66));
-var _props = _interopRequireDefault(__webpack_require__(/*! ./libs/config/props.js */ 67));
-var _zIndex = _interopRequireDefault(__webpack_require__(/*! ./libs/config/zIndex.js */ 157));
-var _color = _interopRequireDefault(__webpack_require__(/*! ./libs/config/color.js */ 115));
-var _platform = _interopRequireDefault(__webpack_require__(/*! ./libs/function/platform */ 158));
+var _mixin = _interopRequireDefault(__webpack_require__(/*! ./libs/mixin/mixin.js */ 42));
+var _mpMixin = _interopRequireDefault(__webpack_require__(/*! ./libs/mixin/mpMixin.js */ 43));
+var _luchRequest = _interopRequireDefault(__webpack_require__(/*! ./libs/luch-request */ 44));
+var _route = _interopRequireDefault(__webpack_require__(/*! ./libs/util/route.js */ 62));
+var _colorGradient = _interopRequireDefault(__webpack_require__(/*! ./libs/function/colorGradient.js */ 63));
+var _test = _interopRequireDefault(__webpack_require__(/*! ./libs/function/test.js */ 64));
+var _debounce = _interopRequireDefault(__webpack_require__(/*! ./libs/function/debounce.js */ 65));
+var _throttle = _interopRequireDefault(__webpack_require__(/*! ./libs/function/throttle.js */ 66));
+var _index = _interopRequireDefault(__webpack_require__(/*! ./libs/function/index.js */ 67));
+var _config = _interopRequireDefault(__webpack_require__(/*! ./libs/config/config.js */ 70));
+var _props = _interopRequireDefault(__webpack_require__(/*! ./libs/config/props.js */ 71));
+var _zIndex = _interopRequireDefault(__webpack_require__(/*! ./libs/config/zIndex.js */ 161));
+var _color = _interopRequireDefault(__webpack_require__(/*! ./libs/config/color.js */ 119));
+var _platform = _interopRequireDefault(__webpack_require__(/*! ./libs/function/platform */ 162));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 // 看到此报错，是因为没有配置vue.config.js的【transpileDependencies】，详见：https://www.uviewui.com/components/npmSetting.html#_5-cli模式额外配置
@@ -9738,10 +10865,10 @@ exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
-/* 35 */
-/*!************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/mixin/mixin.js ***!
-  \************************************************************/
+/* 42 */
+/*!*********************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/mixin/mixin.js ***!
+  \*********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9906,10 +11033,10 @@ exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
-/* 36 */
-/*!**************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/mixin/mpMixin.js ***!
-  \**************************************************************/
+/* 43 */
+/*!***********************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/mixin/mpMixin.js ***!
+  \***********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9929,10 +11056,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 37 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/index.js ***!
-  \*******************************************************************/
+/* 44 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/index.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9944,15 +11071,15 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _Request = _interopRequireDefault(__webpack_require__(/*! ./core/Request */ 38));
+var _Request = _interopRequireDefault(__webpack_require__(/*! ./core/Request */ 45));
 var _default = _Request.default;
 exports.default = _default;
 
 /***/ }),
-/* 38 */
-/*!**************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/core/Request.js ***!
-  \**************************************************************************/
+/* 45 */
+/*!***********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/core/Request.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9967,12 +11094,12 @@ exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
 var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ 23));
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ 24));
-var _dispatchRequest = _interopRequireDefault(__webpack_require__(/*! ./dispatchRequest */ 39));
-var _InterceptorManager = _interopRequireDefault(__webpack_require__(/*! ./InterceptorManager */ 47));
-var _mergeConfig = _interopRequireDefault(__webpack_require__(/*! ./mergeConfig */ 48));
-var _defaults = _interopRequireDefault(__webpack_require__(/*! ./defaults */ 49));
-var _utils = __webpack_require__(/*! ../utils */ 42);
-var _clone = _interopRequireDefault(__webpack_require__(/*! ../utils/clone */ 50));
+var _dispatchRequest = _interopRequireDefault(__webpack_require__(/*! ./dispatchRequest */ 46));
+var _InterceptorManager = _interopRequireDefault(__webpack_require__(/*! ./InterceptorManager */ 54));
+var _mergeConfig = _interopRequireDefault(__webpack_require__(/*! ./mergeConfig */ 55));
+var _defaults = _interopRequireDefault(__webpack_require__(/*! ./defaults */ 56));
+var _utils = __webpack_require__(/*! ../utils */ 49);
+var _clone = _interopRequireDefault(__webpack_require__(/*! ../utils/clone */ 57));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var Request = /*#__PURE__*/function () {
@@ -10155,10 +11282,10 @@ var Request = /*#__PURE__*/function () {
 exports.default = Request;
 
 /***/ }),
-/* 39 */
-/*!**********************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/core/dispatchRequest.js ***!
-  \**********************************************************************************/
+/* 46 */
+/*!*******************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/core/dispatchRequest.js ***!
+  \*******************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10170,17 +11297,17 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _index = _interopRequireDefault(__webpack_require__(/*! ../adapters/index */ 40));
+var _index = _interopRequireDefault(__webpack_require__(/*! ../adapters/index */ 47));
 var _default = function _default(config) {
   return (0, _index.default)(config);
 };
 exports.default = _default;
 
 /***/ }),
-/* 40 */
-/*!****************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/adapters/index.js ***!
-  \****************************************************************************/
+/* 47 */
+/*!*************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/adapters/index.js ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10193,10 +11320,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _buildURL = _interopRequireDefault(__webpack_require__(/*! ../helpers/buildURL */ 41));
-var _buildFullPath = _interopRequireDefault(__webpack_require__(/*! ../core/buildFullPath */ 43));
-var _settle = _interopRequireDefault(__webpack_require__(/*! ../core/settle */ 46));
-var _utils = __webpack_require__(/*! ../utils */ 42);
+var _buildURL = _interopRequireDefault(__webpack_require__(/*! ../helpers/buildURL */ 48));
+var _buildFullPath = _interopRequireDefault(__webpack_require__(/*! ../core/buildFullPath */ 50));
+var _settle = _interopRequireDefault(__webpack_require__(/*! ../core/settle */ 53));
+var _utils = __webpack_require__(/*! ../utils */ 49);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 /**
@@ -10258,10 +11385,10 @@ exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
-/* 41 */
-/*!******************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/helpers/buildURL.js ***!
-  \******************************************************************************/
+/* 48 */
+/*!***************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/helpers/buildURL.js ***!
+  \***************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10273,7 +11400,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = buildURL;
-var utils = _interopRequireWildcard(__webpack_require__(/*! ../utils */ 42));
+var utils = _interopRequireWildcard(__webpack_require__(/*! ../utils */ 49));
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 function encode(val) {
@@ -10328,10 +11455,10 @@ function buildURL(url, params) {
 }
 
 /***/ }),
-/* 42 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/utils.js ***!
-  \*******************************************************************/
+/* 49 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/utils.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10481,10 +11608,10 @@ function isUndefined(val) {
 }
 
 /***/ }),
-/* 43 */
-/*!********************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/core/buildFullPath.js ***!
-  \********************************************************************************/
+/* 50 */
+/*!*****************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/core/buildFullPath.js ***!
+  \*****************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10496,8 +11623,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = buildFullPath;
-var _isAbsoluteURL = _interopRequireDefault(__webpack_require__(/*! ../helpers/isAbsoluteURL */ 44));
-var _combineURLs = _interopRequireDefault(__webpack_require__(/*! ../helpers/combineURLs */ 45));
+var _isAbsoluteURL = _interopRequireDefault(__webpack_require__(/*! ../helpers/isAbsoluteURL */ 51));
+var _combineURLs = _interopRequireDefault(__webpack_require__(/*! ../helpers/combineURLs */ 52));
 /**
  * Creates a new URL by combining the baseURL with the requestedURL,
  * only when the requestedURL is not already an absolute URL.
@@ -10515,10 +11642,10 @@ function buildFullPath(baseURL, requestedURL) {
 }
 
 /***/ }),
-/* 44 */
-/*!***********************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/helpers/isAbsoluteURL.js ***!
-  \***********************************************************************************/
+/* 51 */
+/*!********************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/helpers/isAbsoluteURL.js ***!
+  \********************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10543,10 +11670,10 @@ function isAbsoluteURL(url) {
 }
 
 /***/ }),
-/* 45 */
-/*!*********************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/helpers/combineURLs.js ***!
-  \*********************************************************************************/
+/* 52 */
+/*!******************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/helpers/combineURLs.js ***!
+  \******************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10569,10 +11696,10 @@ function combineURLs(baseURL, relativeURL) {
 }
 
 /***/ }),
-/* 46 */
-/*!*************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/core/settle.js ***!
-  \*************************************************************************/
+/* 53 */
+/*!**********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/core/settle.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10601,10 +11728,10 @@ function settle(resolve, reject, response) {
 }
 
 /***/ }),
-/* 47 */
-/*!*************************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/core/InterceptorManager.js ***!
-  \*************************************************************************************/
+/* 54 */
+/*!**********************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/core/InterceptorManager.js ***!
+  \**********************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10665,10 +11792,10 @@ var _default = InterceptorManager;
 exports.default = _default;
 
 /***/ }),
-/* 48 */
-/*!******************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/core/mergeConfig.js ***!
-  \******************************************************************************/
+/* 55 */
+/*!***************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/core/mergeConfig.js ***!
+  \***************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10681,7 +11808,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _utils = __webpack_require__(/*! ../utils */ 42);
+var _utils = __webpack_require__(/*! ../utils */ 49);
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 /**
@@ -10741,10 +11868,10 @@ var _default = function _default(globalsConfig) {
 exports.default = _default;
 
 /***/ }),
-/* 49 */
-/*!***************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/core/defaults.js ***!
-  \***************************************************************************/
+/* 56 */
+/*!************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/core/defaults.js ***!
+  \************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10773,10 +11900,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 50 */
-/*!*************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/luch-request/utils/clone.js ***!
-  \*************************************************************************/
+/* 57 */
+/*!**********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/luch-request/utils/clone.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11022,10 +12149,10 @@ var clone = function () {
 }();
 var _default = clone;
 exports.default = _default;
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../../../HBuilderX/plugins/uniapp-cli/node_modules/buffer/index.js */ 51).Buffer))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../../HBuilderX/plugins/uniapp-cli/node_modules/buffer/index.js */ 58).Buffer))
 
 /***/ }),
-/* 51 */
+/* 58 */
 /*!**************************************!*\
   !*** ./node_modules/buffer/index.js ***!
   \**************************************/
@@ -11043,9 +12170,9 @@ exports.default = _default;
 
 
 
-var base64 = __webpack_require__(/*! base64-js */ 52)
-var ieee754 = __webpack_require__(/*! ieee754 */ 53)
-var isArray = __webpack_require__(/*! isarray */ 54)
+var base64 = __webpack_require__(/*! base64-js */ 59)
+var ieee754 = __webpack_require__(/*! ieee754 */ 60)
+var isArray = __webpack_require__(/*! isarray */ 61)
 
 exports.Buffer = Buffer
 exports.SlowBuffer = SlowBuffer
@@ -12826,7 +13953,7 @@ function isnan (val) {
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../webpack/buildin/global.js */ 3)))
 
 /***/ }),
-/* 52 */
+/* 59 */
 /*!*****************************************!*\
   !*** ./node_modules/base64-js/index.js ***!
   \*****************************************/
@@ -12987,7 +14114,7 @@ function fromByteArray (uint8) {
 
 
 /***/ }),
-/* 53 */
+/* 60 */
 /*!***************************************!*\
   !*** ./node_modules/ieee754/index.js ***!
   \***************************************/
@@ -13082,7 +14209,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
 
 
 /***/ }),
-/* 54 */
+/* 61 */
 /*!***************************************!*\
   !*** ./node_modules/isarray/index.js ***!
   \***************************************/
@@ -13097,10 +14224,10 @@ module.exports = Array.isArray || function (arr) {
 
 
 /***/ }),
-/* 55 */
-/*!***********************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/util/route.js ***!
-  \***********************************************************/
+/* 62 */
+/*!********************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/util/route.js ***!
+  \********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -13112,8 +14239,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 56));
-var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 58));
+var _regenerator = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/regenerator */ 31));
+var _asyncToGenerator2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/asyncToGenerator */ 33));
 var _classCallCheck2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/classCallCheck */ 23));
 var _createClass2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/createClass */ 24));
 /**
@@ -13285,384 +14412,10 @@ exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
-/* 56 */
-/*!************************************************************************************************!*\
-  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/@babel/runtime/regenerator/index.js ***!
-  \************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-// TODO(Babel 8): Remove this file.
-
-var runtime = __webpack_require__(/*! @babel/runtime/helpers/regeneratorRuntime */ 57)();
-module.exports = runtime;
-
-/***/ }),
-/* 57 */
-/*!*******************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/regeneratorRuntime.js ***!
-  \*******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var _typeof = __webpack_require__(/*! ./typeof.js */ 13)["default"];
-function _regeneratorRuntime() {
-  "use strict";
-
-  /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
-  module.exports = _regeneratorRuntime = function _regeneratorRuntime() {
-    return exports;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
-  var exports = {},
-    Op = Object.prototype,
-    hasOwn = Op.hasOwnProperty,
-    defineProperty = Object.defineProperty || function (obj, key, desc) {
-      obj[key] = desc.value;
-    },
-    $Symbol = "function" == typeof Symbol ? Symbol : {},
-    iteratorSymbol = $Symbol.iterator || "@@iterator",
-    asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
-    toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
-  function define(obj, key, value) {
-    return Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: !0,
-      configurable: !0,
-      writable: !0
-    }), obj[key];
-  }
-  try {
-    define({}, "");
-  } catch (err) {
-    define = function define(obj, key, value) {
-      return obj[key] = value;
-    };
-  }
-  function wrap(innerFn, outerFn, self, tryLocsList) {
-    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
-      generator = Object.create(protoGenerator.prototype),
-      context = new Context(tryLocsList || []);
-    return defineProperty(generator, "_invoke", {
-      value: makeInvokeMethod(innerFn, self, context)
-    }), generator;
-  }
-  function tryCatch(fn, obj, arg) {
-    try {
-      return {
-        type: "normal",
-        arg: fn.call(obj, arg)
-      };
-    } catch (err) {
-      return {
-        type: "throw",
-        arg: err
-      };
-    }
-  }
-  exports.wrap = wrap;
-  var ContinueSentinel = {};
-  function Generator() {}
-  function GeneratorFunction() {}
-  function GeneratorFunctionPrototype() {}
-  var IteratorPrototype = {};
-  define(IteratorPrototype, iteratorSymbol, function () {
-    return this;
-  });
-  var getProto = Object.getPrototypeOf,
-    NativeIteratorPrototype = getProto && getProto(getProto(values([])));
-  NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
-  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
-  function defineIteratorMethods(prototype) {
-    ["next", "throw", "return"].forEach(function (method) {
-      define(prototype, method, function (arg) {
-        return this._invoke(method, arg);
-      });
-    });
-  }
-  function AsyncIterator(generator, PromiseImpl) {
-    function invoke(method, arg, resolve, reject) {
-      var record = tryCatch(generator[method], generator, arg);
-      if ("throw" !== record.type) {
-        var result = record.arg,
-          value = result.value;
-        return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
-          invoke("next", value, resolve, reject);
-        }, function (err) {
-          invoke("throw", err, resolve, reject);
-        }) : PromiseImpl.resolve(value).then(function (unwrapped) {
-          result.value = unwrapped, resolve(result);
-        }, function (error) {
-          return invoke("throw", error, resolve, reject);
-        });
-      }
-      reject(record.arg);
-    }
-    var previousPromise;
-    defineProperty(this, "_invoke", {
-      value: function value(method, arg) {
-        function callInvokeWithMethodAndArg() {
-          return new PromiseImpl(function (resolve, reject) {
-            invoke(method, arg, resolve, reject);
-          });
-        }
-        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
-      }
-    });
-  }
-  function makeInvokeMethod(innerFn, self, context) {
-    var state = "suspendedStart";
-    return function (method, arg) {
-      if ("executing" === state) throw new Error("Generator is already running");
-      if ("completed" === state) {
-        if ("throw" === method) throw arg;
-        return doneResult();
-      }
-      for (context.method = method, context.arg = arg;;) {
-        var delegate = context.delegate;
-        if (delegate) {
-          var delegateResult = maybeInvokeDelegate(delegate, context);
-          if (delegateResult) {
-            if (delegateResult === ContinueSentinel) continue;
-            return delegateResult;
-          }
-        }
-        if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
-          if ("suspendedStart" === state) throw state = "completed", context.arg;
-          context.dispatchException(context.arg);
-        } else "return" === context.method && context.abrupt("return", context.arg);
-        state = "executing";
-        var record = tryCatch(innerFn, self, context);
-        if ("normal" === record.type) {
-          if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
-          return {
-            value: record.arg,
-            done: context.done
-          };
-        }
-        "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
-      }
-    };
-  }
-  function maybeInvokeDelegate(delegate, context) {
-    var methodName = context.method,
-      method = delegate.iterator[methodName];
-    if (undefined === method) return context.delegate = null, "throw" === methodName && delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
-    var record = tryCatch(method, delegate.iterator, context.arg);
-    if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
-    var info = record.arg;
-    return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
-  }
-  function pushTryEntry(locs) {
-    var entry = {
-      tryLoc: locs[0]
-    };
-    1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
-  }
-  function resetTryEntry(entry) {
-    var record = entry.completion || {};
-    record.type = "normal", delete record.arg, entry.completion = record;
-  }
-  function Context(tryLocsList) {
-    this.tryEntries = [{
-      tryLoc: "root"
-    }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
-  }
-  function values(iterable) {
-    if (iterable) {
-      var iteratorMethod = iterable[iteratorSymbol];
-      if (iteratorMethod) return iteratorMethod.call(iterable);
-      if ("function" == typeof iterable.next) return iterable;
-      if (!isNaN(iterable.length)) {
-        var i = -1,
-          next = function next() {
-            for (; ++i < iterable.length;) {
-              if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
-            }
-            return next.value = undefined, next.done = !0, next;
-          };
-        return next.next = next;
-      }
-    }
-    return {
-      next: doneResult
-    };
-  }
-  function doneResult() {
-    return {
-      value: undefined,
-      done: !0
-    };
-  }
-  return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty(Gp, "constructor", {
-    value: GeneratorFunctionPrototype,
-    configurable: !0
-  }), defineProperty(GeneratorFunctionPrototype, "constructor", {
-    value: GeneratorFunction,
-    configurable: !0
-  }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
-    var ctor = "function" == typeof genFun && genFun.constructor;
-    return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
-  }, exports.mark = function (genFun) {
-    return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
-  }, exports.awrap = function (arg) {
-    return {
-      __await: arg
-    };
-  }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
-    return this;
-  }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
-    void 0 === PromiseImpl && (PromiseImpl = Promise);
-    var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
-    return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
-      return result.done ? result.value : iter.next();
-    });
-  }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
-    return this;
-  }), define(Gp, "toString", function () {
-    return "[object Generator]";
-  }), exports.keys = function (val) {
-    var object = Object(val),
-      keys = [];
-    for (var key in object) {
-      keys.push(key);
-    }
-    return keys.reverse(), function next() {
-      for (; keys.length;) {
-        var key = keys.pop();
-        if (key in object) return next.value = key, next.done = !1, next;
-      }
-      return next.done = !0, next;
-    };
-  }, exports.values = values, Context.prototype = {
-    constructor: Context,
-    reset: function reset(skipTempReset) {
-      if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) {
-        "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
-      }
-    },
-    stop: function stop() {
-      this.done = !0;
-      var rootRecord = this.tryEntries[0].completion;
-      if ("throw" === rootRecord.type) throw rootRecord.arg;
-      return this.rval;
-    },
-    dispatchException: function dispatchException(exception) {
-      if (this.done) throw exception;
-      var context = this;
-      function handle(loc, caught) {
-        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
-      }
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i],
-          record = entry.completion;
-        if ("root" === entry.tryLoc) return handle("end");
-        if (entry.tryLoc <= this.prev) {
-          var hasCatch = hasOwn.call(entry, "catchLoc"),
-            hasFinally = hasOwn.call(entry, "finallyLoc");
-          if (hasCatch && hasFinally) {
-            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
-            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
-          } else if (hasCatch) {
-            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
-          } else {
-            if (!hasFinally) throw new Error("try statement without catch or finally");
-            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
-          }
-        }
-      }
-    },
-    abrupt: function abrupt(type, arg) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
-          var finallyEntry = entry;
-          break;
-        }
-      }
-      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
-      var record = finallyEntry ? finallyEntry.completion : {};
-      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
-    },
-    complete: function complete(record, afterLoc) {
-      if ("throw" === record.type) throw record.arg;
-      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
-    },
-    finish: function finish(finallyLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
-      }
-    },
-    "catch": function _catch(tryLoc) {
-      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
-        var entry = this.tryEntries[i];
-        if (entry.tryLoc === tryLoc) {
-          var record = entry.completion;
-          if ("throw" === record.type) {
-            var thrown = record.arg;
-            resetTryEntry(entry);
-          }
-          return thrown;
-        }
-      }
-      throw new Error("illegal catch attempt");
-    },
-    delegateYield: function delegateYield(iterable, resultName, nextLoc) {
-      return this.delegate = {
-        iterator: values(iterable),
-        resultName: resultName,
-        nextLoc: nextLoc
-      }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
-    }
-  }, exports;
-}
-module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-/* 58 */
-/*!*****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/asyncToGenerator.js ***!
-  \*****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-      args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-      _next(undefined);
-    });
-  };
-}
-module.exports = _asyncToGenerator, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-/* 59 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/function/colorGradient.js ***!
-  \***********************************************************************/
+/* 63 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/function/colorGradient.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -13814,10 +14567,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 60 */
-/*!**************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/function/test.js ***!
-  \**************************************************************/
+/* 64 */
+/*!***********************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/function/test.js ***!
+  \***********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -14119,10 +14872,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 61 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/function/debounce.js ***!
-  \******************************************************************/
+/* 65 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/function/debounce.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -14166,10 +14919,10 @@ var _default = debounce;
 exports.default = _default;
 
 /***/ }),
-/* 62 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/function/throttle.js ***!
-  \******************************************************************/
+/* 66 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/function/throttle.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -14215,10 +14968,10 @@ var _default = throttle;
 exports.default = _default;
 
 /***/ }),
-/* 63 */
-/*!***************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/function/index.js ***!
-  \***************************************************************/
+/* 67 */
+/*!************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/function/index.js ***!
+  \************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -14232,8 +14985,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _slicedToArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ 5));
 var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
-var _test = _interopRequireDefault(__webpack_require__(/*! ./test.js */ 60));
-var _digit = __webpack_require__(/*! ./digit.js */ 64);
+var _test = _interopRequireDefault(__webpack_require__(/*! ./test.js */ 64));
+var _digit = __webpack_require__(/*! ./digit.js */ 68);
 /**
  * @description 如果value小于min，取min；如果value大于max，取max
  * @param {number} min
@@ -15016,10 +15769,10 @@ exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
-/* 64 */
-/*!***************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/function/digit.js ***!
-  \***************************************************************/
+/* 68 */
+/*!************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/function/digit.js ***!
+  \************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15037,7 +15790,7 @@ exports.minus = minus;
 exports.plus = plus;
 exports.round = round;
 exports.times = times;
-var _toArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toArray */ 65));
+var _toArray2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/toArray */ 69));
 var _boundaryCheckingState = true; // 是否进行越界检查的全局开关
 
 /**
@@ -15218,7 +15971,7 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 65 */
+/* 69 */
 /*!********************************************************!*\
   !*** ./node_modules/@babel/runtime/helpers/toArray.js ***!
   \********************************************************/
@@ -15235,10 +15988,10 @@ function _toArray(arr) {
 module.exports = _toArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ }),
-/* 66 */
-/*!**************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/config.js ***!
-  \**************************************************************/
+/* 70 */
+/*!***********************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/config.js ***!
+  \***********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15279,10 +16032,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 67 */
-/*!*************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props.js ***!
-  \*************************************************************/
+/* 71 */
+/*!**********************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props.js ***!
+  \**********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15295,95 +16048,95 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ 11));
-var _config = _interopRequireDefault(__webpack_require__(/*! ./config */ 66));
-var _actionSheet = _interopRequireDefault(__webpack_require__(/*! ./props/actionSheet.js */ 68));
-var _album = _interopRequireDefault(__webpack_require__(/*! ./props/album.js */ 69));
-var _alert = _interopRequireDefault(__webpack_require__(/*! ./props/alert.js */ 70));
-var _avatar = _interopRequireDefault(__webpack_require__(/*! ./props/avatar */ 71));
-var _avatarGroup = _interopRequireDefault(__webpack_require__(/*! ./props/avatarGroup */ 72));
-var _backtop = _interopRequireDefault(__webpack_require__(/*! ./props/backtop */ 73));
-var _badge = _interopRequireDefault(__webpack_require__(/*! ./props/badge */ 74));
-var _button = _interopRequireDefault(__webpack_require__(/*! ./props/button */ 75));
-var _calendar = _interopRequireDefault(__webpack_require__(/*! ./props/calendar */ 76));
-var _carKeyboard = _interopRequireDefault(__webpack_require__(/*! ./props/carKeyboard */ 77));
-var _cell = _interopRequireDefault(__webpack_require__(/*! ./props/cell */ 78));
-var _cellGroup = _interopRequireDefault(__webpack_require__(/*! ./props/cellGroup */ 79));
-var _checkbox = _interopRequireDefault(__webpack_require__(/*! ./props/checkbox */ 80));
-var _checkboxGroup = _interopRequireDefault(__webpack_require__(/*! ./props/checkboxGroup */ 81));
-var _circleProgress = _interopRequireDefault(__webpack_require__(/*! ./props/circleProgress */ 82));
-var _code = _interopRequireDefault(__webpack_require__(/*! ./props/code */ 83));
-var _codeInput = _interopRequireDefault(__webpack_require__(/*! ./props/codeInput */ 84));
-var _col = _interopRequireDefault(__webpack_require__(/*! ./props/col */ 85));
-var _collapse = _interopRequireDefault(__webpack_require__(/*! ./props/collapse */ 86));
-var _collapseItem = _interopRequireDefault(__webpack_require__(/*! ./props/collapseItem */ 87));
-var _columnNotice = _interopRequireDefault(__webpack_require__(/*! ./props/columnNotice */ 88));
-var _countDown = _interopRequireDefault(__webpack_require__(/*! ./props/countDown */ 89));
-var _countTo = _interopRequireDefault(__webpack_require__(/*! ./props/countTo */ 90));
-var _datetimePicker = _interopRequireDefault(__webpack_require__(/*! ./props/datetimePicker */ 91));
-var _divider = _interopRequireDefault(__webpack_require__(/*! ./props/divider */ 92));
-var _empty = _interopRequireDefault(__webpack_require__(/*! ./props/empty */ 93));
-var _form = _interopRequireDefault(__webpack_require__(/*! ./props/form */ 94));
-var _formItem = _interopRequireDefault(__webpack_require__(/*! ./props/formItem */ 95));
-var _gap = _interopRequireDefault(__webpack_require__(/*! ./props/gap */ 96));
-var _grid = _interopRequireDefault(__webpack_require__(/*! ./props/grid */ 97));
-var _gridItem = _interopRequireDefault(__webpack_require__(/*! ./props/gridItem */ 98));
-var _icon = _interopRequireDefault(__webpack_require__(/*! ./props/icon */ 99));
-var _image = _interopRequireDefault(__webpack_require__(/*! ./props/image */ 100));
-var _indexAnchor = _interopRequireDefault(__webpack_require__(/*! ./props/indexAnchor */ 101));
-var _indexList = _interopRequireDefault(__webpack_require__(/*! ./props/indexList */ 102));
-var _input = _interopRequireDefault(__webpack_require__(/*! ./props/input */ 103));
-var _keyboard = _interopRequireDefault(__webpack_require__(/*! ./props/keyboard */ 104));
-var _line = _interopRequireDefault(__webpack_require__(/*! ./props/line */ 105));
-var _lineProgress = _interopRequireDefault(__webpack_require__(/*! ./props/lineProgress */ 106));
-var _link = _interopRequireDefault(__webpack_require__(/*! ./props/link */ 107));
-var _list = _interopRequireDefault(__webpack_require__(/*! ./props/list */ 108));
-var _listItem = _interopRequireDefault(__webpack_require__(/*! ./props/listItem */ 109));
-var _loadingIcon = _interopRequireDefault(__webpack_require__(/*! ./props/loadingIcon */ 110));
-var _loadingPage = _interopRequireDefault(__webpack_require__(/*! ./props/loadingPage */ 111));
-var _loadmore = _interopRequireDefault(__webpack_require__(/*! ./props/loadmore */ 112));
-var _modal = _interopRequireDefault(__webpack_require__(/*! ./props/modal */ 113));
-var _navbar = _interopRequireDefault(__webpack_require__(/*! ./props/navbar */ 114));
-var _noNetwork = _interopRequireDefault(__webpack_require__(/*! ./props/noNetwork */ 116));
-var _noticeBar = _interopRequireDefault(__webpack_require__(/*! ./props/noticeBar */ 117));
-var _notify = _interopRequireDefault(__webpack_require__(/*! ./props/notify */ 118));
-var _numberBox = _interopRequireDefault(__webpack_require__(/*! ./props/numberBox */ 119));
-var _numberKeyboard = _interopRequireDefault(__webpack_require__(/*! ./props/numberKeyboard */ 120));
-var _overlay = _interopRequireDefault(__webpack_require__(/*! ./props/overlay */ 121));
-var _parse = _interopRequireDefault(__webpack_require__(/*! ./props/parse */ 122));
-var _picker = _interopRequireDefault(__webpack_require__(/*! ./props/picker */ 123));
-var _popup = _interopRequireDefault(__webpack_require__(/*! ./props/popup */ 124));
-var _radio = _interopRequireDefault(__webpack_require__(/*! ./props/radio */ 125));
-var _radioGroup = _interopRequireDefault(__webpack_require__(/*! ./props/radioGroup */ 126));
-var _rate = _interopRequireDefault(__webpack_require__(/*! ./props/rate */ 127));
-var _readMore = _interopRequireDefault(__webpack_require__(/*! ./props/readMore */ 128));
-var _row = _interopRequireDefault(__webpack_require__(/*! ./props/row */ 129));
-var _rowNotice = _interopRequireDefault(__webpack_require__(/*! ./props/rowNotice */ 130));
-var _scrollList = _interopRequireDefault(__webpack_require__(/*! ./props/scrollList */ 131));
-var _search = _interopRequireDefault(__webpack_require__(/*! ./props/search */ 132));
-var _section = _interopRequireDefault(__webpack_require__(/*! ./props/section */ 133));
-var _skeleton = _interopRequireDefault(__webpack_require__(/*! ./props/skeleton */ 134));
-var _slider = _interopRequireDefault(__webpack_require__(/*! ./props/slider */ 135));
-var _statusBar = _interopRequireDefault(__webpack_require__(/*! ./props/statusBar */ 136));
-var _steps = _interopRequireDefault(__webpack_require__(/*! ./props/steps */ 137));
-var _stepsItem = _interopRequireDefault(__webpack_require__(/*! ./props/stepsItem */ 138));
-var _sticky = _interopRequireDefault(__webpack_require__(/*! ./props/sticky */ 139));
-var _subsection = _interopRequireDefault(__webpack_require__(/*! ./props/subsection */ 140));
-var _swipeAction = _interopRequireDefault(__webpack_require__(/*! ./props/swipeAction */ 141));
-var _swipeActionItem = _interopRequireDefault(__webpack_require__(/*! ./props/swipeActionItem */ 142));
-var _swiper = _interopRequireDefault(__webpack_require__(/*! ./props/swiper */ 143));
-var _swipterIndicator = _interopRequireDefault(__webpack_require__(/*! ./props/swipterIndicator */ 144));
-var _switch2 = _interopRequireDefault(__webpack_require__(/*! ./props/switch */ 145));
-var _tabbar = _interopRequireDefault(__webpack_require__(/*! ./props/tabbar */ 146));
-var _tabbarItem = _interopRequireDefault(__webpack_require__(/*! ./props/tabbarItem */ 147));
-var _tabs = _interopRequireDefault(__webpack_require__(/*! ./props/tabs */ 148));
-var _tag = _interopRequireDefault(__webpack_require__(/*! ./props/tag */ 149));
-var _text = _interopRequireDefault(__webpack_require__(/*! ./props/text */ 150));
-var _textarea = _interopRequireDefault(__webpack_require__(/*! ./props/textarea */ 151));
-var _toast = _interopRequireDefault(__webpack_require__(/*! ./props/toast */ 152));
-var _toolbar = _interopRequireDefault(__webpack_require__(/*! ./props/toolbar */ 153));
-var _tooltip = _interopRequireDefault(__webpack_require__(/*! ./props/tooltip */ 154));
-var _transition = _interopRequireDefault(__webpack_require__(/*! ./props/transition */ 155));
-var _upload = _interopRequireDefault(__webpack_require__(/*! ./props/upload */ 156));
+var _config = _interopRequireDefault(__webpack_require__(/*! ./config */ 70));
+var _actionSheet = _interopRequireDefault(__webpack_require__(/*! ./props/actionSheet.js */ 72));
+var _album = _interopRequireDefault(__webpack_require__(/*! ./props/album.js */ 73));
+var _alert = _interopRequireDefault(__webpack_require__(/*! ./props/alert.js */ 74));
+var _avatar = _interopRequireDefault(__webpack_require__(/*! ./props/avatar */ 75));
+var _avatarGroup = _interopRequireDefault(__webpack_require__(/*! ./props/avatarGroup */ 76));
+var _backtop = _interopRequireDefault(__webpack_require__(/*! ./props/backtop */ 77));
+var _badge = _interopRequireDefault(__webpack_require__(/*! ./props/badge */ 78));
+var _button = _interopRequireDefault(__webpack_require__(/*! ./props/button */ 79));
+var _calendar = _interopRequireDefault(__webpack_require__(/*! ./props/calendar */ 80));
+var _carKeyboard = _interopRequireDefault(__webpack_require__(/*! ./props/carKeyboard */ 81));
+var _cell = _interopRequireDefault(__webpack_require__(/*! ./props/cell */ 82));
+var _cellGroup = _interopRequireDefault(__webpack_require__(/*! ./props/cellGroup */ 83));
+var _checkbox = _interopRequireDefault(__webpack_require__(/*! ./props/checkbox */ 84));
+var _checkboxGroup = _interopRequireDefault(__webpack_require__(/*! ./props/checkboxGroup */ 85));
+var _circleProgress = _interopRequireDefault(__webpack_require__(/*! ./props/circleProgress */ 86));
+var _code = _interopRequireDefault(__webpack_require__(/*! ./props/code */ 87));
+var _codeInput = _interopRequireDefault(__webpack_require__(/*! ./props/codeInput */ 88));
+var _col = _interopRequireDefault(__webpack_require__(/*! ./props/col */ 89));
+var _collapse = _interopRequireDefault(__webpack_require__(/*! ./props/collapse */ 90));
+var _collapseItem = _interopRequireDefault(__webpack_require__(/*! ./props/collapseItem */ 91));
+var _columnNotice = _interopRequireDefault(__webpack_require__(/*! ./props/columnNotice */ 92));
+var _countDown = _interopRequireDefault(__webpack_require__(/*! ./props/countDown */ 93));
+var _countTo = _interopRequireDefault(__webpack_require__(/*! ./props/countTo */ 94));
+var _datetimePicker = _interopRequireDefault(__webpack_require__(/*! ./props/datetimePicker */ 95));
+var _divider = _interopRequireDefault(__webpack_require__(/*! ./props/divider */ 96));
+var _empty = _interopRequireDefault(__webpack_require__(/*! ./props/empty */ 97));
+var _form = _interopRequireDefault(__webpack_require__(/*! ./props/form */ 98));
+var _formItem = _interopRequireDefault(__webpack_require__(/*! ./props/formItem */ 99));
+var _gap = _interopRequireDefault(__webpack_require__(/*! ./props/gap */ 100));
+var _grid = _interopRequireDefault(__webpack_require__(/*! ./props/grid */ 101));
+var _gridItem = _interopRequireDefault(__webpack_require__(/*! ./props/gridItem */ 102));
+var _icon = _interopRequireDefault(__webpack_require__(/*! ./props/icon */ 103));
+var _image = _interopRequireDefault(__webpack_require__(/*! ./props/image */ 104));
+var _indexAnchor = _interopRequireDefault(__webpack_require__(/*! ./props/indexAnchor */ 105));
+var _indexList = _interopRequireDefault(__webpack_require__(/*! ./props/indexList */ 106));
+var _input = _interopRequireDefault(__webpack_require__(/*! ./props/input */ 107));
+var _keyboard = _interopRequireDefault(__webpack_require__(/*! ./props/keyboard */ 108));
+var _line = _interopRequireDefault(__webpack_require__(/*! ./props/line */ 109));
+var _lineProgress = _interopRequireDefault(__webpack_require__(/*! ./props/lineProgress */ 110));
+var _link = _interopRequireDefault(__webpack_require__(/*! ./props/link */ 111));
+var _list = _interopRequireDefault(__webpack_require__(/*! ./props/list */ 112));
+var _listItem = _interopRequireDefault(__webpack_require__(/*! ./props/listItem */ 113));
+var _loadingIcon = _interopRequireDefault(__webpack_require__(/*! ./props/loadingIcon */ 114));
+var _loadingPage = _interopRequireDefault(__webpack_require__(/*! ./props/loadingPage */ 115));
+var _loadmore = _interopRequireDefault(__webpack_require__(/*! ./props/loadmore */ 116));
+var _modal = _interopRequireDefault(__webpack_require__(/*! ./props/modal */ 117));
+var _navbar = _interopRequireDefault(__webpack_require__(/*! ./props/navbar */ 118));
+var _noNetwork = _interopRequireDefault(__webpack_require__(/*! ./props/noNetwork */ 120));
+var _noticeBar = _interopRequireDefault(__webpack_require__(/*! ./props/noticeBar */ 121));
+var _notify = _interopRequireDefault(__webpack_require__(/*! ./props/notify */ 122));
+var _numberBox = _interopRequireDefault(__webpack_require__(/*! ./props/numberBox */ 123));
+var _numberKeyboard = _interopRequireDefault(__webpack_require__(/*! ./props/numberKeyboard */ 124));
+var _overlay = _interopRequireDefault(__webpack_require__(/*! ./props/overlay */ 125));
+var _parse = _interopRequireDefault(__webpack_require__(/*! ./props/parse */ 126));
+var _picker = _interopRequireDefault(__webpack_require__(/*! ./props/picker */ 127));
+var _popup = _interopRequireDefault(__webpack_require__(/*! ./props/popup */ 128));
+var _radio = _interopRequireDefault(__webpack_require__(/*! ./props/radio */ 129));
+var _radioGroup = _interopRequireDefault(__webpack_require__(/*! ./props/radioGroup */ 130));
+var _rate = _interopRequireDefault(__webpack_require__(/*! ./props/rate */ 131));
+var _readMore = _interopRequireDefault(__webpack_require__(/*! ./props/readMore */ 132));
+var _row = _interopRequireDefault(__webpack_require__(/*! ./props/row */ 133));
+var _rowNotice = _interopRequireDefault(__webpack_require__(/*! ./props/rowNotice */ 134));
+var _scrollList = _interopRequireDefault(__webpack_require__(/*! ./props/scrollList */ 135));
+var _search = _interopRequireDefault(__webpack_require__(/*! ./props/search */ 136));
+var _section = _interopRequireDefault(__webpack_require__(/*! ./props/section */ 137));
+var _skeleton = _interopRequireDefault(__webpack_require__(/*! ./props/skeleton */ 138));
+var _slider = _interopRequireDefault(__webpack_require__(/*! ./props/slider */ 139));
+var _statusBar = _interopRequireDefault(__webpack_require__(/*! ./props/statusBar */ 140));
+var _steps = _interopRequireDefault(__webpack_require__(/*! ./props/steps */ 141));
+var _stepsItem = _interopRequireDefault(__webpack_require__(/*! ./props/stepsItem */ 142));
+var _sticky = _interopRequireDefault(__webpack_require__(/*! ./props/sticky */ 143));
+var _subsection = _interopRequireDefault(__webpack_require__(/*! ./props/subsection */ 144));
+var _swipeAction = _interopRequireDefault(__webpack_require__(/*! ./props/swipeAction */ 145));
+var _swipeActionItem = _interopRequireDefault(__webpack_require__(/*! ./props/swipeActionItem */ 146));
+var _swiper = _interopRequireDefault(__webpack_require__(/*! ./props/swiper */ 147));
+var _swipterIndicator = _interopRequireDefault(__webpack_require__(/*! ./props/swipterIndicator */ 148));
+var _switch2 = _interopRequireDefault(__webpack_require__(/*! ./props/switch */ 149));
+var _tabbar = _interopRequireDefault(__webpack_require__(/*! ./props/tabbar */ 150));
+var _tabbarItem = _interopRequireDefault(__webpack_require__(/*! ./props/tabbarItem */ 151));
+var _tabs = _interopRequireDefault(__webpack_require__(/*! ./props/tabs */ 152));
+var _tag = _interopRequireDefault(__webpack_require__(/*! ./props/tag */ 153));
+var _text = _interopRequireDefault(__webpack_require__(/*! ./props/text */ 154));
+var _textarea = _interopRequireDefault(__webpack_require__(/*! ./props/textarea */ 155));
+var _toast = _interopRequireDefault(__webpack_require__(/*! ./props/toast */ 156));
+var _toolbar = _interopRequireDefault(__webpack_require__(/*! ./props/toolbar */ 157));
+var _tooltip = _interopRequireDefault(__webpack_require__(/*! ./props/tooltip */ 158));
+var _transition = _interopRequireDefault(__webpack_require__(/*! ./props/transition */ 159));
+var _upload = _interopRequireDefault(__webpack_require__(/*! ./props/upload */ 160));
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { (0, _defineProperty2.default)(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 var color = _config.default.color;
@@ -15391,10 +16144,10 @@ var _default = _objectSpread(_objectSpread(_objectSpread(_objectSpread(_objectSp
 exports.default = _default;
 
 /***/ }),
-/* 68 */
-/*!*************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/actionSheet.js ***!
-  \*************************************************************************/
+/* 72 */
+/*!**********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/actionSheet.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15435,10 +16188,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 69 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/album.js ***!
-  \*******************************************************************/
+/* 73 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/album.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15479,10 +16232,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 70 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/alert.js ***!
-  \*******************************************************************/
+/* 74 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/alert.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15518,10 +16271,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 71 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/avatar.js ***!
-  \********************************************************************/
+/* 75 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/avatar.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15563,10 +16316,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 72 */
-/*!*************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/avatarGroup.js ***!
-  \*************************************************************************/
+/* 76 */
+/*!**********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/avatarGroup.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15605,10 +16358,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 73 */
-/*!*********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/backtop.js ***!
-  \*********************************************************************/
+/* 77 */
+/*!******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/backtop.js ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15651,10 +16404,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 74 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/badge.js ***!
-  \*******************************************************************/
+/* 78 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/badge.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15697,10 +16450,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 75 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/button.js ***!
-  \********************************************************************/
+/* 79 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/button.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15756,10 +16509,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 76 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/calendar.js ***!
-  \**********************************************************************/
+/* 80 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/calendar.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15819,10 +16572,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 77 */
-/*!*************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/carKeyboard.js ***!
-  \*************************************************************************/
+/* 81 */
+/*!**********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/carKeyboard.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15851,10 +16604,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 78 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/cell.js ***!
-  \******************************************************************/
+/* 82 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/cell.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15903,10 +16656,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 79 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/cellGroup.js ***!
-  \***********************************************************************/
+/* 83 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/cellGroup.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15937,10 +16690,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 80 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/checkbox.js ***!
-  \**********************************************************************/
+/* 84 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/checkbox.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -15981,10 +16734,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 81 */
-/*!***************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/checkboxGroup.js ***!
-  \***************************************************************************/
+/* 85 */
+/*!************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/checkboxGroup.js ***!
+  \************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16029,10 +16782,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 82 */
-/*!****************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/circleProgress.js ***!
-  \****************************************************************************/
+/* 86 */
+/*!*************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/circleProgress.js ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16061,10 +16814,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 83 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/code.js ***!
-  \******************************************************************/
+/* 87 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/code.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16098,10 +16851,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 84 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/codeInput.js ***!
-  \***********************************************************************/
+/* 88 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/codeInput.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16144,10 +16897,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 85 */
-/*!*****************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/col.js ***!
-  \*****************************************************************/
+/* 89 */
+/*!**************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/col.js ***!
+  \**************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16180,10 +16933,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 86 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/collapse.js ***!
-  \**********************************************************************/
+/* 90 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/collapse.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16214,10 +16967,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 87 */
-/*!**************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/collapseItem.js ***!
-  \**************************************************************************/
+/* 91 */
+/*!***********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/collapseItem.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16256,10 +17009,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 88 */
-/*!**************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/columnNotice.js ***!
-  \**************************************************************************/
+/* 92 */
+/*!***********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/columnNotice.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16297,10 +17050,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 89 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/countDown.js ***!
-  \***********************************************************************/
+/* 93 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/countDown.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16332,10 +17085,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 90 */
-/*!*********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/countTo.js ***!
-  \*********************************************************************/
+/* 94 */
+/*!******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/countTo.js ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16374,10 +17127,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 91 */
-/*!****************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/datetimePicker.js ***!
-  \****************************************************************************/
+/* 95 */
+/*!*************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/datetimePicker.js ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16429,10 +17182,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 92 */
-/*!*********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/divider.js ***!
-  \*********************************************************************/
+/* 96 */
+/*!******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/divider.js ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16468,10 +17221,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 93 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/empty.js ***!
-  \*******************************************************************/
+/* 97 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/empty.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16510,10 +17263,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 94 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/form.js ***!
-  \******************************************************************/
+/* 98 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/form.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16555,10 +17308,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 95 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/formItem.js ***!
-  \**********************************************************************/
+/* 99 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/formItem.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16595,10 +17348,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 96 */
-/*!*****************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/gap.js ***!
-  \*****************************************************************/
+/* 100 */
+/*!**************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/gap.js ***!
+  \**************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16631,10 +17384,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 97 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/grid.js ***!
-  \******************************************************************/
+/* 101 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/grid.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16665,10 +17418,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 98 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/gridItem.js ***!
-  \**********************************************************************/
+/* 102 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/gridItem.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16698,10 +17451,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 99 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/icon.js ***!
-  \******************************************************************/
+/* 103 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/icon.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16713,7 +17466,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _config = _interopRequireDefault(__webpack_require__(/*! ../config */ 66));
+var _config = _interopRequireDefault(__webpack_require__(/*! ../config */ 70));
 /*
  * @Author       : LQ
  * @Description  :
@@ -16750,10 +17503,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 100 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/image.js ***!
-  \*******************************************************************/
+/* 104 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/image.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16797,10 +17550,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 101 */
-/*!*************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/indexAnchor.js ***!
-  \*************************************************************************/
+/* 105 */
+/*!**********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/indexAnchor.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16833,10 +17586,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 102 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/indexList.js ***!
-  \***********************************************************************/
+/* 106 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/indexList.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16871,10 +17624,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 103 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/input.js ***!
-  \*******************************************************************/
+/* 107 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/input.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16936,10 +17689,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 104 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/keyboard.js ***!
-  \**********************************************************************/
+/* 108 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/keyboard.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -16983,10 +17736,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 105 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/line.js ***!
-  \******************************************************************/
+/* 109 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/line.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17020,10 +17773,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 106 */
-/*!**************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/lineProgress.js ***!
-  \**************************************************************************/
+/* 110 */
+/*!***********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/lineProgress.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17056,10 +17809,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 107 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/link.js ***!
-  \******************************************************************/
+/* 111 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/link.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17071,7 +17824,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _config = _interopRequireDefault(__webpack_require__(/*! ../config */ 66));
+var _config = _interopRequireDefault(__webpack_require__(/*! ../config */ 70));
 /*
  * @Author       : LQ
  * @Description  :
@@ -17098,10 +17851,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 108 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/list.js ***!
-  \******************************************************************/
+/* 112 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/list.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17143,10 +17896,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 109 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/listItem.js ***!
-  \**********************************************************************/
+/* 113 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/listItem.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17175,10 +17928,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 110 */
-/*!*************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/loadingIcon.js ***!
-  \*************************************************************************/
+/* 114 */
+/*!**********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/loadingIcon.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17190,7 +17943,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _config = _interopRequireDefault(__webpack_require__(/*! ../config */ 66));
+var _config = _interopRequireDefault(__webpack_require__(/*! ../config */ 70));
 /*
  * @Author       : LQ
  * @Description  :
@@ -17221,10 +17974,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 111 */
-/*!*************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/loadingPage.js ***!
-  \*************************************************************************/
+/* 115 */
+/*!**********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/loadingPage.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17261,10 +18014,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 112 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/loadmore.js ***!
-  \**********************************************************************/
+/* 116 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/loadmore.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17310,10 +18063,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 113 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/modal.js ***!
-  \*******************************************************************/
+/* 117 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/modal.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17357,10 +18110,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 114 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/navbar.js ***!
-  \********************************************************************/
+/* 118 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/navbar.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17372,7 +18125,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
-var _color = _interopRequireDefault(__webpack_require__(/*! ../color */ 115));
+var _color = _interopRequireDefault(__webpack_require__(/*! ../color */ 119));
 /*
  * @Author       : LQ
  * @Description  :
@@ -17406,10 +18159,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 115 */
-/*!*************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/color.js ***!
-  \*************************************************************/
+/* 119 */
+/*!**********************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/color.js ***!
+  \**********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17439,10 +18192,10 @@ var _default = color;
 exports.default = _default;
 
 /***/ }),
-/* 116 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/noNetwork.js ***!
-  \***********************************************************************/
+/* 120 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/noNetwork.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17473,10 +18226,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 117 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/noticeBar.js ***!
-  \***********************************************************************/
+/* 121 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/noticeBar.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17519,10 +18272,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 118 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/notify.js ***!
-  \********************************************************************/
+/* 122 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/notify.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17558,10 +18311,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 119 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/numberBox.js ***!
-  \***********************************************************************/
+/* 123 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/numberBox.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17610,10 +18363,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 120 */
-/*!****************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/numberKeyboard.js ***!
-  \****************************************************************************/
+/* 124 */
+/*!*************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/numberKeyboard.js ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17644,10 +18397,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 121 */
-/*!*********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/overlay.js ***!
-  \*********************************************************************/
+/* 125 */
+/*!******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/overlay.js ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17679,10 +18432,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 122 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/parse.js ***!
-  \*******************************************************************/
+/* 126 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/parse.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17718,10 +18471,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 123 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/picker.js ***!
-  \********************************************************************/
+/* 127 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/picker.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17768,10 +18521,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 124 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/popup.js ***!
-  \*******************************************************************/
+/* 128 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/popup.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17814,10 +18567,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 125 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/radio.js ***!
-  \*******************************************************************/
+/* 129 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/radio.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17858,10 +18611,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 126 */
-/*!************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/radioGroup.js ***!
-  \************************************************************************/
+/* 130 */
+/*!*********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/radioGroup.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17905,10 +18658,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 127 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/rate.js ***!
-  \******************************************************************/
+/* 131 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/rate.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17948,10 +18701,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 128 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/readMore.js ***!
-  \**********************************************************************/
+/* 132 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/readMore.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -17987,10 +18740,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 129 */
-/*!*****************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/row.js ***!
-  \*****************************************************************/
+/* 133 */
+/*!**************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/row.js ***!
+  \**************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18021,10 +18774,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 130 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/rowNotice.js ***!
-  \***********************************************************************/
+/* 134 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/rowNotice.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18059,10 +18812,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 131 */
-/*!************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/scrollList.js ***!
-  \************************************************************************/
+/* 135 */
+/*!*********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/scrollList.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18096,10 +18849,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 132 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/search.js ***!
-  \********************************************************************/
+/* 136 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/search.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18154,10 +18907,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 133 */
-/*!*********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/section.js ***!
-  \*********************************************************************/
+/* 137 */
+/*!******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/section.js ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18195,10 +18948,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 134 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/skeleton.js ***!
-  \**********************************************************************/
+/* 138 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/skeleton.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18237,10 +18990,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 135 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/slider.js ***!
-  \********************************************************************/
+/* 139 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/slider.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18279,10 +19032,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 136 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/statusBar.js ***!
-  \***********************************************************************/
+/* 140 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/statusBar.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18311,10 +19064,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 137 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/steps.js ***!
-  \*******************************************************************/
+/* 141 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/steps.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18349,10 +19102,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 138 */
-/*!***********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/stepsItem.js ***!
-  \***********************************************************************/
+/* 142 */
+/*!********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/stepsItem.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18384,10 +19137,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 139 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/sticky.js ***!
-  \********************************************************************/
+/* 143 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/sticky.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18421,10 +19174,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 140 */
-/*!************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/subsection.js ***!
-  \************************************************************************/
+/* 144 */
+/*!*********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/subsection.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18461,10 +19214,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 141 */
-/*!*************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/swipeAction.js ***!
-  \*************************************************************************/
+/* 145 */
+/*!**********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/swipeAction.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18493,10 +19246,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 142 */
-/*!*****************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/swipeActionItem.js ***!
-  \*****************************************************************************/
+/* 146 */
+/*!**************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/swipeActionItem.js ***!
+  \**************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18531,10 +19284,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 143 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/swiper.js ***!
-  \********************************************************************/
+/* 147 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/swiper.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18588,10 +19341,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 144 */
-/*!******************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/swipterIndicator.js ***!
-  \******************************************************************************/
+/* 148 */
+/*!***************************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/swipterIndicator.js ***!
+  \***************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18624,10 +19377,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 145 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/switch.js ***!
-  \********************************************************************/
+/* 149 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/switch.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18665,10 +19418,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 146 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/tabbar.js ***!
-  \********************************************************************/
+/* 150 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/tabbar.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18704,10 +19457,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 147 */
-/*!************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/tabbarItem.js ***!
-  \************************************************************************/
+/* 151 */
+/*!*********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/tabbarItem.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18741,10 +19494,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 148 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/tabs.js ***!
-  \******************************************************************/
+/* 152 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/tabs.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18798,10 +19551,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 149 */
-/*!*****************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/tag.js ***!
-  \*****************************************************************/
+/* 153 */
+/*!**************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/tag.js ***!
+  \**************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18844,10 +19597,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 150 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/text.js ***!
-  \******************************************************************/
+/* 154 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/text.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18900,10 +19653,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 151 */
-/*!**********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/textarea.js ***!
-  \**********************************************************************/
+/* 155 */
+/*!*******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/textarea.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18953,10 +19706,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 152 */
-/*!*******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/toast.js ***!
-  \*******************************************************************/
+/* 156 */
+/*!****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/toast.js ***!
+  \****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -18999,10 +19752,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 153 */
-/*!*********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/toolbar.js ***!
-  \*********************************************************************/
+/* 157 */
+/*!******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/toolbar.js ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19036,10 +19789,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 154 */
-/*!*********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/tooltip.js ***!
-  \*********************************************************************/
+/* 158 */
+/*!******************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/tooltip.js ***!
+  \******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19080,10 +19833,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 155 */
-/*!************************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/transition.js ***!
-  \************************************************************************/
+/* 159 */
+/*!*********************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/transition.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19115,10 +19868,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 156 */
-/*!********************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/props/upload.js ***!
-  \********************************************************************/
+/* 160 */
+/*!*****************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/props/upload.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19174,10 +19927,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 157 */
-/*!**************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/config/zIndex.js ***!
-  \**************************************************************/
+/* 161 */
+/*!***********************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/config/zIndex.js ***!
+  \***********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19210,10 +19963,10 @@ var _default = {
 exports.default = _default;
 
 /***/ }),
-/* 158 */
-/*!******************************************************************!*\
-  !*** D:/项目/youli/uni_modules/uview-ui/libs/function/platform.js ***!
-  \******************************************************************/
+/* 162 */
+/*!***************************************************************!*\
+  !*** D:/youli/uni_modules/uview-ui/libs/function/platform.js ***!
+  \***************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19238,6 +19991,1372 @@ platform = 'weixin';
 platform = 'mp';
 var _default = platform;
 exports.default = _default;
+
+/***/ }),
+/* 163 */
+/*!*******************************!*\
+  !*** D:/youli/store/index.js ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {
+
+var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _typeof2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/typeof */ 13));
+var _vue = _interopRequireDefault(__webpack_require__(/*! vue */ 25));
+var _vuex = _interopRequireDefault(__webpack_require__(/*! vuex */ 164));
+var _chat = _interopRequireDefault(__webpack_require__(/*! ../common/chat.js */ 30));
+var _config = _interopRequireDefault(__webpack_require__(/*! ../api/config.js */ 36));
+_vue.default.use(_vuex.default);
+var store = new _vuex.default.Store({
+  modules: {},
+  state: {
+    userInfo: false,
+    chat: {}
+  },
+  mutations: {
+    setUserInfo: function setUserInfo(state, val) {
+      state.userInfo = val;
+    },
+    setChat: function setChat(state, val) {
+      state.chat = Object.assign({}, val);
+    },
+    closeChat: function closeChat(state) {
+      state.chat.close();
+      state.chat = null;
+    }
+  },
+  actions: {
+    login: function login(_ref, user) {
+      var state = _ref.state,
+        commit = _ref.commit,
+        dispatch = _ref.dispatch;
+      commit('setUserInfo', JSON.parse(JSON.stringify(user)));
+      uni.setStorageSync('token', user.token);
+      uni.setStorageSync('userInfo', user);
+      var chat = new _chat.default({
+        url: _config.default.scoketUrl
+      });
+      commit('setChat', chat);
+    },
+    logout: function logout(_ref2) {
+      var state = _ref2.state,
+        commit = _ref2.commit,
+        dispatch = _ref2.dispatch;
+      uni.clearStorageSync();
+      if (state.chat) {
+        commit("closeChat");
+      }
+    },
+    // 初始化登录状态
+    initLogin: function initLogin(_ref3) {
+      var state = _ref3.state,
+        commit = _ref3.commit,
+        dispatch = _ref3.dispatch;
+      // 拿到存储
+      var user = uni.getStorageSync('userInfo');
+      if (user) {
+        // 初始化登录状态
+        commit('setUserInfo', JSON.parse(JSON.stringify(user)));
+        // 连接socket
+        var chat = new _chat.default({
+          url: _config.default.scoketUrl
+        });
+        commit('setChat', chat);
+      }
+    },
+    // 断线自动重连
+    reconnect: function reconnect(_ref4) {
+      var state = _ref4.state;
+      if (state.user && state.chat) {
+        state.chat.reconnect();
+      }
+    }
+  },
+  strict: false
+});
+function deepClone(source) {
+  if (!source || (0, _typeof2.default)(source) !== 'object') {
+    throw new Error('error arguments', 'shallowClone');
+  }
+  var targetObj = source.constructor === Array ? [] : {};
+  for (var keys in source) {
+    if (source.hasOwnProperty(keys)) {
+      if (source[keys] && (0, _typeof2.default)(source[keys]) === 'object') {
+        targetObj[keys] = source[keys].constructor === Array ? [] : {};
+        targetObj[keys] = deepClone(source[keys]);
+      } else {
+        targetObj[keys] = source[keys];
+      }
+    }
+  }
+  return targetObj;
+}
+var _default = store;
+exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
+
+/***/ }),
+/* 164 */
+/*!**************************************************************************************!*\
+  !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vuex3/dist/vuex.common.js ***!
+  \**************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {/*!
+ * vuex v3.6.2
+ * (c) 2021 Evan You
+ * @license MIT
+ */
+
+
+function applyMixin (Vue) {
+  var version = Number(Vue.version.split('.')[0]);
+
+  if (version >= 2) {
+    Vue.mixin({ beforeCreate: vuexInit });
+  } else {
+    // override init and inject vuex init procedure
+    // for 1.x backwards compatibility.
+    var _init = Vue.prototype._init;
+    Vue.prototype._init = function (options) {
+      if ( options === void 0 ) options = {};
+
+      options.init = options.init
+        ? [vuexInit].concat(options.init)
+        : vuexInit;
+      _init.call(this, options);
+    };
+  }
+
+  /**
+   * Vuex init hook, injected into each instances init hooks list.
+   */
+
+  function vuexInit () {
+    var options = this.$options;
+    // store injection
+    if (options.store) {
+      this.$store = typeof options.store === 'function'
+        ? options.store()
+        : options.store;
+    } else if (options.parent && options.parent.$store) {
+      this.$store = options.parent.$store;
+    }
+  }
+}
+
+var target = typeof window !== 'undefined'
+  ? window
+  : typeof global !== 'undefined'
+    ? global
+    : {};
+var devtoolHook = target.__VUE_DEVTOOLS_GLOBAL_HOOK__;
+
+function devtoolPlugin (store) {
+  if (!devtoolHook) { return }
+
+  store._devtoolHook = devtoolHook;
+
+  devtoolHook.emit('vuex:init', store);
+
+  devtoolHook.on('vuex:travel-to-state', function (targetState) {
+    store.replaceState(targetState);
+  });
+
+  store.subscribe(function (mutation, state) {
+    devtoolHook.emit('vuex:mutation', mutation, state);
+  }, { prepend: true });
+
+  store.subscribeAction(function (action, state) {
+    devtoolHook.emit('vuex:action', action, state);
+  }, { prepend: true });
+}
+
+/**
+ * Get the first item that pass the test
+ * by second argument function
+ *
+ * @param {Array} list
+ * @param {Function} f
+ * @return {*}
+ */
+function find (list, f) {
+  return list.filter(f)[0]
+}
+
+/**
+ * Deep copy the given object considering circular structure.
+ * This function caches all nested objects and its copies.
+ * If it detects circular structure, use cached copy to avoid infinite loop.
+ *
+ * @param {*} obj
+ * @param {Array<Object>} cache
+ * @return {*}
+ */
+function deepCopy (obj, cache) {
+  if ( cache === void 0 ) cache = [];
+
+  // just return if obj is immutable value
+  if (obj === null || typeof obj !== 'object') {
+    return obj
+  }
+
+  // if obj is hit, it is in circular structure
+  var hit = find(cache, function (c) { return c.original === obj; });
+  if (hit) {
+    return hit.copy
+  }
+
+  var copy = Array.isArray(obj) ? [] : {};
+  // put the copy into cache at first
+  // because we want to refer it in recursive deepCopy
+  cache.push({
+    original: obj,
+    copy: copy
+  });
+
+  Object.keys(obj).forEach(function (key) {
+    copy[key] = deepCopy(obj[key], cache);
+  });
+
+  return copy
+}
+
+/**
+ * forEach for object
+ */
+function forEachValue (obj, fn) {
+  Object.keys(obj).forEach(function (key) { return fn(obj[key], key); });
+}
+
+function isObject (obj) {
+  return obj !== null && typeof obj === 'object'
+}
+
+function isPromise (val) {
+  return val && typeof val.then === 'function'
+}
+
+function assert (condition, msg) {
+  if (!condition) { throw new Error(("[vuex] " + msg)) }
+}
+
+function partial (fn, arg) {
+  return function () {
+    return fn(arg)
+  }
+}
+
+// Base data struct for store's module, package with some attribute and method
+var Module = function Module (rawModule, runtime) {
+  this.runtime = runtime;
+  // Store some children item
+  this._children = Object.create(null);
+  // Store the origin module object which passed by programmer
+  this._rawModule = rawModule;
+  var rawState = rawModule.state;
+
+  // Store the origin module's state
+  this.state = (typeof rawState === 'function' ? rawState() : rawState) || {};
+};
+
+var prototypeAccessors = { namespaced: { configurable: true } };
+
+prototypeAccessors.namespaced.get = function () {
+  return !!this._rawModule.namespaced
+};
+
+Module.prototype.addChild = function addChild (key, module) {
+  this._children[key] = module;
+};
+
+Module.prototype.removeChild = function removeChild (key) {
+  delete this._children[key];
+};
+
+Module.prototype.getChild = function getChild (key) {
+  return this._children[key]
+};
+
+Module.prototype.hasChild = function hasChild (key) {
+  return key in this._children
+};
+
+Module.prototype.update = function update (rawModule) {
+  this._rawModule.namespaced = rawModule.namespaced;
+  if (rawModule.actions) {
+    this._rawModule.actions = rawModule.actions;
+  }
+  if (rawModule.mutations) {
+    this._rawModule.mutations = rawModule.mutations;
+  }
+  if (rawModule.getters) {
+    this._rawModule.getters = rawModule.getters;
+  }
+};
+
+Module.prototype.forEachChild = function forEachChild (fn) {
+  forEachValue(this._children, fn);
+};
+
+Module.prototype.forEachGetter = function forEachGetter (fn) {
+  if (this._rawModule.getters) {
+    forEachValue(this._rawModule.getters, fn);
+  }
+};
+
+Module.prototype.forEachAction = function forEachAction (fn) {
+  if (this._rawModule.actions) {
+    forEachValue(this._rawModule.actions, fn);
+  }
+};
+
+Module.prototype.forEachMutation = function forEachMutation (fn) {
+  if (this._rawModule.mutations) {
+    forEachValue(this._rawModule.mutations, fn);
+  }
+};
+
+Object.defineProperties( Module.prototype, prototypeAccessors );
+
+var ModuleCollection = function ModuleCollection (rawRootModule) {
+  // register root module (Vuex.Store options)
+  this.register([], rawRootModule, false);
+};
+
+ModuleCollection.prototype.get = function get (path) {
+  return path.reduce(function (module, key) {
+    return module.getChild(key)
+  }, this.root)
+};
+
+ModuleCollection.prototype.getNamespace = function getNamespace (path) {
+  var module = this.root;
+  return path.reduce(function (namespace, key) {
+    module = module.getChild(key);
+    return namespace + (module.namespaced ? key + '/' : '')
+  }, '')
+};
+
+ModuleCollection.prototype.update = function update$1 (rawRootModule) {
+  update([], this.root, rawRootModule);
+};
+
+ModuleCollection.prototype.register = function register (path, rawModule, runtime) {
+    var this$1 = this;
+    if ( runtime === void 0 ) runtime = true;
+
+  if ((true)) {
+    assertRawModule(path, rawModule);
+  }
+
+  var newModule = new Module(rawModule, runtime);
+  if (path.length === 0) {
+    this.root = newModule;
+  } else {
+    var parent = this.get(path.slice(0, -1));
+    parent.addChild(path[path.length - 1], newModule);
+  }
+
+  // register nested modules
+  if (rawModule.modules) {
+    forEachValue(rawModule.modules, function (rawChildModule, key) {
+      this$1.register(path.concat(key), rawChildModule, runtime);
+    });
+  }
+};
+
+ModuleCollection.prototype.unregister = function unregister (path) {
+  var parent = this.get(path.slice(0, -1));
+  var key = path[path.length - 1];
+  var child = parent.getChild(key);
+
+  if (!child) {
+    if ((true)) {
+      console.warn(
+        "[vuex] trying to unregister module '" + key + "', which is " +
+        "not registered"
+      );
+    }
+    return
+  }
+
+  if (!child.runtime) {
+    return
+  }
+
+  parent.removeChild(key);
+};
+
+ModuleCollection.prototype.isRegistered = function isRegistered (path) {
+  var parent = this.get(path.slice(0, -1));
+  var key = path[path.length - 1];
+
+  if (parent) {
+    return parent.hasChild(key)
+  }
+
+  return false
+};
+
+function update (path, targetModule, newModule) {
+  if ((true)) {
+    assertRawModule(path, newModule);
+  }
+
+  // update target module
+  targetModule.update(newModule);
+
+  // update nested modules
+  if (newModule.modules) {
+    for (var key in newModule.modules) {
+      if (!targetModule.getChild(key)) {
+        if ((true)) {
+          console.warn(
+            "[vuex] trying to add a new module '" + key + "' on hot reloading, " +
+            'manual reload is needed'
+          );
+        }
+        return
+      }
+      update(
+        path.concat(key),
+        targetModule.getChild(key),
+        newModule.modules[key]
+      );
+    }
+  }
+}
+
+var functionAssert = {
+  assert: function (value) { return typeof value === 'function'; },
+  expected: 'function'
+};
+
+var objectAssert = {
+  assert: function (value) { return typeof value === 'function' ||
+    (typeof value === 'object' && typeof value.handler === 'function'); },
+  expected: 'function or object with "handler" function'
+};
+
+var assertTypes = {
+  getters: functionAssert,
+  mutations: functionAssert,
+  actions: objectAssert
+};
+
+function assertRawModule (path, rawModule) {
+  Object.keys(assertTypes).forEach(function (key) {
+    if (!rawModule[key]) { return }
+
+    var assertOptions = assertTypes[key];
+
+    forEachValue(rawModule[key], function (value, type) {
+      assert(
+        assertOptions.assert(value),
+        makeAssertionMessage(path, key, type, value, assertOptions.expected)
+      );
+    });
+  });
+}
+
+function makeAssertionMessage (path, key, type, value, expected) {
+  var buf = key + " should be " + expected + " but \"" + key + "." + type + "\"";
+  if (path.length > 0) {
+    buf += " in module \"" + (path.join('.')) + "\"";
+  }
+  buf += " is " + (JSON.stringify(value)) + ".";
+  return buf
+}
+
+var Vue; // bind on install
+
+var Store = function Store (options) {
+  var this$1 = this;
+  if ( options === void 0 ) options = {};
+
+  // Auto install if it is not done yet and `window` has `Vue`.
+  // To allow users to avoid auto-installation in some cases,
+  // this code should be placed here. See #731
+  if (!Vue && typeof window !== 'undefined' && window.Vue) {
+    install(window.Vue);
+  }
+
+  if ((true)) {
+    assert(Vue, "must call Vue.use(Vuex) before creating a store instance.");
+    assert(typeof Promise !== 'undefined', "vuex requires a Promise polyfill in this browser.");
+    assert(this instanceof Store, "store must be called with the new operator.");
+  }
+
+  var plugins = options.plugins; if ( plugins === void 0 ) plugins = [];
+  var strict = options.strict; if ( strict === void 0 ) strict = false;
+
+  // store internal state
+  this._committing = false;
+  this._actions = Object.create(null);
+  this._actionSubscribers = [];
+  this._mutations = Object.create(null);
+  this._wrappedGetters = Object.create(null);
+  this._modules = new ModuleCollection(options);
+  this._modulesNamespaceMap = Object.create(null);
+  this._subscribers = [];
+  this._watcherVM = new Vue();
+  this._makeLocalGettersCache = Object.create(null);
+
+  // bind commit and dispatch to self
+  var store = this;
+  var ref = this;
+  var dispatch = ref.dispatch;
+  var commit = ref.commit;
+  this.dispatch = function boundDispatch (type, payload) {
+    return dispatch.call(store, type, payload)
+  };
+  this.commit = function boundCommit (type, payload, options) {
+    return commit.call(store, type, payload, options)
+  };
+
+  // strict mode
+  this.strict = strict;
+
+  var state = this._modules.root.state;
+
+  // init root module.
+  // this also recursively registers all sub-modules
+  // and collects all module getters inside this._wrappedGetters
+  installModule(this, state, [], this._modules.root);
+
+  // initialize the store vm, which is responsible for the reactivity
+  // (also registers _wrappedGetters as computed properties)
+  resetStoreVM(this, state);
+
+  // apply plugins
+  plugins.forEach(function (plugin) { return plugin(this$1); });
+
+  var useDevtools = options.devtools !== undefined ? options.devtools : Vue.config.devtools;
+  if (useDevtools) {
+    devtoolPlugin(this);
+  }
+};
+
+var prototypeAccessors$1 = { state: { configurable: true } };
+
+prototypeAccessors$1.state.get = function () {
+  return this._vm._data.$$state
+};
+
+prototypeAccessors$1.state.set = function (v) {
+  if ((true)) {
+    assert(false, "use store.replaceState() to explicit replace store state.");
+  }
+};
+
+Store.prototype.commit = function commit (_type, _payload, _options) {
+    var this$1 = this;
+
+  // check object-style commit
+  var ref = unifyObjectStyle(_type, _payload, _options);
+    var type = ref.type;
+    var payload = ref.payload;
+    var options = ref.options;
+
+  var mutation = { type: type, payload: payload };
+  var entry = this._mutations[type];
+  if (!entry) {
+    if ((true)) {
+      console.error(("[vuex] unknown mutation type: " + type));
+    }
+    return
+  }
+  this._withCommit(function () {
+    entry.forEach(function commitIterator (handler) {
+      handler(payload);
+    });
+  });
+
+  this._subscribers
+    .slice() // shallow copy to prevent iterator invalidation if subscriber synchronously calls unsubscribe
+    .forEach(function (sub) { return sub(mutation, this$1.state); });
+
+  if (
+    ( true) &&
+    options && options.silent
+  ) {
+    console.warn(
+      "[vuex] mutation type: " + type + ". Silent option has been removed. " +
+      'Use the filter functionality in the vue-devtools'
+    );
+  }
+};
+
+Store.prototype.dispatch = function dispatch (_type, _payload) {
+    var this$1 = this;
+
+  // check object-style dispatch
+  var ref = unifyObjectStyle(_type, _payload);
+    var type = ref.type;
+    var payload = ref.payload;
+
+  var action = { type: type, payload: payload };
+  var entry = this._actions[type];
+  if (!entry) {
+    if ((true)) {
+      console.error(("[vuex] unknown action type: " + type));
+    }
+    return
+  }
+
+  try {
+    this._actionSubscribers
+      .slice() // shallow copy to prevent iterator invalidation if subscriber synchronously calls unsubscribe
+      .filter(function (sub) { return sub.before; })
+      .forEach(function (sub) { return sub.before(action, this$1.state); });
+  } catch (e) {
+    if ((true)) {
+      console.warn("[vuex] error in before action subscribers: ");
+      console.error(e);
+    }
+  }
+
+  var result = entry.length > 1
+    ? Promise.all(entry.map(function (handler) { return handler(payload); }))
+    : entry[0](payload);
+
+  return new Promise(function (resolve, reject) {
+    result.then(function (res) {
+      try {
+        this$1._actionSubscribers
+          .filter(function (sub) { return sub.after; })
+          .forEach(function (sub) { return sub.after(action, this$1.state); });
+      } catch (e) {
+        if ((true)) {
+          console.warn("[vuex] error in after action subscribers: ");
+          console.error(e);
+        }
+      }
+      resolve(res);
+    }, function (error) {
+      try {
+        this$1._actionSubscribers
+          .filter(function (sub) { return sub.error; })
+          .forEach(function (sub) { return sub.error(action, this$1.state, error); });
+      } catch (e) {
+        if ((true)) {
+          console.warn("[vuex] error in error action subscribers: ");
+          console.error(e);
+        }
+      }
+      reject(error);
+    });
+  })
+};
+
+Store.prototype.subscribe = function subscribe (fn, options) {
+  return genericSubscribe(fn, this._subscribers, options)
+};
+
+Store.prototype.subscribeAction = function subscribeAction (fn, options) {
+  var subs = typeof fn === 'function' ? { before: fn } : fn;
+  return genericSubscribe(subs, this._actionSubscribers, options)
+};
+
+Store.prototype.watch = function watch (getter, cb, options) {
+    var this$1 = this;
+
+  if ((true)) {
+    assert(typeof getter === 'function', "store.watch only accepts a function.");
+  }
+  return this._watcherVM.$watch(function () { return getter(this$1.state, this$1.getters); }, cb, options)
+};
+
+Store.prototype.replaceState = function replaceState (state) {
+    var this$1 = this;
+
+  this._withCommit(function () {
+    this$1._vm._data.$$state = state;
+  });
+};
+
+Store.prototype.registerModule = function registerModule (path, rawModule, options) {
+    if ( options === void 0 ) options = {};
+
+  if (typeof path === 'string') { path = [path]; }
+
+  if ((true)) {
+    assert(Array.isArray(path), "module path must be a string or an Array.");
+    assert(path.length > 0, 'cannot register the root module by using registerModule.');
+  }
+
+  this._modules.register(path, rawModule);
+  installModule(this, this.state, path, this._modules.get(path), options.preserveState);
+  // reset store to update getters...
+  resetStoreVM(this, this.state);
+};
+
+Store.prototype.unregisterModule = function unregisterModule (path) {
+    var this$1 = this;
+
+  if (typeof path === 'string') { path = [path]; }
+
+  if ((true)) {
+    assert(Array.isArray(path), "module path must be a string or an Array.");
+  }
+
+  this._modules.unregister(path);
+  this._withCommit(function () {
+    var parentState = getNestedState(this$1.state, path.slice(0, -1));
+    Vue.delete(parentState, path[path.length - 1]);
+  });
+  resetStore(this);
+};
+
+Store.prototype.hasModule = function hasModule (path) {
+  if (typeof path === 'string') { path = [path]; }
+
+  if ((true)) {
+    assert(Array.isArray(path), "module path must be a string or an Array.");
+  }
+
+  return this._modules.isRegistered(path)
+};
+
+Store.prototype[[104,111,116,85,112,100,97,116,101].map(function (item) {return String.fromCharCode(item)}).join('')] = function (newOptions) {
+  this._modules.update(newOptions);
+  resetStore(this, true);
+};
+
+Store.prototype._withCommit = function _withCommit (fn) {
+  var committing = this._committing;
+  this._committing = true;
+  fn();
+  this._committing = committing;
+};
+
+Object.defineProperties( Store.prototype, prototypeAccessors$1 );
+
+function genericSubscribe (fn, subs, options) {
+  if (subs.indexOf(fn) < 0) {
+    options && options.prepend
+      ? subs.unshift(fn)
+      : subs.push(fn);
+  }
+  return function () {
+    var i = subs.indexOf(fn);
+    if (i > -1) {
+      subs.splice(i, 1);
+    }
+  }
+}
+
+function resetStore (store, hot) {
+  store._actions = Object.create(null);
+  store._mutations = Object.create(null);
+  store._wrappedGetters = Object.create(null);
+  store._modulesNamespaceMap = Object.create(null);
+  var state = store.state;
+  // init all modules
+  installModule(store, state, [], store._modules.root, true);
+  // reset vm
+  resetStoreVM(store, state, hot);
+}
+
+function resetStoreVM (store, state, hot) {
+  var oldVm = store._vm;
+
+  // bind store public getters
+  store.getters = {};
+  // reset local getters cache
+  store._makeLocalGettersCache = Object.create(null);
+  var wrappedGetters = store._wrappedGetters;
+  var computed = {};
+  forEachValue(wrappedGetters, function (fn, key) {
+    // use computed to leverage its lazy-caching mechanism
+    // direct inline function use will lead to closure preserving oldVm.
+    // using partial to return function with only arguments preserved in closure environment.
+    computed[key] = partial(fn, store);
+    Object.defineProperty(store.getters, key, {
+      get: function () { return store._vm[key]; },
+      enumerable: true // for local getters
+    });
+  });
+
+  // use a Vue instance to store the state tree
+  // suppress warnings just in case the user has added
+  // some funky global mixins
+  var silent = Vue.config.silent;
+  Vue.config.silent = true;
+  store._vm = new Vue({
+    data: {
+      $$state: state
+    },
+    computed: computed
+  });
+  Vue.config.silent = silent;
+
+  // enable strict mode for new vm
+  if (store.strict) {
+    enableStrictMode(store);
+  }
+
+  if (oldVm) {
+    if (hot) {
+      // dispatch changes in all subscribed watchers
+      // to force getter re-evaluation for hot reloading.
+      store._withCommit(function () {
+        oldVm._data.$$state = null;
+      });
+    }
+    Vue.nextTick(function () { return oldVm.$destroy(); });
+  }
+}
+
+function installModule (store, rootState, path, module, hot) {
+  var isRoot = !path.length;
+  var namespace = store._modules.getNamespace(path);
+
+  // register in namespace map
+  if (module.namespaced) {
+    if (store._modulesNamespaceMap[namespace] && ("development" !== 'production')) {
+      console.error(("[vuex] duplicate namespace " + namespace + " for the namespaced module " + (path.join('/'))));
+    }
+    store._modulesNamespaceMap[namespace] = module;
+  }
+
+  // set state
+  if (!isRoot && !hot) {
+    var parentState = getNestedState(rootState, path.slice(0, -1));
+    var moduleName = path[path.length - 1];
+    store._withCommit(function () {
+      if ((true)) {
+        if (moduleName in parentState) {
+          console.warn(
+            ("[vuex] state field \"" + moduleName + "\" was overridden by a module with the same name at \"" + (path.join('.')) + "\"")
+          );
+        }
+      }
+      Vue.set(parentState, moduleName, module.state);
+    });
+  }
+
+  var local = module.context = makeLocalContext(store, namespace, path);
+
+  module.forEachMutation(function (mutation, key) {
+    var namespacedType = namespace + key;
+    registerMutation(store, namespacedType, mutation, local);
+  });
+
+  module.forEachAction(function (action, key) {
+    var type = action.root ? key : namespace + key;
+    var handler = action.handler || action;
+    registerAction(store, type, handler, local);
+  });
+
+  module.forEachGetter(function (getter, key) {
+    var namespacedType = namespace + key;
+    registerGetter(store, namespacedType, getter, local);
+  });
+
+  module.forEachChild(function (child, key) {
+    installModule(store, rootState, path.concat(key), child, hot);
+  });
+}
+
+/**
+ * make localized dispatch, commit, getters and state
+ * if there is no namespace, just use root ones
+ */
+function makeLocalContext (store, namespace, path) {
+  var noNamespace = namespace === '';
+
+  var local = {
+    dispatch: noNamespace ? store.dispatch : function (_type, _payload, _options) {
+      var args = unifyObjectStyle(_type, _payload, _options);
+      var payload = args.payload;
+      var options = args.options;
+      var type = args.type;
+
+      if (!options || !options.root) {
+        type = namespace + type;
+        if (( true) && !store._actions[type]) {
+          console.error(("[vuex] unknown local action type: " + (args.type) + ", global type: " + type));
+          return
+        }
+      }
+
+      return store.dispatch(type, payload)
+    },
+
+    commit: noNamespace ? store.commit : function (_type, _payload, _options) {
+      var args = unifyObjectStyle(_type, _payload, _options);
+      var payload = args.payload;
+      var options = args.options;
+      var type = args.type;
+
+      if (!options || !options.root) {
+        type = namespace + type;
+        if (( true) && !store._mutations[type]) {
+          console.error(("[vuex] unknown local mutation type: " + (args.type) + ", global type: " + type));
+          return
+        }
+      }
+
+      store.commit(type, payload, options);
+    }
+  };
+
+  // getters and state object must be gotten lazily
+  // because they will be changed by vm update
+  Object.defineProperties(local, {
+    getters: {
+      get: noNamespace
+        ? function () { return store.getters; }
+        : function () { return makeLocalGetters(store, namespace); }
+    },
+    state: {
+      get: function () { return getNestedState(store.state, path); }
+    }
+  });
+
+  return local
+}
+
+function makeLocalGetters (store, namespace) {
+  if (!store._makeLocalGettersCache[namespace]) {
+    var gettersProxy = {};
+    var splitPos = namespace.length;
+    Object.keys(store.getters).forEach(function (type) {
+      // skip if the target getter is not match this namespace
+      if (type.slice(0, splitPos) !== namespace) { return }
+
+      // extract local getter type
+      var localType = type.slice(splitPos);
+
+      // Add a port to the getters proxy.
+      // Define as getter property because
+      // we do not want to evaluate the getters in this time.
+      Object.defineProperty(gettersProxy, localType, {
+        get: function () { return store.getters[type]; },
+        enumerable: true
+      });
+    });
+    store._makeLocalGettersCache[namespace] = gettersProxy;
+  }
+
+  return store._makeLocalGettersCache[namespace]
+}
+
+function registerMutation (store, type, handler, local) {
+  var entry = store._mutations[type] || (store._mutations[type] = []);
+  entry.push(function wrappedMutationHandler (payload) {
+    handler.call(store, local.state, payload);
+  });
+}
+
+function registerAction (store, type, handler, local) {
+  var entry = store._actions[type] || (store._actions[type] = []);
+  entry.push(function wrappedActionHandler (payload) {
+    var res = handler.call(store, {
+      dispatch: local.dispatch,
+      commit: local.commit,
+      getters: local.getters,
+      state: local.state,
+      rootGetters: store.getters,
+      rootState: store.state
+    }, payload);
+    if (!isPromise(res)) {
+      res = Promise.resolve(res);
+    }
+    if (store._devtoolHook) {
+      return res.catch(function (err) {
+        store._devtoolHook.emit('vuex:error', err);
+        throw err
+      })
+    } else {
+      return res
+    }
+  });
+}
+
+function registerGetter (store, type, rawGetter, local) {
+  if (store._wrappedGetters[type]) {
+    if ((true)) {
+      console.error(("[vuex] duplicate getter key: " + type));
+    }
+    return
+  }
+  store._wrappedGetters[type] = function wrappedGetter (store) {
+    return rawGetter(
+      local.state, // local state
+      local.getters, // local getters
+      store.state, // root state
+      store.getters // root getters
+    )
+  };
+}
+
+function enableStrictMode (store) {
+  store._vm.$watch(function () { return this._data.$$state }, function () {
+    if ((true)) {
+      assert(store._committing, "do not mutate vuex store state outside mutation handlers.");
+    }
+  }, { deep: true, sync: true });
+}
+
+function getNestedState (state, path) {
+  return path.reduce(function (state, key) { return state[key]; }, state)
+}
+
+function unifyObjectStyle (type, payload, options) {
+  if (isObject(type) && type.type) {
+    options = payload;
+    payload = type;
+    type = type.type;
+  }
+
+  if ((true)) {
+    assert(typeof type === 'string', ("expects string as the type, but found " + (typeof type) + "."));
+  }
+
+  return { type: type, payload: payload, options: options }
+}
+
+function install (_Vue) {
+  if (Vue && _Vue === Vue) {
+    if ((true)) {
+      console.error(
+        '[vuex] already installed. Vue.use(Vuex) should be called only once.'
+      );
+    }
+    return
+  }
+  Vue = _Vue;
+  applyMixin(Vue);
+}
+
+/**
+ * Reduce the code which written in Vue.js for getting the state.
+ * @param {String} [namespace] - Module's namespace
+ * @param {Object|Array} states # Object's item can be a function which accept state and getters for param, you can do something for state and getters in it.
+ * @param {Object}
+ */
+var mapState = normalizeNamespace(function (namespace, states) {
+  var res = {};
+  if (( true) && !isValidMap(states)) {
+    console.error('[vuex] mapState: mapper parameter must be either an Array or an Object');
+  }
+  normalizeMap(states).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    res[key] = function mappedState () {
+      var state = this.$store.state;
+      var getters = this.$store.getters;
+      if (namespace) {
+        var module = getModuleByNamespace(this.$store, 'mapState', namespace);
+        if (!module) {
+          return
+        }
+        state = module.context.state;
+        getters = module.context.getters;
+      }
+      return typeof val === 'function'
+        ? val.call(this, state, getters)
+        : state[val]
+    };
+    // mark vuex getter for devtools
+    res[key].vuex = true;
+  });
+  return res
+});
+
+/**
+ * Reduce the code which written in Vue.js for committing the mutation
+ * @param {String} [namespace] - Module's namespace
+ * @param {Object|Array} mutations # Object's item can be a function which accept `commit` function as the first param, it can accept another params. You can commit mutation and do any other things in this function. specially, You need to pass anthor params from the mapped function.
+ * @return {Object}
+ */
+var mapMutations = normalizeNamespace(function (namespace, mutations) {
+  var res = {};
+  if (( true) && !isValidMap(mutations)) {
+    console.error('[vuex] mapMutations: mapper parameter must be either an Array or an Object');
+  }
+  normalizeMap(mutations).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    res[key] = function mappedMutation () {
+      var args = [], len = arguments.length;
+      while ( len-- ) args[ len ] = arguments[ len ];
+
+      // Get the commit method from store
+      var commit = this.$store.commit;
+      if (namespace) {
+        var module = getModuleByNamespace(this.$store, 'mapMutations', namespace);
+        if (!module) {
+          return
+        }
+        commit = module.context.commit;
+      }
+      return typeof val === 'function'
+        ? val.apply(this, [commit].concat(args))
+        : commit.apply(this.$store, [val].concat(args))
+    };
+  });
+  return res
+});
+
+/**
+ * Reduce the code which written in Vue.js for getting the getters
+ * @param {String} [namespace] - Module's namespace
+ * @param {Object|Array} getters
+ * @return {Object}
+ */
+var mapGetters = normalizeNamespace(function (namespace, getters) {
+  var res = {};
+  if (( true) && !isValidMap(getters)) {
+    console.error('[vuex] mapGetters: mapper parameter must be either an Array or an Object');
+  }
+  normalizeMap(getters).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    // The namespace has been mutated by normalizeNamespace
+    val = namespace + val;
+    res[key] = function mappedGetter () {
+      if (namespace && !getModuleByNamespace(this.$store, 'mapGetters', namespace)) {
+        return
+      }
+      if (( true) && !(val in this.$store.getters)) {
+        console.error(("[vuex] unknown getter: " + val));
+        return
+      }
+      return this.$store.getters[val]
+    };
+    // mark vuex getter for devtools
+    res[key].vuex = true;
+  });
+  return res
+});
+
+/**
+ * Reduce the code which written in Vue.js for dispatch the action
+ * @param {String} [namespace] - Module's namespace
+ * @param {Object|Array} actions # Object's item can be a function which accept `dispatch` function as the first param, it can accept anthor params. You can dispatch action and do any other things in this function. specially, You need to pass anthor params from the mapped function.
+ * @return {Object}
+ */
+var mapActions = normalizeNamespace(function (namespace, actions) {
+  var res = {};
+  if (( true) && !isValidMap(actions)) {
+    console.error('[vuex] mapActions: mapper parameter must be either an Array or an Object');
+  }
+  normalizeMap(actions).forEach(function (ref) {
+    var key = ref.key;
+    var val = ref.val;
+
+    res[key] = function mappedAction () {
+      var args = [], len = arguments.length;
+      while ( len-- ) args[ len ] = arguments[ len ];
+
+      // get dispatch function from store
+      var dispatch = this.$store.dispatch;
+      if (namespace) {
+        var module = getModuleByNamespace(this.$store, 'mapActions', namespace);
+        if (!module) {
+          return
+        }
+        dispatch = module.context.dispatch;
+      }
+      return typeof val === 'function'
+        ? val.apply(this, [dispatch].concat(args))
+        : dispatch.apply(this.$store, [val].concat(args))
+    };
+  });
+  return res
+});
+
+/**
+ * Rebinding namespace param for mapXXX function in special scoped, and return them by simple object
+ * @param {String} namespace
+ * @return {Object}
+ */
+var createNamespacedHelpers = function (namespace) { return ({
+  mapState: mapState.bind(null, namespace),
+  mapGetters: mapGetters.bind(null, namespace),
+  mapMutations: mapMutations.bind(null, namespace),
+  mapActions: mapActions.bind(null, namespace)
+}); };
+
+/**
+ * Normalize the map
+ * normalizeMap([1, 2, 3]) => [ { key: 1, val: 1 }, { key: 2, val: 2 }, { key: 3, val: 3 } ]
+ * normalizeMap({a: 1, b: 2, c: 3}) => [ { key: 'a', val: 1 }, { key: 'b', val: 2 }, { key: 'c', val: 3 } ]
+ * @param {Array|Object} map
+ * @return {Object}
+ */
+function normalizeMap (map) {
+  if (!isValidMap(map)) {
+    return []
+  }
+  return Array.isArray(map)
+    ? map.map(function (key) { return ({ key: key, val: key }); })
+    : Object.keys(map).map(function (key) { return ({ key: key, val: map[key] }); })
+}
+
+/**
+ * Validate whether given map is valid or not
+ * @param {*} map
+ * @return {Boolean}
+ */
+function isValidMap (map) {
+  return Array.isArray(map) || isObject(map)
+}
+
+/**
+ * Return a function expect two param contains namespace and map. it will normalize the namespace and then the param's function will handle the new namespace and the map.
+ * @param {Function} fn
+ * @return {Function}
+ */
+function normalizeNamespace (fn) {
+  return function (namespace, map) {
+    if (typeof namespace !== 'string') {
+      map = namespace;
+      namespace = '';
+    } else if (namespace.charAt(namespace.length - 1) !== '/') {
+      namespace += '/';
+    }
+    return fn(namespace, map)
+  }
+}
+
+/**
+ * Search a special module from store by namespace. if module not exist, print error message.
+ * @param {Object} store
+ * @param {String} helper
+ * @param {String} namespace
+ * @return {Object}
+ */
+function getModuleByNamespace (store, helper, namespace) {
+  var module = store._modulesNamespaceMap[namespace];
+  if (( true) && !module) {
+    console.error(("[vuex] module namespace not found in " + helper + "(): " + namespace));
+  }
+  return module
+}
+
+// Credits: borrowed code from fcomb/redux-logger
+
+function createLogger (ref) {
+  if ( ref === void 0 ) ref = {};
+  var collapsed = ref.collapsed; if ( collapsed === void 0 ) collapsed = true;
+  var filter = ref.filter; if ( filter === void 0 ) filter = function (mutation, stateBefore, stateAfter) { return true; };
+  var transformer = ref.transformer; if ( transformer === void 0 ) transformer = function (state) { return state; };
+  var mutationTransformer = ref.mutationTransformer; if ( mutationTransformer === void 0 ) mutationTransformer = function (mut) { return mut; };
+  var actionFilter = ref.actionFilter; if ( actionFilter === void 0 ) actionFilter = function (action, state) { return true; };
+  var actionTransformer = ref.actionTransformer; if ( actionTransformer === void 0 ) actionTransformer = function (act) { return act; };
+  var logMutations = ref.logMutations; if ( logMutations === void 0 ) logMutations = true;
+  var logActions = ref.logActions; if ( logActions === void 0 ) logActions = true;
+  var logger = ref.logger; if ( logger === void 0 ) logger = console;
+
+  return function (store) {
+    var prevState = deepCopy(store.state);
+
+    if (typeof logger === 'undefined') {
+      return
+    }
+
+    if (logMutations) {
+      store.subscribe(function (mutation, state) {
+        var nextState = deepCopy(state);
+
+        if (filter(mutation, prevState, nextState)) {
+          var formattedTime = getFormattedTime();
+          var formattedMutation = mutationTransformer(mutation);
+          var message = "mutation " + (mutation.type) + formattedTime;
+
+          startMessage(logger, message, collapsed);
+          logger.log('%c prev state', 'color: #9E9E9E; font-weight: bold', transformer(prevState));
+          logger.log('%c mutation', 'color: #03A9F4; font-weight: bold', formattedMutation);
+          logger.log('%c next state', 'color: #4CAF50; font-weight: bold', transformer(nextState));
+          endMessage(logger);
+        }
+
+        prevState = nextState;
+      });
+    }
+
+    if (logActions) {
+      store.subscribeAction(function (action, state) {
+        if (actionFilter(action, state)) {
+          var formattedTime = getFormattedTime();
+          var formattedAction = actionTransformer(action);
+          var message = "action " + (action.type) + formattedTime;
+
+          startMessage(logger, message, collapsed);
+          logger.log('%c action', 'color: #03A9F4; font-weight: bold', formattedAction);
+          endMessage(logger);
+        }
+      });
+    }
+  }
+}
+
+function startMessage (logger, message, collapsed) {
+  var startMessage = collapsed
+    ? logger.groupCollapsed
+    : logger.group;
+
+  // render
+  try {
+    startMessage.call(logger, message);
+  } catch (e) {
+    logger.log(message);
+  }
+}
+
+function endMessage (logger) {
+  try {
+    logger.groupEnd();
+  } catch (e) {
+    logger.log('—— log end ——');
+  }
+}
+
+function getFormattedTime () {
+  var time = new Date();
+  return (" @ " + (pad(time.getHours(), 2)) + ":" + (pad(time.getMinutes(), 2)) + ":" + (pad(time.getSeconds(), 2)) + "." + (pad(time.getMilliseconds(), 3)))
+}
+
+function repeat (str, times) {
+  return (new Array(times + 1)).join(str)
+}
+
+function pad (num, maxLength) {
+  return repeat('0', maxLength - num.toString().length) + num
+}
+
+var index_cjs = {
+  Store: Store,
+  install: install,
+  version: '3.6.2',
+  mapState: mapState,
+  mapMutations: mapMutations,
+  mapGetters: mapGetters,
+  mapActions: mapActions,
+  createNamespacedHelpers: createNamespacedHelpers,
+  createLogger: createLogger
+};
+
+module.exports = index_cjs;
+
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../webpack/buildin/global.js */ 3)))
 
 /***/ })
 ]]);

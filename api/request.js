@@ -1,7 +1,8 @@
+import config from "./config.js"
 export default {
     // 全局配置
     common:{
-        baseUrl:"https://xxx",
+        baseUrl:config.baseUrl,
         header:{
             'Content-Type':'application/json;charset=UTF-8',
         },
@@ -22,20 +23,19 @@ export default {
 
         // 请求之前验证...
         // token验证
-        if (options.token) {
-            let token = uni.getStorageSync('token')
-            // 二次验证
-            if (!token) {
-                uni.showToast({ title: '请先登录', icon: 'none' });
-                // token不存在时跳转
-                return uni.reLaunch({
-                    url: '/pages/index/index',
-                });
-            }
-            // 往header头中添加token
-            options.header.token = token
-        }
-
+        // if (options.token) {
+        //     let token = uni.getStorageSync('token')
+        //     // 二次验证
+        //     if (!token) {
+        //         uni.showToast({ title: '请先登录', icon: 'none' });
+        //         // token不存在时跳转
+        //         return uni.reLaunch({
+        //             url: '/pages/index/index',
+        //         });
+        //     }
+        //     // 往header头中添加token
+        //     options.header.token = token
+        // }
         // 请求
         return new Promise((res,rej)=>{
             // 请求中...
@@ -59,7 +59,7 @@ export default {
 						if(result.data.data === 'Token 令牌不合法!'){
 							console.log("需要退出登录");
 						}
-                        return rej(result.data) 
+                        return rej(result.data)
                     }
                     // 其他验证...
                     // 成功
@@ -85,6 +85,9 @@ export default {
         options.url = url
         options.data = data
         options.method = 'POST'
+		options.header = {
+			'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'
+		}
         return this.request(options)
     },
     // delete请求

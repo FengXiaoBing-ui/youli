@@ -4,40 +4,57 @@
 		<view @click="userPolicy">用户协议</view>
 		<view @click="privacyAgreements">隐私政策</view>
 		<view @click="feedback">意见反馈</view>
+		<view @click="fLogout">退出登录</view>
 	</view>
 </template>
 
 <script>
+	import {mapActions} from "vuex";
 	export default {
 		data() {
 			return {
-				
+
 			};
 		},
-		methods:{
-			getPhoneNumber(e){
+		methods: {
+			...mapActions(['login','logout']),
+			getPhoneNumber(e) {
+				let that = this
 				uni.login({
-				  provider: 'weixin', //使用微信登录
-				  success: function (loginRes) {
-				    console.log(loginRes.authResult);
-					console.log(e);
-				  }
+					"provider": "weixin",
+					"onlyAuthorize": true, // 微信登录仅请求授权认证
+					success: function(loginRes) {
+						that.$http.login({
+							openIdCode:loginRes.code,
+							phoneCode:e.detail.code
+						}).then(res => {
+							that.login(res)
+						})
+					}
 				});
+				// uni.getUserProfile({
+				// 	success: function(infoRes) {
+				// 		console.log(infoRes);
+				// 	}
+				// });
 			},
-			userPolicy(){
+			userPolicy() {
 				uni.navigateTo({
-					url:"/pages/userPolicy/userPolicy"
+					url: "/pages/userPolicy/userPolicy"
 				})
 			},
-			privacyAgreements(){
+			privacyAgreements() {
 				uni.navigateTo({
-					url:"/pages/privacyAgreements/privacyAgreements"
+					url: "/pages/privacyAgreements/privacyAgreements"
 				})
 			},
-			feedback(){
+			feedback() {
 				uni.navigateTo({
-					url:"/pages/feedBack/feedBack"
+					url: "/pages/feedBack/feedBack"
 				})
+			},
+			fLogout(){
+				this.logout()
 			}
 		}
 	}

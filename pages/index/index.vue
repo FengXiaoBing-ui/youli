@@ -1,6 +1,6 @@
 <template>
 	<view class="content">
-		
+		123123
 	</view>
 </template>
 
@@ -12,7 +12,7 @@
 			}
 		},
 		onLoad() {
-
+			
 		},
 		methods: {
 
