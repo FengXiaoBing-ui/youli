@@ -8,7 +8,7 @@
     "urlCheck": false,
     "es6": false,
     "postcss": false,
-    "minified": false,
+    "minified": true,
     "newFeature": true,
     "bigPackageSizeSupport": true,
     "babelSetting": {
@@ -20,7 +20,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "2.33.0",
-  "appid": "wxa861ba656c5f1237",
+  "appid": "wx51170a9f6f5aed08",
   "projectname": "youli",
   "condition": {},
   "editorSetting": {

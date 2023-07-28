@@ -7,8 +7,10 @@ import './uni.promisify.adaptor'
 import uView from '@/uni_modules/uview-ui'
 import api from "./api/api.js"
 import store from "./store/index.js";
+import { router } from "./router/index";
 
 Vue.use(uView)
+Vue.use(router)
 
 Vue.config.productionTip = false
 

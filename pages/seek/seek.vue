@@ -23,7 +23,6 @@
 			async allUser(){
 				const res = await this.$http.allUser()
 				this.chatList = res
-				console.log(this.chatList);
 			},
 			async goChat(item){
 				const res = await this.$http.createChat({
