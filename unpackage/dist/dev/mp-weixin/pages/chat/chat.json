@@ -1,5 +1,10 @@
 {
   "navigationBarTitleText": "",
   "enablePullDownRefresh": false,
-  "usingComponents": {}
+  "usingComponents": {
+    "free-icon-button": "/components/free-ui/free-icon-button",
+    "free-chat-item": "/components/free-ui/free-chat-item",
+    "free-popup": "/components/free-ui/free-popup",
+    "free-main-button": "/components/free-ui/free-main-button"
+  }
 }

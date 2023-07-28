@@ -9,6 +9,9 @@
 		onShow: function() {
 			console.log('App Show')
 			this.$store.dispatch('reconnect')
+			uni.onKeyboardHeightChange(res => {
+			  this.$store.commit('changeKeyboardHeight',res.height)
+			})
 		},
 		onHide: function() {
 			console.log('App Hide')
@@ -18,6 +21,16 @@
 
 <style lang="scss">
 	/*每个页面公共css */
+	@import "./common/free.css";
+	@import "./common/common.css";
+	/* #ifndef APP-PLUS-NVUE */
+	@import "./common/free-icon.css";
+	/* #endif */
+	/* #ifdef MP */
+	::-webkit-scrollbar{
+		display: none;
+	}
+	/* #endif */
 	@import '@/uni_modules/uview-ui/theme.scss';
 	@import "main.css";
 </style>

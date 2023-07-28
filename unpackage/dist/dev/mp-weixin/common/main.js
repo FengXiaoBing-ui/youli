@@ -100,7 +100,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-
+/* WEBPACK VAR INJECTION */(function(uni) {
 
 var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ 4);
 Object.defineProperty(exports, "__esModule", {
@@ -115,14 +115,19 @@ var _default = {
     this.$store.dispatch('initLogin');
   },
   onShow: function onShow() {
+    var _this = this;
     console.log('App Show');
     this.$store.dispatch('reconnect');
+    uni.onKeyboardHeightChange(function (res) {
+      _this.$store.commit('changeKeyboardHeight', res.height);
+    });
   },
   onHide: function onHide() {
     console.log('App Hide');
   }
 };
 exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 2)["default"]))
 
 /***/ }),
 

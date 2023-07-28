@@ -78,10 +78,9 @@ class chat {
 	// 监听接收消息
 	onMessage(data) {
 		let res = JSON.parse(data.data)
-		console.log(res);
 		// console.log('监听接收消息',res)
 		// 错误
-		switch (res.type) {
+		switch (res.chat_type) {
 			case -3:
 				uni.showToast({
 					title: res.date,
@@ -91,7 +90,7 @@ class chat {
 			// case 'moment': // 朋友圈更新
 			// 	this.handleMoment(res.data)
 			// 	break;
-			case 1: // 朋友圈更新
+			case "1": //普通文字消息
 				this.handleOnMessage(res.data)
 				break;
 			default:
@@ -110,7 +109,7 @@ class chat {
 		uni.$emit('onMessage',data)
 	}
 	//发送消息
-	send(message,onProgress = false){
+	send(message,onProgress = false,chatRoomNumber){
 		return new Promise(async (result,reject)=>{
 			// 添加消息历史记录
 			let { k } = this.addChatDetail(message)
@@ -121,8 +120,18 @@ class chat {
 			
 			// 提交到后端
 			let data = message.data
+			// chatRoomNumber: "ChatRoom1689573771263430"
+			// date: "2023-07-25T08:27:17.618Z"
+			// isRead: 0
+			// text: "77"
+			// type: 1
+			// userIdFrom: 203066
+			// userIdTo: "9527"
 			$H.sendMsg({
-				to_id:message.to_id || this.TO.id,
+				chatRoomNumber,
+				date:new Date(),
+				from_id:this.user.userId,
+				to_id:message.to_id || this.TO.to_id,
 				chat_type:message.chat_type || this.TO.chat_type, 
 				type:message.type, 
 				data, 
@@ -131,11 +140,13 @@ class chat {
 				// 发送成功
 				message.id = res.id
 				message.sendStatus = 'success'
+				this.socket.send({
+					data:JSON.stringify(message)
+				})
 				
 				if(message.type === 'video'){
 					message.options = res.options
 				}
-				
 				// 更新指定历史记录
 				// console.log('更新指定历史记录',message);
 				this.updateChatDetail(message,k)
@@ -156,7 +167,7 @@ class chat {
 		// 获取对方id
 		let id = message.chat_type === 'user' ? (isSend ? message.to_id : message.from_id) : message.to_id
 		// key值：chatDetail_当前用户id_会话类型_接收人/群id
-		let key = `chatDetail_${this.user.id}_${message.chat_type}_${id}`
+		let key = `chatDetail_${this.user.userId}_${message.chat_type}_${id}`
 		// 获取原来的聊天记录
 		let list = this.getChatDetail(key)
 		// console.log('获取原来的聊天记录',list)
@@ -249,7 +260,7 @@ class chat {
 			list = this.listToFirst(list,index)
 		}
 		// 存储
-		let key = `chatlist_${this.user.id}`
+		let key = `chatlist_${this.user.userId}`
 		this.setStorage(key,list)
 		
 		// 更新未读数
@@ -273,7 +284,7 @@ class chat {
 		// 获取对方id
 		let id = message.chat_type === 'user' ? (isSend ? message.to_id : message.from_id) : message.to_id
 		// key值：chatDetail_当前用户id_会话类型_接收人/群id
-		let key = `chatDetail_${this.user.id}_${message.chat_type}_${id}`
+		let key = `chatDetail_${this.user.userId}_${message.chat_type}_${id}`
 		// console.log('key值',key)
 		// 获取原来的聊天记录
 		let list = this.getChatDetail(key)
@@ -309,8 +320,11 @@ class chat {
 		return uni.setStorageSync(key,JSON.stringify(value))
 	}
 	// 获取聊天记录
-	getChatDetail(key = false){
-		key = key ? key : `chatDetail_${this.user.id}_${this.TO.chat_type}_${this.TO.id}`
+	getChatDetail(key = false,chatRoom){
+		$H.chatLog({chatRoomNumber:chatRoom}).then(res => {
+			console.log(res);
+		})
+		key = key ? key : `chatDetail_${this.user.userId}_${this.TO.chat_type}_${this.TO.to_id}`
 		return this.getStorage(key)
 	}
 	// 格式化会话最后一条消息显示
@@ -350,6 +364,83 @@ class chat {
 		}
 		this.isOpenReconnect = false
 		console.log('关闭成功');
+	}
+	// 销毁聊天对象
+	destoryChatObject(){
+		this.TO = false
+		// console.log('销毁聊天对象');
+	}
+	// 创建聊天对象
+	createChatObject(detail){
+		this.TO = detail
+		// console.log('创建聊天对象',this.TO);
+	}
+	// 获取本地存储会话列表
+	getChatList(){
+		let key = `chatlist_${this.user.userId}`
+		return this.getStorage(key)
+	}
+	// 初始化会话
+	initChatListItem(message){
+		 // 获取本地存储会话列表
+		 let list = this.getChatList()
+		 // 会话是否存在
+		 let index = list.findIndex(item=>{
+		 	return item.chat_type === message.chat_type && item.id === message.to_id
+		 })
+		 // 最后一条消息展现形式
+		 let data = this.formatChatItemData(message,true)
+		 // 会话不存在，创建会话
+		 if(index === -1){
+		 	let chatItem = {
+		 		id:message.to_id, // 接收人/群 id
+		 		chat_type:message.chat_type, // 接收类型 user单聊 group群聊
+		 		avatar:message.to_avatar,// 接收人/群 头像
+		 		name:message.to_name,// 接收人/群 昵称
+		 		update_time:(new Date()).getTime(), // 最后一条消息的时间戳
+		 		data:message.data, // 最后一条消息内容
+		 		type:'system', 		   // 最后一条消息类型
+		 		noreadnum:0, // 未读数
+		 		istop:false, // 是否置顶
+		 		shownickname:false, // 是否显示昵称
+		 		nowarn:false, // 消息免打扰
+		 		strongwarn:false, // 是否开启强提醒
+		 	}
+		 	// 群聊
+		 	if(message.chat_type === 'group' && message.group){
+		 		chatItem = {
+		 			...chatItem,
+		 			user_id:message.group.user_id, // 群管理员id
+		 			remark:'', // 群公告
+		 			invite_confirm:message.group.invite_confirm, // 邀请确认
+		 		}
+		 	}
+		 	list.unshift(chatItem)
+		 	// 存储
+		 	let key = `chatlist_${this.user.userId}`
+		 	this.setStorage(key,list)
+		 	// 通知更新vuex中的聊天会话列表
+		 	uni.$emit('onUpdateChatList',list)
+		 }
+	}
+	// 组织发送信息格式
+	formatSendData(params){
+		return {
+			id:0, // 唯一id，后端生成，用于撤回指定消息
+			from_avatar:this.user.user.avatar,// 发送者头像
+			from_name:this.user.user.nickName || this.user.username, // 发送者昵称
+			from_id:this.user.userId, // 发送者id
+			to_id:params.to_id || this.TO.to_id, // 接收人/群 id
+			to_name:params.to_name || this.TO.to_name, // 接收人/群 名称
+			to_avatar:params.to_avatar || this.TO.to_avatar, // 接收人/群 头像
+			chat_type:params.chat_type || this.TO.chat_type, // 接收类型
+			type:params.type,// 消息类型
+			data:params.data, // 消息内容
+			options:params.options ? params.options : {}, // 其他参数
+			create_time:(new Date()).getTime(), // 创建时间
+			isremove:0, // 是否撤回
+			sendStatus:params.sendStatus ? params.sendStatus : "pending" // 发送状态，success发送成功,fail发送失败,pending发送中
+		}
 	}
 }
 export default chat

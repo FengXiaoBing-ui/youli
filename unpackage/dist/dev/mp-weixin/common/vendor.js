@@ -1557,7 +1557,7 @@ function initData(vueOptions, context) {
     try {
       data = data.call(context); // 支持 Vue.prototype 上挂的数据
     } catch (e) {
-      if (Object({"VUE_APP_DARK_MODE":"false","VUE_APP_NAME":"youli","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG) {
+      if (Object({"NODE_ENV":"development","VUE_APP_DARK_MODE":"false","VUE_APP_NAME":"youli","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG) {
         console.warn('根据 Vue 的 data 函数初始化小程序 data 失败，请尽量确保 data 函数中不访问 vm 对象，否则可能影响首次数据渲染速度。', data);
       }
     }
@@ -8938,7 +8938,7 @@ function type(obj) {
 
 function flushCallbacks$1(vm) {
     if (vm.__next_tick_callbacks && vm.__next_tick_callbacks.length) {
-        if (Object({"VUE_APP_DARK_MODE":"false","VUE_APP_NAME":"youli","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG) {
+        if (Object({"NODE_ENV":"development","VUE_APP_DARK_MODE":"false","VUE_APP_NAME":"youli","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG) {
             var mpInstance = vm.$scope;
             console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + vm._uid +
                 ']:flushCallbacks[' + vm.__next_tick_callbacks.length + ']');
@@ -8959,14 +8959,14 @@ function nextTick$1(vm, cb) {
     //1.nextTick 之前 已 setData 且 setData 还未回调完成
     //2.nextTick 之前存在 render watcher
     if (!vm.__next_tick_pending && !hasRenderWatcher(vm)) {
-        if(Object({"VUE_APP_DARK_MODE":"false","VUE_APP_NAME":"youli","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG){
+        if(Object({"NODE_ENV":"development","VUE_APP_DARK_MODE":"false","VUE_APP_NAME":"youli","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG){
             var mpInstance = vm.$scope;
             console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + vm._uid +
                 ']:nextVueTick');
         }
         return nextTick(cb, vm)
     }else{
-        if(Object({"VUE_APP_DARK_MODE":"false","VUE_APP_NAME":"youli","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG){
+        if(Object({"NODE_ENV":"development","VUE_APP_DARK_MODE":"false","VUE_APP_NAME":"youli","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG){
             var mpInstance$1 = vm.$scope;
             console.log('[' + (+new Date) + '][' + (mpInstance$1.is || mpInstance$1.route) + '][' + vm._uid +
                 ']:nextMPTick');
@@ -9062,7 +9062,7 @@ var patch = function(oldVnode, vnode) {
     });
     var diffData = this.$shouldDiffData === false ? data : diff(data, mpData);
     if (Object.keys(diffData).length) {
-      if (Object({"VUE_APP_DARK_MODE":"false","VUE_APP_NAME":"youli","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG) {
+      if (Object({"NODE_ENV":"development","VUE_APP_DARK_MODE":"false","VUE_APP_NAME":"youli","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG) {
         console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + this._uid +
           ']差量更新',
           JSON.stringify(diffData));
@@ -9619,10 +9619,9 @@ var chat = /*#__PURE__*/function () {
     key: "onMessage",
     value: function onMessage(data) {
       var res = JSON.parse(data.data);
-      console.log(res);
       // console.log('监听接收消息',res)
       // 错误
-      switch (res.type) {
+      switch (res.chat_type) {
         case -3:
           uni.showToast({
             title: res.date,
@@ -9632,8 +9631,8 @@ var chat = /*#__PURE__*/function () {
         // case 'moment': // 朋友圈更新
         // 	this.handleMoment(res.data)
         // 	break;
-        case 1:
-          // 朋友圈更新
+        case "1":
+          //普通文字消息
           this.handleOnMessage(res.data);
           break;
         default:
@@ -9674,6 +9673,7 @@ var chat = /*#__PURE__*/function () {
     value: function send(message) {
       var _this2 = this;
       var onProgress = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var chatRoomNumber = arguments.length > 2 ? arguments[2] : undefined;
       return new Promise( /*#__PURE__*/function () {
         var _ref = (0, _asyncToGenerator2.default)( /*#__PURE__*/_regenerator.default.mark(function _callee2(result, reject) {
           var _this2$addChatDetail, k, data;
@@ -9692,9 +9692,18 @@ var chat = /*#__PURE__*/function () {
                   return _context2.abrupt("return", reject('未上线'));
                 case 4:
                   // 提交到后端
-                  data = message.data;
+                  data = message.data; // chatRoomNumber: "ChatRoom1689573771263430"
+                  // date: "2023-07-25T08:27:17.618Z"
+                  // isRead: 0
+                  // text: "77"
+                  // type: 1
+                  // userIdFrom: 203066
+                  // userIdTo: "9527"
                   _api.default.sendMsg({
-                    to_id: message.to_id || _this2.TO.id,
+                    chatRoomNumber: chatRoomNumber,
+                    date: new Date(),
+                    from_id: _this2.user.userId,
+                    to_id: message.to_id || _this2.TO.to_id,
                     chat_type: message.chat_type || _this2.TO.chat_type,
                     type: message.type,
                     data: data,
@@ -9703,10 +9712,12 @@ var chat = /*#__PURE__*/function () {
                     // 发送成功
                     message.id = res.id;
                     message.sendStatus = 'success';
+                    _this2.socket.send({
+                      data: JSON.stringify(message)
+                    });
                     if (message.type === 'video') {
                       message.options = res.options;
                     }
-
                     // 更新指定历史记录
                     // console.log('更新指定历史记录',message);
                     _this2.updateChatDetail(message, k);
@@ -9740,7 +9751,7 @@ var chat = /*#__PURE__*/function () {
       // 获取对方id
       var id = message.chat_type === 'user' ? isSend ? message.to_id : message.from_id : message.to_id;
       // key值：chatDetail_当前用户id_会话类型_接收人/群id
-      var key = "chatDetail_".concat(this.user.id, "_").concat(message.chat_type, "_").concat(id);
+      var key = "chatDetail_".concat(this.user.userId, "_").concat(message.chat_type, "_").concat(id);
       // 获取原来的聊天记录
       var list = this.getChatDetail(key);
       // console.log('获取原来的聊天记录',list)
@@ -9851,7 +9862,7 @@ var chat = /*#__PURE__*/function () {
         list = this.listToFirst(list, index);
       }
       // 存储
-      var key = "chatlist_".concat(this.user.id);
+      var key = "chatlist_".concat(this.user.userId);
       this.setStorage(key, list);
 
       // 更新未读数
@@ -9890,7 +9901,7 @@ var chat = /*#__PURE__*/function () {
                 isSend = _args3.length > 2 && _args3[2] !== undefined ? _args3[2] : true;
                 // 获取对方id
                 id = message.chat_type === 'user' ? isSend ? message.to_id : message.from_id : message.to_id; // key值：chatDetail_当前用户id_会话类型_接收人/群id
-                key = "chatDetail_".concat(this.user.id, "_").concat(message.chat_type, "_").concat(id); // console.log('key值',key)
+                key = "chatDetail_".concat(this.user.userId, "_").concat(message.chat_type, "_").concat(id); // console.log('key值',key)
                 // 获取原来的聊天记录
                 list = this.getChatDetail(key); // console.log('获取原来的聊天记录',list)
                 // 根据k查找对应聊天记录
@@ -9951,7 +9962,13 @@ var chat = /*#__PURE__*/function () {
     key: "getChatDetail",
     value: function getChatDetail() {
       var key = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-      key = key ? key : "chatDetail_".concat(this.user.id, "_").concat(this.TO.chat_type, "_").concat(this.TO.id);
+      var chatRoom = arguments.length > 1 ? arguments[1] : undefined;
+      _api.default.chatLog({
+        chatRoomNumber: chatRoom
+      }).then(function (res) {
+        console.log(res);
+      });
+      key = key ? key : "chatDetail_".concat(this.user.userId, "_").concat(this.TO.chat_type, "_").concat(this.TO.to_id);
       return this.getStorage(key);
     }
     // 格式化会话最后一条消息显示
@@ -9997,6 +10014,119 @@ var chat = /*#__PURE__*/function () {
       }
       this.isOpenReconnect = false;
       console.log('关闭成功');
+    }
+    // 销毁聊天对象
+  }, {
+    key: "destoryChatObject",
+    value: function destoryChatObject() {
+      this.TO = false;
+      // console.log('销毁聊天对象');
+    }
+    // 创建聊天对象
+  }, {
+    key: "createChatObject",
+    value: function createChatObject(detail) {
+      this.TO = detail;
+      // console.log('创建聊天对象',this.TO);
+    }
+    // 获取本地存储会话列表
+  }, {
+    key: "getChatList",
+    value: function getChatList() {
+      var key = "chatlist_".concat(this.user.userId);
+      return this.getStorage(key);
+    }
+    // 初始化会话
+  }, {
+    key: "initChatListItem",
+    value: function initChatListItem(message) {
+      // 获取本地存储会话列表
+      var list = this.getChatList();
+      // 会话是否存在
+      var index = list.findIndex(function (item) {
+        return item.chat_type === message.chat_type && item.id === message.to_id;
+      });
+      // 最后一条消息展现形式
+      var data = this.formatChatItemData(message, true);
+      // 会话不存在，创建会话
+      if (index === -1) {
+        var chatItem = {
+          id: message.to_id,
+          // 接收人/群 id
+          chat_type: message.chat_type,
+          // 接收类型 user单聊 group群聊
+          avatar: message.to_avatar,
+          // 接收人/群 头像
+          name: message.to_name,
+          // 接收人/群 昵称
+          update_time: new Date().getTime(),
+          // 最后一条消息的时间戳
+          data: message.data,
+          // 最后一条消息内容
+          type: 'system',
+          // 最后一条消息类型
+          noreadnum: 0,
+          // 未读数
+          istop: false,
+          // 是否置顶
+          shownickname: false,
+          // 是否显示昵称
+          nowarn: false,
+          // 消息免打扰
+          strongwarn: false // 是否开启强提醒
+        };
+        // 群聊
+        if (message.chat_type === 'group' && message.group) {
+          chatItem = _objectSpread(_objectSpread({}, chatItem), {}, {
+            user_id: message.group.user_id,
+            // 群管理员id
+            remark: '',
+            // 群公告
+            invite_confirm: message.group.invite_confirm // 邀请确认
+          });
+        }
+
+        list.unshift(chatItem);
+        // 存储
+        var key = "chatlist_".concat(this.user.userId);
+        this.setStorage(key, list);
+        // 通知更新vuex中的聊天会话列表
+        uni.$emit('onUpdateChatList', list);
+      }
+    }
+    // 组织发送信息格式
+  }, {
+    key: "formatSendData",
+    value: function formatSendData(params) {
+      return {
+        id: 0,
+        // 唯一id，后端生成，用于撤回指定消息
+        from_avatar: this.user.user.avatar,
+        // 发送者头像
+        from_name: this.user.user.nickName || this.user.username,
+        // 发送者昵称
+        from_id: this.user.userId,
+        // 发送者id
+        to_id: params.to_id || this.TO.to_id,
+        // 接收人/群 id
+        to_name: params.to_name || this.TO.to_name,
+        // 接收人/群 名称
+        to_avatar: params.to_avatar || this.TO.to_avatar,
+        // 接收人/群 头像
+        chat_type: params.chat_type || this.TO.chat_type,
+        // 接收类型
+        type: params.type,
+        // 消息类型
+        data: params.data,
+        // 消息内容
+        options: params.options ? params.options : {},
+        // 其他参数
+        create_time: new Date().getTime(),
+        // 创建时间
+        isremove: 0,
+        // 是否撤回
+        sendStatus: params.sendStatus ? params.sendStatus : "pending" // 发送状态，success发送成功,fail发送失败,pending发送中
+      };
     }
   }]);
   return chat;
@@ -10397,16 +10527,22 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = void 0;
 var _request = _interopRequireDefault(__webpack_require__(/*! ./request.js */ 35));
 function login(data) {
-  return _request.default.post('/app/user/appletLogin', data);
+  return _request.default.get('/app/user/appletLogin', data);
 }
 function logout(data) {
   return _request.default.get('/logout', data);
+}
+function allUser(data) {
+  return _request.default.get('/app/user/allUsers', data);
 }
 function sendMsg(data) {
   return _request.default.post('/module/chat/startChat', data);
 }
 function chatLog(data) {
   return _request.default.get('/module/chat/chatLog', data);
+}
+function createChat(data) {
+  return _request.default.post('/module/chat', data);
 }
 var _default = {
   login: login,
@@ -10415,7 +10551,11 @@ var _default = {
   //退出登录
   sendMsg: sendMsg,
   //发送消息
-  chatLog: chatLog //聊天记录
+  chatLog: chatLog,
+  //聊天记录
+  allUser: allUser,
+  //所有用户
+  createChat: createChat //创建聊天室
 };
 exports.default = _default;
 
@@ -10460,23 +10600,25 @@ var _default = {
     options.data = options.data || this.common.data;
     options.method = options.method || this.common.method;
     options.dataType = options.dataType || this.common.dataType;
-    options.token = options.token === false ? false : this.common.token;
 
     // 请求之前验证...
     // token验证
-    // if (options.token) {
-    //     let token = uni.getStorageSync('token')
-    //     // 二次验证
-    //     if (!token) {
-    //         uni.showToast({ title: '请先登录', icon: 'none' });
-    //         // token不存在时跳转
-    //         return uni.reLaunch({
-    //             url: '/pages/index/index',
-    //         });
-    //     }
-    //     // 往header头中添加token
-    //     options.header.token = token
-    // }
+    if (uni.getStorageSync('token')) {
+      var token = uni.getStorageSync('token');
+      // 二次验证
+      if (!token) {
+        uni.showToast({
+          title: '请先登录',
+          icon: 'none'
+        });
+        // token不存在时跳转
+        return uni.reLaunch({
+          url: '/pages/index/index'
+        });
+      }
+      // 往header头中添加token
+      options.header.Authorization = token;
+    }
     // 请求
     return new Promise(function (res, rej) {
       // 请求中...
@@ -10532,9 +10674,6 @@ var _default = {
     options.url = url;
     options.data = data;
     options.method = 'POST';
-    options.header = {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-    };
     return this.request(options);
   },
   // delete请求
@@ -20018,9 +20157,15 @@ var store = new _vuex.default.Store({
   modules: {},
   state: {
     userInfo: false,
-    chat: {}
+    chat: null,
+    KeyboardHeight: 0,
+    chatList: [],
+    totalNoreadnum: 3
   },
   mutations: {
+    changeKeyboardHeight: function changeKeyboardHeight(state, h) {
+      state.KeyboardHeight = h;
+    },
     setUserInfo: function setUserInfo(state, val) {
       state.userInfo = val;
     },
@@ -20037,13 +20182,12 @@ var store = new _vuex.default.Store({
       var state = _ref.state,
         commit = _ref.commit,
         dispatch = _ref.dispatch;
-      commit('setUserInfo', JSON.parse(JSON.stringify(user)));
+      state.userInfo = user;
       uni.setStorageSync('token', user.token);
       uni.setStorageSync('userInfo', user);
-      var chat = new _chat.default({
+      state.chat = new _chat.default({
         url: _config.default.scoketUrl
       });
-      commit('setChat', chat);
     },
     logout: function logout(_ref2) {
       var state = _ref2.state,
@@ -20063,12 +20207,11 @@ var store = new _vuex.default.Store({
       var user = uni.getStorageSync('userInfo');
       if (user) {
         // 初始化登录状态
-        commit('setUserInfo', JSON.parse(JSON.stringify(user)));
+        state.userInfo = user;
         // 连接socket
-        var chat = new _chat.default({
+        state.chat = new _chat.default({
           url: _config.default.scoketUrl
         });
-        commit('setChat', chat);
       }
     },
     // 断线自动重连
@@ -21357,6 +21500,165 @@ var index_cjs = {
 module.exports = index_cjs;
 
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../webpack/buildin/global.js */ 3)))
+
+/***/ }),
+/* 165 */,
+/* 166 */,
+/* 167 */,
+/* 168 */,
+/* 169 */,
+/* 170 */,
+/* 171 */
+/*!********************************!*\
+  !*** D:/youli/static/logo.png ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "data:image/png;base64,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UmVhZHlxyWU8AAADKmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxMzIgNzkuMTU5Mjg0LCAyMDE2LzA0LzE5LTEzOjEzOjQwICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpGRkE0MjcxNTdEQzYxMUU4QkZBOERDOEVCQ0U0NTBGMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpGRkE0MjcxNDdEQzYxMUU4QkZBOERDOEVCQ0U0NTBGMSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxNS41IChNYWNpbnRvc2gpIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6QkE4RkFCN0M3REM1MTFFOEJGQThEQzhFQkNFNDUwRjEiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6QkE4RkFCN0Q3REM1MTFFOEJGQThEQzhFQkNFNDUwRjEiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz5BZZ+3AAAB1ElEQVR42mJkAALtmZb/GfAAJkIKwIoYiAA4FV1JO0Ylk0hWxILLHTgV6cyywqoIIIAYiQinb8S4iYs036E7esgEJq6ABAGAACImMBmo5m6yDcLlR5gcNnnaumhADWIhJoOTbRC+9ILPa9+o4TWAAAIlyDVAOphCc1SYqGAICNwZxumIidi8NILz2qhBdCyPaOcicgq1wRnYAAFErRKSgZo+GzSOoWpQD1sHsRCjCDnzkpp90DM+If2jUTbqoFEHjZZDpJYroyFESeNmNFHTykEqg8g9bwACCNRiVAYyLgEx1wA7Zu3V9OMhVBt1opajBlsaCh7NZaMOGnXQgFeupHZjKO1CjUbZqINGHTTqoFEHjTpo1EGjDhqMgw342kejUTaahggpoOdg1WiUjTpoODoIvL7tzSBykB5AgPbtGIdBGIYCaBR16swROEQvzT06cxjm1lRFDC0LcpXC+xJzpIdJhOW8e4z359MVWSde1C32xRYasC0mCmascDZzrQz+7NgABAgQINnRY/iUrb5D9v9l9toqCBAgQIAAAQIESAABAgQIEKCD5ZK9QPaMigoCdIJP7NdjOyoIECBAgGQBGjB8zVDjam153T0OqInJbBAWfdg8AExKZVcA71uIAAAAAElFTkSuQmCC"
+
+/***/ }),
+/* 172 */,
+/* 173 */,
+/* 174 */,
+/* 175 */,
+/* 176 */,
+/* 177 */,
+/* 178 */,
+/* 179 */,
+/* 180 */,
+/* 181 */,
+/* 182 */,
+/* 183 */,
+/* 184 */,
+/* 185 */,
+/* 186 */,
+/* 187 */,
+/* 188 */,
+/* 189 */,
+/* 190 */,
+/* 191 */,
+/* 192 */,
+/* 193 */,
+/* 194 */,
+/* 195 */,
+/* 196 */,
+/* 197 */,
+/* 198 */,
+/* 199 */,
+/* 200 */,
+/* 201 */,
+/* 202 */,
+/* 203 */,
+/* 204 */,
+/* 205 */,
+/* 206 */,
+/* 207 */,
+/* 208 */,
+/* 209 */,
+/* 210 */,
+/* 211 */,
+/* 212 */,
+/* 213 */,
+/* 214 */
+/*!*******************************!*\
+  !*** D:/youli/common/time.js ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+var _default = {
+  // 计算当前日期星座
+  getHoroscope: function getHoroscope(date) {
+    var c = ['摩羯', '水瓶', '双鱼', '白羊', '金牛', '双子', '巨蟹', '狮子', '处女', '天秤', '天蝎', '射手', '摩羯'];
+    date = new Date(date);
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+    var startMonth = month - (day - 14 < '865778999988'.charAt(month));
+    return c[startMonth] + '座';
+  },
+  // 计算指定时间与当前的时间差
+  sumAge: function sumAge(data) {
+    var dateBegin = new Date(data.replace(/-/g, "/"));
+    var dateEnd = new Date(); //获取当前时间
+    var dateDiff = dateEnd.getTime() - dateBegin.getTime(); //时间差的毫秒数
+    var dayDiff = Math.floor(dateDiff / (24 * 3600 * 1000)); //计算出相差天数
+    var leave1 = dateDiff % (24 * 3600 * 1000); //计算天数后剩余的毫秒数
+    var hours = Math.floor(leave1 / (3600 * 1000)); //计算出小时数
+    //计算相差分钟数
+    var leave2 = leave1 % (3600 * 1000); //计算小时数后剩余的毫秒数
+    var minutes = Math.floor(leave2 / (60 * 1000)); //计算相差分钟数
+    //计算相差秒数
+    var leave3 = leave2 % (60 * 1000); //计算分钟数后剩余的毫秒数
+    var seconds = Math.round(leave3 / 1000);
+    return dayDiff + "天 " + hours + "小时 ";
+  },
+  // 获取聊天时间（相差300s内的信息不会显示时间）
+  getChatTime: function getChatTime(v1, v2) {
+    v1 = v1.toString().length < 13 ? v1 * 1000 : v1;
+    v2 = v2.toString().length < 13 ? v2 * 1000 : v2;
+    if ((parseInt(v1) - parseInt(v2)) / 1000 > 300) {
+      return this.gettime(v1);
+    }
+  },
+  // 人性化时间格式
+  gettime: function gettime(shorttime) {
+    shorttime = shorttime.toString().length < 13 ? shorttime * 1000 : shorttime;
+    var now = new Date().getTime();
+    var cha = (now - parseInt(shorttime)) / 1000;
+    if (cha < 43200) {
+      // 当天
+      return this.dateFormat(new Date(shorttime), "{A} {t}:{ii}");
+    } else if (cha < 518400) {
+      // 隔天 显示日期+时间
+      return this.dateFormat(new Date(shorttime), "{Mon}月{DD}日 {A} {t}:{ii}");
+    } else {
+      // 隔年 显示完整日期+时间
+      return this.dateFormat(new Date(shorttime), "{Y}-{MM}-{DD} {A} {t}:{ii}");
+    }
+  },
+  parseNumber: function parseNumber(num) {
+    return num < 10 ? "0" + num : num;
+  },
+  dateFormat: function dateFormat(date, formatStr) {
+    var dateObj = {},
+      rStr = /\{([^}]+)\}/,
+      mons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+    dateObj["Y"] = date.getFullYear();
+    dateObj["M"] = date.getMonth() + 1;
+    dateObj["MM"] = this.parseNumber(dateObj["M"]);
+    dateObj["Mon"] = mons[dateObj['M'] - 1];
+    dateObj["D"] = date.getDate();
+    dateObj["DD"] = this.parseNumber(dateObj["D"]);
+    dateObj["h"] = date.getHours();
+    dateObj["hh"] = this.parseNumber(dateObj["h"]);
+    dateObj["t"] = dateObj["h"] > 12 ? dateObj["h"] - 12 : dateObj["h"];
+    dateObj["tt"] = this.parseNumber(dateObj["t"]);
+    dateObj["A"] = dateObj["h"] > 12 ? '下午' : '上午';
+    dateObj["i"] = date.getMinutes();
+    dateObj["ii"] = this.parseNumber(dateObj["i"]);
+    dateObj["s"] = date.getSeconds();
+    dateObj["ss"] = this.parseNumber(dateObj["s"]);
+    while (rStr.test(formatStr)) {
+      formatStr = formatStr.replace(rStr, dateObj[RegExp.$1]);
+    }
+    return formatStr;
+  },
+  // 获取年龄
+  getAgeByBirthday: function getAgeByBirthday(data) {
+    var birthday = new Date(data.replace(/-/g, "\/"));
+    var d = new Date();
+    return d.getFullYear() - birthday.getFullYear() - (d.getMonth() < birthday.getMonth() || d.getMonth() == birthday.getMonth() && d.getDate() < birthday.getDate() ? 1 : 0);
+  }
+};
+exports.default = _default;
 
 /***/ })
 ]]);

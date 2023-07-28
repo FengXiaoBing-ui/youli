@@ -1,1 +1,1 @@
-<view>zixun</view>
+<view class="content padding-lr-xs"><view class="w100 padding-sm radius bg-white"><block wx:for="{{chatList}}" wx:for-item="item" wx:for-index="__i0__" wx:key="updateTime"><view data-event-opts="{{[['tap',[['goChat',['$0'],[[['chatList','updateTime',item.updateTime]]]]]]]}}" class="flex padding-tb-sm" bindtap="__e"><image class="radius" style="width:100rpx;height:100rpx;" src="{{item.avatar}}" mode="aspectFill"></image><view class="margin-left-sm" style="width:500rpx;">{{item.nickName}}</view></view></block></view></view>

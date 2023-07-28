@@ -10,9 +10,15 @@ const store = new Vuex.Store({
     },
     state: {
 		userInfo:false,
-		chat:{},
+		chat:null,
+		KeyboardHeight:0,
+		chatList:[],
+		totalNoreadnum:3,
     },
     mutations: {
+		changeKeyboardHeight(state,h){
+			state.KeyboardHeight = h
+		},
 		setUserInfo(state,val){
 			state.userInfo = val
 		},
@@ -26,13 +32,12 @@ const store = new Vuex.Store({
     },
     actions: {
 		login({state,commit,dispatch},user){
-			commit('setUserInfo',JSON.parse(JSON.stringify(user)))
+			state.userInfo = user
 			uni.setStorageSync('token',user.token)
 			uni.setStorageSync('userInfo',user)
-			let chat = new Chat({
+			state.chat = new Chat({
 				url:config.scoketUrl
 			})
-			commit('setChat',chat)
 		},
 		logout({state,commit,dispatch}){
 			uni.clearStorageSync()
@@ -46,12 +51,11 @@ const store = new Vuex.Store({
 			let user = uni.getStorageSync('userInfo')
 			if(user){
 				// 初始化登录状态
-				commit('setUserInfo',JSON.parse(JSON.stringify(user)))
+				state.userInfo = user
 				// 连接socket
-				let chat = new Chat({
+				state.chat = new Chat({
 					url:config.scoketUrl
 				})
-				commit('setChat',chat)
 			}
 		},
 		// 断线自动重连

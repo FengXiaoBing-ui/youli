@@ -19,23 +19,22 @@ export default {
         options.data = options.data || this.common.data
         options.method = options.method || this.common.method
         options.dataType = options.dataType || this.common.dataType
-        options.token = options.token === false ?  false : this.common.token
 
         // 请求之前验证...
         // token验证
-        // if (options.token) {
-        //     let token = uni.getStorageSync('token')
-        //     // 二次验证
-        //     if (!token) {
-        //         uni.showToast({ title: '请先登录', icon: 'none' });
-        //         // token不存在时跳转
-        //         return uni.reLaunch({
-        //             url: '/pages/index/index',
-        //         });
-        //     }
-        //     // 往header头中添加token
-        //     options.header.token = token
-        // }
+        if (uni.getStorageSync('token')) {
+            let token = uni.getStorageSync('token')
+            // 二次验证
+            if (!token) {
+                uni.showToast({ title: '请先登录', icon: 'none' });
+                // token不存在时跳转
+                return uni.reLaunch({
+                    url: '/pages/index/index',
+                });
+            }
+            // 往header头中添加token
+            options.header.Authorization = token
+        }
         // 请求
         return new Promise((res,rej)=>{
             // 请求中...
@@ -85,9 +84,6 @@ export default {
         options.url = url
         options.data = data
         options.method = 'POST'
-		options.header = {
-			'Content-Type':'application/x-www-form-urlencoded; charset=UTF-8'
-		}
         return this.request(options)
     },
     // delete请求
