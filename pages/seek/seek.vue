@@ -19,6 +19,13 @@
 		onLoad() {
 			this.allUser()
 		},
+		onShow() {
+			if(!uni.getStorageSync('token')){
+				uni.switchTab({
+					url:"/pages/my/my"
+				})
+			}
+		},
 		methods:{
 			async allUser(){
 				const res = await this.$http.allUser()

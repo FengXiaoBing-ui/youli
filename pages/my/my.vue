@@ -1,9 +1,17 @@
 <template>
 	<view>
 		<button click="login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">立即登录</button>
-		<view @click="userPolicy">用户协议</view>
-		<view @click="privacyAgreements">隐私政策</view>
-		<view @click="feedback">意见反馈</view>
+		<view class="w100 padding-sm">
+			<view class="w100 padding-lr-sm">
+				<view @click="userPolicy">用户协议</view>
+			</view>
+			<view class="w100 padding-lr-sm">
+				<view @click="privacyAgreements">隐私政策</view>
+			</view>
+			<view class="w100 padding-lr-sm">
+				<view @click="feedback">意见反馈</view>
+			</view>
+		</view>
 		<view @click="fLogout">退出登录</view>
 	</view>
 </template>
