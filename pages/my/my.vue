@@ -27,6 +27,7 @@
 		methods: {
 			...mapActions(['login','logout']),
 			getPhoneNumber(e) {
+				console.log(e);
 				let that = this
 				uni.login({
 					"provider": "weixin",

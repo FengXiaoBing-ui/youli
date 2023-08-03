@@ -1,4 +1,5 @@
 {
-  "navigationBarTitleText": "有理法律咨询",
+  "navigationStyle": "custom",
+  "navigationBarTextStyle": "black",
   "usingComponents": {}
 }

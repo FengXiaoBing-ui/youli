@@ -25,6 +25,10 @@ function createChat (data){
 	return request.post('/module/chat',data);
 }
 
+function appletList (data){
+	return request.get('/module/branch/appletList',data);
+}
+
 export default {
 	login,//登录
 	logout,//退出登录
@@ -32,4 +36,5 @@ export default {
 	chatLog,//聊天记录
 	allUser,//所有用户
 	createChat,//创建聊天室
+	appletList,//线下网点列表
 }

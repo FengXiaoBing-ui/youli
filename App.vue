@@ -15,7 +15,7 @@
 		},
 		onHide: function() {
 			console.log('App Hide')
-		}
+		},
 	}
 </script>
 
@@ -33,4 +33,14 @@
 	/* #endif */
 	@import '@/uni_modules/uview-ui/theme.scss';
 	@import "main.css";
+	page{
+		background-color: white;
+	}
+	.content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		background-color: white;
+	}
 </style>

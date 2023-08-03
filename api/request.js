@@ -41,14 +41,13 @@ export default {
             uni.request({
                 ...options,
                 success: (result) => {
-					// console.log(result);
                     // 返回原始数据
                     if(options.native){
                         return res(result)
                     }
                     // 服务端失败
-                    if(result.statusCode !== 200){
-                        if (options.toast !== false) {
+                    if(result.statusCode != 200){
+                        if (options.toast != false) {
                             uni.showToast({
                                 title: result.data.data || '服务端失败',
                                 icon: 'none'
@@ -62,7 +61,7 @@ export default {
                     }
                     // 其他验证...
                     // 成功
-                    let data = result.data.data
+                    let data = result.data
                     res(data)
                 },
                 fail: (error) => {

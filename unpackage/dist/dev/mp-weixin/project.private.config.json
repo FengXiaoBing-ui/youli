@@ -3,5 +3,6 @@
   "projectname": "youli",
   "setting": {
     "compileHotReLoad": true
-  }
+  },
+  "libVersion": "3.0.0"
 }

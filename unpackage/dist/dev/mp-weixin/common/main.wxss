@@ -3930,4 +3930,14 @@ scroll-view.cu-steps .cu-item {
 ::-webkit-scrollbar {
   display: none;
 }
+page {
+  background-color: white;
+}
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+}
 
