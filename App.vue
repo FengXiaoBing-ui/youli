@@ -20,6 +20,7 @@
 </script>
 
 <style lang="scss">
+	@import '@/uni_modules/uview-ui/theme.scss';
 	/*每个页面公共css */
 	@import "./common/free.css";
 	@import "./common/common.css";
@@ -31,16 +32,11 @@
 		display: none;
 	}
 	/* #endif */
-	@import '@/uni_modules/uview-ui/theme.scss';
 	@import "main.css";
 	page{
 		background-color: white;
 	}
 	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
 		background-color: white;
 	}
 </style>

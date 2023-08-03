@@ -32,7 +32,7 @@
 						</view>
 						<view class="flex align-center justify-between">
 							<view>营业时间：{{ item.opening }}</view>
-							<view class="reservation text-white text-center">立即预约</view>
+							<view @click="reservation" class="reservation text-white text-center">立即预约</view>
 						</view>
 					</view>
 				</view>
@@ -69,11 +69,22 @@
 				m:""
 			}
 		},
-		onLoad() {
+		onShow() {
 			this.getAppletList()
+		},
+		onLoad() {
 			this.getLocation()
+			uni.$on("loginSuccess",(res)=>{
+				this.getAppletList()
+			})
 		},
 		methods: {
+			reservation(){
+				return
+				uni.navigateTo({
+					url:"/pages/reservation/reservation"
+				})
+			},
 			getLocation() {
 				let that = this;
 				uni.getLocation({
@@ -93,6 +104,7 @@
 			async getAppletList(){
 				let that = this;
 				let res = await this.$http.appletList()
+				console.log(res);
 				res.rows.forEach(item => {
 					item.distance = that.$util.getDistances(that.latitude,that.longitude,item.latitude,item.longitude)
 				})

@@ -24,26 +24,29 @@ const store = new Vuex.Store({
 		},
 		setChat(state,val){
 			state.chat = Object.assign({},val)
-		},
-		closeChat(state){
-			state.chat.close()
-			state.chat = null
 		}
     },
     actions: {
 		login({state,commit,dispatch},user){
-			state.userInfo = user
-			uni.setStorageSync('token',user.token)
-			uni.setStorageSync('userInfo',user)
+			state.userInfo = user.data
+			uni.setStorageSync('token',state.userInfo.token)
+			uni.setStorageSync('userInfo',state.userInfo)
 			state.chat = new Chat({
 				url:config.scoketUrl
 			})
+			uni.$emit('loginSuccess',true)
+			uni.hideLoading()
 		},
 		logout({state,commit,dispatch}){
 			uni.clearStorageSync()
+			state.userInfo = null
 			if(state.chat){
-				commit("closeChat")
+				state.chat.close()
+				state.chat = null
 			}
+			uni.reLaunch({
+				url:"/pages/my/my"
+			})
 		},
 		// 初始化登录状态
 		initLogin({state,commit,dispatch}){

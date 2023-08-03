@@ -43,7 +43,7 @@ export default {
                 success: (result) => {
                     // 返回原始数据
                     if(options.native){
-                        return res(result)
+                        return res(result.data)
                     }
                     // 服务端失败
                     if(result.statusCode != 200){

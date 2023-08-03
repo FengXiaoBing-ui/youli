@@ -1,46 +1,81 @@
 <template>
-	<view>
-		<button click="login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">立即登录</button>
-		<view class="w100 padding-sm">
-			<view class="w100 padding-lr-sm">
-				<view @click="userPolicy">用户协议</view>
+	<view class="content padding-lr-sm">
+		<view class="loginBox flex align-center justify-between padding-lr padding-top-xl">
+			<view class="flex align-center">
+				<image style="width: 120rpx;height: 120rpx;" class="round boxShadow" :src="userInfo?userInfo.user.avatar:'../../static/images/bg.jpg'" mode="aspectFill"></image>
+				<button v-if="!userInfo" class="loginText margin-left" click="login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">立即登录</button>
+				<view v-else class="loginText margin-left">{{ userInfo.username }}</view>
 			</view>
-			<view class="w100 padding-lr-sm">
-				<view @click="privacyAgreements">隐私政策</view>
-			</view>
-			<view class="w100 padding-lr-sm">
-				<view @click="feedback">意见反馈</view>
+			<view v-if="userInfo" @click="fLogout" class="logout text-sm">
+				退出登录
 			</view>
 		</view>
-		<view @click="fLogout">退出登录</view>
+		<view class="boxShadow w100 padding-lr-sm radius margin-top-xl">
+			<view class="flex justify-between align-center border-bottom padding-tb-sm">
+				<view>我的预约</view>
+				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
+			</view>
+			<view class="flex justify-between align-center padding-tb-sm">
+				<view>我的预约</view>
+				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
+			</view>
+		</view>
+		<view class="boxShadow w100 padding-lr-sm radius margin-top-xl">
+			<view @click="userPolicy" class="flex justify-between align-center border-bottom padding-tb-sm">
+				<view>用户协议</view>
+				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
+			</view>
+			<view @click="privacyAgreements" class="flex justify-between align-center padding-tb-sm">
+				<view>隐私政策</view>
+				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
+			</view>
+			<view @click="feedback" class="flex justify-between align-center padding-tb-sm">
+				<view>意见反馈</view>
+				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
+			</view>
+		</view>
 	</view>
 </template>
 
 <script>
-	import {mapActions} from "vuex";
+	import {mapActions,mapState} from "vuex";
 	export default {
 		data() {
 			return {
 
 			};
 		},
+		computed:{
+			...mapState(["userInfo"])
+		},
 		methods: {
 			...mapActions(['login','logout']),
 			getPhoneNumber(e) {
 				console.log(e);
-				let that = this
-				uni.login({
-					"provider": "weixin",
-					"onlyAuthorize": true, // 微信登录仅请求授权认证
-					success: function(loginRes) {
-						that.$http.login({
-							openIdCode:loginRes.code,
-							phoneCode:e.detail.code
-						}).then(res => {
-							that.login(res)
-						})
-					}
-				});
+				if(e.detail.code){
+					let that = this
+					uni.showLoading({
+						title:"登录中...",
+						mask:true
+					})
+					uni.login({
+						"provider": "weixin",
+						"onlyAuthorize": true, // 微信登录仅请求授权认证
+						success: function(loginRes) {
+							that.$http.login({
+								openIdCode:loginRes.code,
+								phoneCode:e.detail.code
+							}).then(res => {
+								that.login(res)
+							})
+						}
+					});
+				}else{
+					uni.showToast({
+						title:"已取消登录",
+						icon:"none"
+					})
+				}
 				// uni.getUserProfile({
 				// 	success: function(infoRes) {
 				// 		console.log(infoRes);
@@ -69,6 +104,36 @@
 	}
 </script>
 
-<style lang="scss">
-
+<style lang="scss" scoped>
+.loginBox{
+	width: 100%;
+	.loginText{
+		font-size: 32rpx;
+		font-family: PingFang SC-Bold, PingFang SC;
+		font-weight: bold;
+		color: #1D1D1D;
+	}
+}
+.logout{
+	width: 178rpx;
+	height: 60rpx;
+	line-height: 60rpx;
+	background: #212E72;
+	border-radius:30rpx;
+	color: white;
+	text-align: center;
+}
+button::after {
+   border: none;
+}
+button:hover{
+    background: transparent; 
+}
+.boxShadow{
+	box-shadow: 0 6rpx 12rpx 2rpx rgba(0, 0, 0, 0.06);
+}
+.content{
+	background-color: #F9F9F9;
+	min-height: 100vh;
+}
 </style>
