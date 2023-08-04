@@ -9,9 +9,12 @@ import api from "./api/api.js"
 import store from "./store/index.js";
 import util from "./util/util.js"
 import { router } from "./router/index";
+import Box from "@/components/box.vue"
 
 Vue.use(uView)
 Vue.use(router)
+
+Vue.component("Box",Box)
 
 Vue.config.productionTip = false
 

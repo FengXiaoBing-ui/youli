@@ -61,6 +61,69 @@
             }
             
         }
+        ,{
+            "path" : "pages/reservation/reservation",
+            "style" :                                                                                    
+            {
+                "navigationStyle": "custom",
+                "navigationBarTextStyle": "black"
+            }
+            
+        }
+        ,{
+            "path" : "pages/myReservation/myReservation",
+            "style" :                                                                                    
+            {
+                "navigationStyle": "custom",
+                "navigationBarTextStyle": "black"
+            }
+            
+        }
+        ,{
+            "path" : "pages/myApply/myApply",
+            "style" :                                                                                    
+            {
+                "navigationStyle": "custom",
+                "navigationBarTextStyle": "black"
+            }
+            
+        }
+        ,{
+            "path" : "pages/reservationDetails/reservationDetails",
+            "style" :                                                                                    
+            {
+                "navigationStyle": "custom",
+                "navigationBarTextStyle": "black"
+            }
+            
+        }
+        ,{
+            "path" : "pages/cultivate/cultivate",
+            "style" :                                                                                    
+            {
+                "navigationStyle": "custom",
+                "navigationBarTextStyle": "black"
+            }
+            
+        }
+        ,{
+            "path" : "pages/assistApply/assistApply",
+            "style" :                                                                                    
+            {
+                "navigationStyle": "custom",
+                "navigationBarTextStyle": "black"
+            }
+            
+        }
+        ,{
+            "path" : "pages/assistDetails/assistDetails",
+            "style" :                                                                                    
+            {
+                "navigationStyle": "custom",
+                "navigationBarTextStyle": "black"
+            }
+            
+        }
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

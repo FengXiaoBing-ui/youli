@@ -6,7 +6,14 @@
     "pages/userPolicy/userPolicy",
     "pages/privacyAgreements/privacyAgreements",
     "pages/feedBack/feedBack",
-    "pages/chat/chat"
+    "pages/chat/chat",
+    "pages/reservation/reservation",
+    "pages/myReservation/myReservation",
+    "pages/myApply/myApply",
+    "pages/reservationDetails/reservationDetails",
+    "pages/cultivate/cultivate",
+    "pages/assistApply/assistApply",
+    "pages/assistDetails/assistDetails"
   ],
   "subPackages": [],
   "window": {
@@ -50,5 +57,7 @@
   "requiredPrivateInfos": [
     "getLocation"
   ],
-  "usingComponents": {}
+  "usingComponents": {
+    "box": "/components/box"
+  }
 }

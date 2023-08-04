@@ -9,13 +9,13 @@
 			</view>
 		</view>
 		<view class="fnList" :style="'--top:'+(statusBarHeight.top+statusBarHeight.height+30)+'px'">
-			<view class="flex-sub text-center" v-for="(item,index) in fnList" :key="index">
+			<view @click="jump(item.path)" class="flex-sub text-center" v-for="(item,index) in fnList" :key="index">
 				<image style="width: 100rpx;height: 100rpx;" :src="item.url" mode="aspectFill"></image>
 				<view class="text-bold text-lg margin-top-sm">{{ item.name }}</view>
 			</view>
 		</view>
 		<view class="padding-lr-sm w100" style="position: relative;" :style="'top:'+(statusBarHeight.top+statusBarHeight.height+170)+'px'">
-			<view class="padding-sm w100" style="border-radius: 12rpx;background: #F7F7F7;">
+			<view @click="cultivate" class="padding-sm w100" style="border-radius: 12rpx;background: #F7F7F7;">
 				<view class="text-bold" style="color: #777777;">课程培训</view>
 				<view class="margin-top-sm" style="color: #999999;">文案</view>
 			</view>
@@ -32,7 +32,7 @@
 						</view>
 						<view class="flex align-center justify-between">
 							<view>营业时间：{{ item.opening }}</view>
-							<view @click="reservation" class="reservation text-white text-center">立即预约</view>
+							<view @click="reservation(item)" class="reservation text-white text-center">立即预约</view>
 						</view>
 					</view>
 				</view>
@@ -42,25 +42,25 @@
 </template>
 
 <script>
-	import qqmapsdk from "@/qqmap-sdk/qqmap-wx-jssdk.js";
-	const QQMapWX = new qqmapsdk({
-	    key: "E7EBZ-RX2CN-JVRFG-SQVDG-FFK66-4BB6T", //你的key
-	});
 	export default {
 		data() {
 			return {
 				statusBarHeight: this.StatusBarHeight,
-				fnList: [{
+				fnList: [
+					{
 						name: "线上咨询",
-						url: require('../../static/index/xianxia.png')
+						url: require('../../static/index/xianxia.png'),
+						path:"/pages/seek/seek"
 					},
 					{
 						name: "线下网点",
-						url: require('../../static/index/xianshang.png')
+						url: require('../../static/index/xianshang.png'),
+						path:""
 					},
 					{
 						name: "法律援助",
-						url: require('../../static/index/susong.png')
+						url: require('../../static/index/susong.png'),
+						path:"/pages/assistApply/assistApply"
 					}
 				],
 				latitude:'',
@@ -79,10 +79,22 @@
 			})
 		},
 		methods: {
-			reservation(){
-				return
+			jump(path){
 				uni.navigateTo({
-					url:"/pages/reservation/reservation"
+					url:path
+				})
+			},
+			cultivate(){
+				uni.navigateTo({
+					url:"/pages/cultivate/cultivate"
+				})
+			},
+			reservation(item){
+				uni.navigateTo({
+					url:"/pages/reservation/reservation",
+					success(e) {
+						e.eventChannel.emit("info",item)
+					}
 				})
 			},
 			getLocation() {

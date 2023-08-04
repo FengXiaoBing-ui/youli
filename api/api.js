@@ -29,6 +29,31 @@ function appletList (data){
 	return request.get('/module/branch/appletList',data);
 }
 
+function addReservation (data){
+	return request.post('/module/reservation',data);
+}
+
+function reservationList (data){
+	return request.get('/module/reservation/list',data);
+}
+
+function reservation (id){
+	return request.get(`/module/reservation/${id}`);
+}
+
+function aid (data){
+	return request.post(`/module/aid`,data);
+}
+
+function aidList (data){
+	return request.get(`/module/aid/list`,data);
+}
+
+function aidDetails (id){
+	return request.get(`/module/aid/${id}`);
+}
+
+
 export default {
 	login,//登录
 	logout,//退出登录
@@ -37,4 +62,10 @@ export default {
 	allUser,//所有用户
 	createChat,//创建聊天室
 	appletList,//线下网点列表
+	addReservation,//新增线下网点预约
+	reservationList,//我的线下网点预约列表
+	reservation,//预约详情
+	aid,//新增法律援助申请
+	aidList,//法律援助申请列表
+	aidDetails,//法律援助申请详情
 }

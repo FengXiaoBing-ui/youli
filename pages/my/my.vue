@@ -11,26 +11,41 @@
 			</view>
 		</view>
 		<view class="boxShadow w100 padding-lr-sm radius margin-top-xl">
-			<view class="flex justify-between align-center border-bottom padding-tb-sm">
-				<view>我的预约</view>
+			<view @click="myReservation" class="flex justify-between align-center border-bottom padding-tb-sm">
+				<view class="flex align-center">
+					<image style="width: 26rpx;height: 32rpx;" src="@/static/my/组 434@2x.png" mode=""></image>
+					<view class="margin-left-xs">我的预约</view>
+				</view>
 				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
 			</view>
-			<view class="flex justify-between align-center padding-tb-sm">
-				<view>我的预约</view>
+			<view @click="myApply" class="flex justify-between align-center padding-tb-sm">
+				<view class="flex align-center">
+					<image style="width: 26rpx;height: 32rpx;" src="@/static/my/组 433@2x.png" mode=""></image>
+					<view class="margin-left-xs">我的申请</view>
+				</view>
 				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
 			</view>
 		</view>
 		<view class="boxShadow w100 padding-lr-sm radius margin-top-xl">
 			<view @click="userPolicy" class="flex justify-between align-center border-bottom padding-tb-sm">
-				<view>用户协议</view>
+				<view class="flex align-center">
+					<image style="width: 26rpx;height: 32rpx;" src="@/static/my/组 430@2x.png" mode=""></image>
+					<view class="margin-left-xs">用户协议</view>
+				</view>
 				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
 			</view>
 			<view @click="privacyAgreements" class="flex justify-between align-center padding-tb-sm">
-				<view>隐私政策</view>
+				<view class="flex align-center">
+					<image style="width: 26rpx;height: 32rpx;" src="@/static/my/组 432@2x.png" mode=""></image>
+					<view class="margin-left-xs">隐私政策</view>
+				</view>
 				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
 			</view>
 			<view @click="feedback" class="flex justify-between align-center padding-tb-sm">
-				<view>意见反馈</view>
+				<view class="flex align-center">
+					<image style="width: 26rpx;height: 32rpx;" src="@/static/my/组 431@2x.png" mode=""></image>
+					<view class="margin-left-xs">意见反馈</view>
+				</view>
 				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
 			</view>
 		</view>
@@ -50,6 +65,16 @@
 		},
 		methods: {
 			...mapActions(['login','logout']),
+			myReservation(){
+				uni.navigateTo({
+					url:"/pages/myReservation/myReservation"
+				})
+			},
+			myApply(){
+				uni.navigateTo({
+					url:"/pages/myApply/myApply"
+				})
+			},
 			getPhoneNumber(e) {
 				console.log(e);
 				if(e.detail.code){
