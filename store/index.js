@@ -13,9 +13,13 @@ const store = new Vuex.Store({
 		chat:null,
 		KeyboardHeight:0,
 		chatList:[],
-		totalNoreadnum:3
+		totalNoreadnum:3,
+		latlong:{}
     },
     mutations: {
+		setLatLong(state,val){
+			state.latlong = val
+		},
 		changeKeyboardHeight(state,h){
 			state.KeyboardHeight = h
 		},

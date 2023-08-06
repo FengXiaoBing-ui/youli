@@ -4,7 +4,7 @@
 			<view class="w100 flex flex-direction padding-tb">
 				<view class="flex justify-between align-center border-bottom padding-tb-sm">
 					<view class="flex-sub">线下网点</view>
-					<view class="flex-treble">XXXX法律咨询</view>
+					<view class="flex-treble">{{ details.branchName }}</view>
 				</view>
 				<view class="flex justify-between align-center border-bottom padding-tb-sm">
 					<view class="flex-sub">预约人员</view>

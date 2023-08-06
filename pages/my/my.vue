@@ -2,7 +2,7 @@
 	<view class="content padding-lr-sm">
 		<view class="loginBox flex align-center justify-between padding-lr padding-top-xl">
 			<view class="flex align-center">
-				<image style="width: 120rpx;height: 120rpx;" class="round boxShadow" :src="userInfo?userInfo.user.avatar:'../../static/images/bg.jpg'" mode="aspectFill"></image>
+				<image style="width: 120rpx;height: 120rpx;" class="round boxShadow" :src="userInfo?userInfo.user.avatar:'../../static/images/userpic.png'" mode="aspectFill"></image>
 				<button v-if="!userInfo" class="loginText margin-left" click="login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">立即登录</button>
 				<view v-else class="loginText margin-left">{{ userInfo.username }}</view>
 			</view>
@@ -62,6 +62,16 @@
 		},
 		computed:{
 			...mapState(["userInfo"])
+		},
+		onLoad() {
+			// #ifndef MP-WEIXIN
+			let that = this
+			that.$http.phoneLogin({
+				phone:'19185661231'
+			}).then(res => {
+				that.login(res)
+			})
+			// #endif
 		},
 		methods: {
 			...mapActions(['login','logout']),

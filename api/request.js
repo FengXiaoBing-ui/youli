@@ -34,7 +34,9 @@ export default {
             }
             // 往header头中添加token
             options.header.Authorization = token
-        }
+        }else{
+			options.header.Authorization = ""
+		}
         // 请求
         return new Promise((res,rej)=>{
             // 请求中...

@@ -13,7 +13,8 @@
     "pages/reservationDetails/reservationDetails",
     "pages/cultivate/cultivate",
     "pages/assistApply/assistApply",
-    "pages/assistDetails/assistDetails"
+    "pages/assistDetails/assistDetails",
+    "pages/branch/branch"
   ],
   "subPackages": [],
   "window": {

@@ -1,11 +1,13 @@
 <template>
 	<view class="content padding-lr-xs">
-		<view class="w100 padding-sm radius bg-white">
-			<view @click="goChat(item)" class="flex padding-tb-sm" v-for="item in chatList" :key="item.updateTime">
-				<image style="width: 100rpx;height: 100rpx;" class="radius" :src="item.avatar" mode="aspectFill"></image>
-				<view style="width: 500rpx;" class="margin-left-sm">{{ item.nickName }}</view>
+		<Box title="咨询" :rightIcon="require('@/static/navbar/seek.png')">
+			<view class="w100 padding-sm radius bg-white" style="height: 80vh;overflow-y: auto;">
+				<view @click="goChat(item)" class="flex padding-tb-sm" v-for="item in chatList" :key="item.updateTime">
+					<image style="width: 100rpx;height: 100rpx;" class="radius" :src="item.avatar" mode="aspectFill"></image>
+					<view style="width: 500rpx;" class="margin-left-sm">{{ item.nickName }}</view>
+				</view>
 			</view>
-		</view>
+		</Box>
 	</view>
 </template>
 
@@ -16,20 +18,18 @@
 				chatList:[]
 			};
 		},
-		onLoad() {
-			this.allUser()
-		},
 		onShow() {
 			if(!uni.getStorageSync('token')){
-				uni.switchTab({
+				return uni.switchTab({
 					url:"/pages/my/my"
 				})
 			}
+			this.allUser()
 		},
 		methods:{
 			async allUser(){
 				const res = await this.$http.allUser()
-				this.chatList = res
+				this.chatList = res.data
 			},
 			async goChat(item){
 				const res = await this.$http.createChat({

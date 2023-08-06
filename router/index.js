@@ -7,7 +7,6 @@ const router = createRouter({
 
 const nextArr = [
 	"/pages/my/my",
-	"/pages/feedBack/feedBack",
 	"/pages/privacyAgreements/privacyAgreements",
 	"/pages/userPolicy/userPolicy"
 ];

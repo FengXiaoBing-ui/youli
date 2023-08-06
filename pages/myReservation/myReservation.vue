@@ -2,11 +2,11 @@
 	<view class="content">
 		<Box title="我的预约" :rightIcon="require('@/static/navbar/myReservation.png')">
 			<view class="w100 flex justify-center align-center padding-tb">
-				<view class="padding-lr" @click="status = item" :class="item==status?'active':'noActive'" v-for="(item,index) in options" :key="index">{{ item }}</view>
+				<view class="padding-lr" @click="switchStatus(item,index)" :class="item==status?'active':'noActive'" v-for="(item,index) in options" :key="index">{{ item }}</view>
 			</view>
 			<view @click="details(item.id)" class="boxShadow flex justify-between align-center padding-sm radius margin-top-sm" v-for="item in list" :key="item.id">
 				<view class="flex flex-direction">
-					<view class="reservationName">{{ item.reservationName }}</view>
+					<view class="reservationName">{{ item.branchName }}</view>
 					<view class="reservationTime">{{ item.reservationTime }}</view>
 				</view>
 				<u-icon name="arrow-right" color="#DBDBDB" size="18"></u-icon>
@@ -21,18 +21,27 @@
 			return {
 				options:["已确认","预约中"],
 				status:"已确认",
-				list:[]
+				list:[],
+				statusIndex:1,
 			};
 		},
-		async onLoad() {
-			let res = await this.$http.reservationList({userId:uni.getStorageSync('userInfo').userId})
-			this.list = res.rows
+		onLoad() {
+			this.getReservationList()
 		},
 		methods:{
+			async getReservationList(){
+				let res = await this.$http.reservationList({userId:uni.getStorageSync('userInfo').userId,reservationStatus:this.statusIndex})
+				this.list = res.rows
+			},
 			details(id){
 				uni.navigateTo({
 					url:"/pages/reservationDetails/reservationDetails?id="+id
 				})
+			},
+			switchStatus(item,index){
+				this.status = item
+				this.statusIndex = (index?0:1)
+				this.getReservationList()
 			}
 		}
 	}

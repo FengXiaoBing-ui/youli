@@ -29,9 +29,9 @@
 			<view @click="submit" class="submit text-center">提交预约</view>
 		</Box>
 		<u-datetime-picker @confirm="confirm" @close="datetimeShow = false" @cancel="datetimeShow = false"
-			ref="datetimePicker" :minDate="new Date().getTime()" :show="datetimeShow" v-model="reservationTime"
+			ref="datetimePicker" :minDate="minDate" :show="datetimeShow" v-model="reservationTime"
 			mode="date" :formatter="formatter"></u-datetime-picker>
-		<u-picker :show="show" :columns="columns"></u-picker>
+		<!-- <u-picker :show="show" :columns="columns"></u-picker> -->
 	</view>
 </template>
 
@@ -39,6 +39,7 @@
 	export default {
 		data() {
 			return {
+				minDate:new Date().getTime(),
 				info:"",
 				datetimeShow: false,
 				pickerShow: false,

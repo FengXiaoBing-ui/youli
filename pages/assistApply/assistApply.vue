@@ -46,7 +46,7 @@
 					</u-checkbox>
 				</u-checkbox-group>
 				<u-datetime-picker @confirm="confirm" @close="datetimeShow = false" @cancel="datetimeShow = false"
-					ref="datetimePicker" minDate="1600000000" :show="datetimeShow" v-model="reservationTime" mode="date"
+					ref="datetimePicker" :minDate="1600000000" :show="datetimeShow" v-model="reservationTime" mode="date"
 					:formatter="formatter"></u-datetime-picker>
 				<u-action-sheet :show="showSex" :actions="actions" title="请选择性别" description="如果选择保密会报错"
 					@close="showSex = false" @select="sexSelect">
@@ -197,6 +197,7 @@
 					uni.showLoading({
 						title: "申请提交中..."
 					})
+					this.formData.aidStatus = 0
 					console.log(this.formData);
 					let data = await this.$http.aid({...this.formData,sex:this.sex})
 					uni.hideLoading()

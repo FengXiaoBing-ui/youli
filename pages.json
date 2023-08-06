@@ -11,8 +11,8 @@
             "path" : "pages/seek/seek",
             "style" :                                                                                    
             {
-                "navigationBarTitleText": "咨询",
-                "enablePullDownRefresh": false
+                "navigationStyle": "custom",
+                "navigationBarTextStyle": "black"
             }
             
         }
@@ -29,7 +29,7 @@
             "path" : "pages/userPolicy/userPolicy",
             "style" :                                                                                    
             {
-                "navigationBarTitleText": "",
+                "navigationBarTitleText": "用户协议",
                 "enablePullDownRefresh": false
             }
             
@@ -38,7 +38,7 @@
             "path" : "pages/privacyAgreements/privacyAgreements",
             "style" :                                                                                    
             {
-                "navigationBarTitleText": "",
+                "navigationBarTitleText": "隐私政策",
                 "enablePullDownRefresh": false
             }
             
@@ -47,8 +47,10 @@
             "path" : "pages/feedBack/feedBack",
             "style" :                                                                                    
             {
-                "navigationBarTitleText": "",
-                "enablePullDownRefresh": false
+                "navigationBarTitleText": "意见反馈",
+                "enablePullDownRefresh": false,
+				"navigationBarBackgroundColor": "#032466",
+				"navigationBarTextStyle": "white"
             }
             
         }
@@ -121,6 +123,15 @@
             {
                 "navigationStyle": "custom",
                 "navigationBarTextStyle": "black"
+            }
+            
+        }
+        ,{
+            "path" : "pages/branch/branch",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "线下网点",
+                "enablePullDownRefresh": false
             }
             
         }

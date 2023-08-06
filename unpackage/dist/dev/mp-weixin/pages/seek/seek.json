@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "咨询",
-  "enablePullDownRefresh": false,
+  "navigationStyle": "custom",
+  "navigationBarTextStyle": "black",
   "usingComponents": {}
 }

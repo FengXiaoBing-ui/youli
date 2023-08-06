@@ -14,25 +14,37 @@
 				<view class="text-bold text-lg margin-top-sm">{{ item.name }}</view>
 			</view>
 		</view>
-		<view class="padding-lr-sm w100" style="position: relative;" :style="'top:'+(statusBarHeight.top+statusBarHeight.height+170)+'px'">
+		<view class="padding-lr-sm w100" style="position: relative;"
+			:style="'top:'+(statusBarHeight.top+statusBarHeight.height+170)+'px'">
 			<view @click="cultivate" class="padding-sm w100" style="border-radius: 12rpx;background: #F7F7F7;">
 				<view class="text-bold" style="color: #777777;">课程培训</view>
-				<view class="margin-top-sm" style="color: #999999;">文案</view>
+				<view class="margin-top-sm" style="color: #999999;">
+					本课程面向即将就业的高等院校学生及法律职业从业人士，着重提高法律应用实践能力，为从事法律业务的单位、企业、律所等提供参考标准和依据。</view>
 			</view>
-			<view class="branchBox margin-top padding-bottom">
-				<view v-for="(item,index) in branchList" :key="index" class="w100 margin-top-sm flex justify-between padding-sm radius" style="background: #F7F8FF;">
-					<view class="w100">
+			<view class="branchBox margin-top" style="padding-bottom: 120rpx;">
+				<view
+					style="font-size: 32rpx;font-family: PingFang SC-Bold, PingFang SC;font-weight: bold;color: #1D1D1D;">
+					线下网点
+				</view>
+				<view v-for="(item,index) in branchList" :key="index"
+					class="w100 margin-top-sm flex justify-between padding-sm radius" style="background: #F7F8FF;">
+					<view @click="reservation(item)" class="w100">
 						<view class="flex align-center">
 							<view>{{ item.branchName }}</view>
-							<view :style="'background:'+(item.rest=='营业中'?'#81D3F8':'#C7C7C7')" class="radius text-white text-xs margin-left-sm" style="padding: 2rpx 4rpx;">{{ item.rest }}</view>
+							<view :style="'background:'+(item.rest=='营业中'?'#81D3F8':'#C7C7C7')"
+								class="radius text-white text-xs margin-left-sm" style="padding: 2rpx 4rpx;">
+								{{ item.rest }}
+							</view>
 						</view>
 						<view class="flex align-center justify-between margin-tb-sm">
 							<view class="flex-treble">{{ item.address }}</view>
-							<view class="flex-sub">{{ item.distance.m }}m</view>
+							<view class="flex-sub text-right">
+								{{ item.distance.m.toString().length>3?item.distance.km+'km':item.distance.m+'m' }}
+							</view>
 						</view>
 						<view class="flex align-center justify-between">
 							<view>营业时间：{{ item.opening }}</view>
-							<view @click="reservation(item)" class="reservation text-white text-center">立即预约</view>
+							<view class="reservation text-white text-center">立即预约</view>
 						</view>
 					</view>
 				</view>
@@ -42,101 +54,131 @@
 </template>
 
 <script>
+	import qqMap from "@/qqmap-sdk/qqmap-wx-jssdk.js";
+
+	const qqmapsdk = new qqMap.QQMapWX({
+		key: "E7EBZ-RX2CN-JVRFG-SQVDG-FFK66-4BB6T", //你的key
+	});
+	import {
+		mapMutations,
+		mapState
+	} from "vuex"
 	export default {
 		data() {
 			return {
 				statusBarHeight: this.StatusBarHeight,
-				fnList: [
-					{
+				fnList: [{
 						name: "线上咨询",
 						url: require('../../static/index/xianxia.png'),
-						path:"/pages/seek/seek"
+						path: "/pages/seek/seek"
 					},
 					{
 						name: "线下网点",
 						url: require('../../static/index/xianshang.png'),
-						path:""
+						path: "/pages/branch/branch"
 					},
 					{
 						name: "法律援助",
 						url: require('../../static/index/susong.png'),
-						path:"/pages/assistApply/assistApply"
+						path: "/pages/assistApply/assistApply"
 					}
 				],
-				latitude:'',
-				longitude:'',
-				branchList:[],
-				m:""
+				branchList: [],
+				m: ""
 			}
 		},
+		computed: {
+			...mapState(["latlong"])
+		},
 		onShow() {
-			this.getAppletList()
+			this.getLocation()
 		},
 		onLoad() {
-			this.getLocation()
-			uni.$on("loginSuccess",(res)=>{
+			uni.$on("loginSuccess", (res) => {
 				this.getAppletList()
 			})
 		},
 		methods: {
-			jump(path){
+			...mapMutations(["setLatLong"]),
+			jump(path) {
 				uni.navigateTo({
-					url:path
+					url: path
 				})
 			},
-			cultivate(){
+			cultivate() {
 				uni.navigateTo({
-					url:"/pages/cultivate/cultivate"
+					url: "/pages/cultivate/cultivate"
 				})
 			},
-			reservation(item){
+			reservation(item) {
 				uni.navigateTo({
-					url:"/pages/reservation/reservation",
+					url: "/pages/reservation/reservation",
 					success(e) {
-						e.eventChannel.emit("info",item)
+						e.eventChannel.emit("info", item)
 					}
 				})
 			},
-			getLocation() {
-				let that = this;
-				uni.getLocation({
-					type: "wgs84",
-					geocode: true,
-					success: res => {
-						console.log("获取经纬度成功", res);
-						that.latitude = res.latitude;
-						that.longitude = res.longitude;
-					},
-					fail: err => {
-						console.log("获取经纬度失败", err);
-					},
-					complete: err => {},
-				});
-			},
-			async getAppletList(){
+			async getAppletList() {
 				let that = this;
 				let res = await this.$http.appletList()
 				console.log(res);
 				res.rows.forEach(item => {
-					item.distance = that.$util.getDistances(that.latitude,that.longitude,item.latitude,item.longitude)
+					// item.distance = that.$util.getDistances(item.latitude, item.longitude, '26.63604','106.656188')
+					item.distance = that.$util.getDistances(item.latitude, item.longitude, that.latlong
+						.latitude, that.latlong.longitude)
 				})
 				this.branchList = res.rows
-			}
+			},
+			getLocation() {
+				let that = this;
+				uni.getLocation({
+					type: 'gcj02', // 默认为 wgs84 返回 gps 坐标，gcj02 返回国测局坐标
+					geocode: true, //设置该参数为true可直接获取经纬度及城市信息
+					isHighAccuracy: true, // 开启高精度定位 微信小程序 (基础库 2.9.0+)
+					highAccuracyExpireTime: 4000, // 高精度定位超时时间(ms)，指定时间内返回最高精度，该值3000ms以上高精度定位才有效果
+					timeout: 5,
+					success: res => {
+						console.log("获取经纬度成功", res);
+						qqmapsdk.reverseGeocoder({
+							location: {
+								latitude: res.latitude,
+								longitude: res.longitude,
+							},
+							success: function(data){
+								console.log(data);
+							}
+						})
+						that.setLatLong({
+							latitude: res.latitude,
+							longitude: res.longitude
+						})
+						that.getAppletList()
+					},
+					fail: err => {
+						console.log("获取经纬度失败", err);
+					},
+					complete: err => {
+						console.log('???', err);
+					},
+				});
+			},
 		}
 	}
 </script>
 
 <style lang="scss" scoped>
-	.branchBox{
+	.branchBox {
 		width: 100%;
 	}
-	.reservation{
+
+	.reservation {
 		width: 144rpx;
 		height: 54rpx;
 		line-height: 54rpx;
 		background: #032466;
 		border-radius: 8rpx;
 	}
+
 	.bgHeader {
 		width: 100%;
 		position: fixed;

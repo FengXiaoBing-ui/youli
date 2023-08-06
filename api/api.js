@@ -5,6 +5,10 @@ function login (data){
 	return request.get('/app/user/appletLogin',data);
 }
 
+function phoneLogin (data){
+	return request.post('/app/user/phoneLogin',data);
+}
+
 function logout (data){
 	return request.get('/logout',data);
 }
@@ -53,9 +57,18 @@ function aidDetails (id){
 	return request.get(`/module/aid/${id}`);
 }
 
+function feedback (data){
+	return request.post(`/module/feedback`,data);
+}
+
+function lessonList (data){
+	return request.get(`/module/lesson/list`,data);
+}
+
 
 export default {
 	login,//登录
+	phoneLogin,//手机号一键登录
 	logout,//退出登录
 	sendMsg,//发送消息
 	chatLog,//聊天记录
@@ -68,4 +81,6 @@ export default {
 	aid,//新增法律援助申请
 	aidList,//法律援助申请列表
 	aidDetails,//法律援助申请详情
+	feedback,//新增意见反馈
+	lessonList,//课程培训
 }

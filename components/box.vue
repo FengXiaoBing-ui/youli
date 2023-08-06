@@ -8,7 +8,7 @@
 			</view>
 			<image class="bgHeaderImg" style="width: 330rpx;height: 214rpx;" :src="rightIcon" mode=""></image>
 		</view>
-		<view class="infoBox padding-lr-lg" :style="'--top:'+(statusBarHeight.top+statusBarHeight.height+53)+'px'">
+		<view class="infoBox padding-lr" :style="'--top:'+(statusBarHeight.top+statusBarHeight.height+53)+'px'">
 			<slot></slot>
 		</view>
 	</view>
@@ -62,7 +62,6 @@
 		top: var(--top);
 		left: 0;
 		width: 100%;
-		height: 100px;
 		background-color: white;
 	}
 </style>

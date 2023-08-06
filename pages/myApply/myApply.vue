@@ -2,7 +2,7 @@
 	<view class="content">
 		<Box title="我的申请" :rightIcon="require('@/static/navbar/myApply.png')">
 			<view class="w100 flex justify-center align-center padding-tb">
-				<view class="padding-lr" @click="status = item" :class="item==status?'active':'noActive'" v-for="(item,index) in options" :key="index">{{ item }}</view>
+				<view class="padding-lr" @click="switchStatus(item,index)" :class="item==status?'active':'noActive'" v-for="(item,index) in options" :key="index">{{ item }}</view>
 			</view>
 			<view @click="details(item.id)" class="boxShadow flex justify-between align-center padding-sm radius margin-top-sm" v-for="item in list" :key="item.id">
 				<view class="caseText">{{ item.caseText }}</view>
@@ -17,18 +17,27 @@
 			return {
 				options:["申请中","处理中","已完成"],
 				status:"申请中",
-				list:[]
+				list:[],
+				statusIndex:0,
 			};
 		},
-		async onLoad() {
-			let res = await this.$http.aidList()
-			this.list = res.rows
+		onLoad() {
+			this.aidList()
 		},
 		methods:{
+			async aidList(){
+				let res = await this.$http.aidList({aidStatus:this.statusIndex})
+				this.list = res.rows
+			},
 			details(id){
 				uni.navigateTo({
 					url:"/pages/assistDetails/assistDetails?id="+id
 				})
+			},
+			switchStatus(item,index){
+				this.status = item
+				this.statusIndex = index
+				this.aidList()
 			}
 		}
 	}
