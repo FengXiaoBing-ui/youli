@@ -58,7 +58,7 @@
             "path" : "pages/chat/chat",
             "style" :                                                                                    
             {
-                "navigationBarTitleText": "",
+                "navigationBarTitleText": "线上咨询",
                 "enablePullDownRefresh": false
             }
             

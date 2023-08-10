@@ -64,14 +64,14 @@
 			...mapState(["userInfo"])
 		},
 		onLoad() {
-			// #ifndef MP-WEIXIN
-			let that = this
-			that.$http.phoneLogin({
-				phone:'19185661231'
-			}).then(res => {
-				that.login(res)
-			})
-			// #endif
+			// // #ifndef MP-WEIXIN
+			// let that = this
+			// that.$http.phoneLogin({
+			// 	phone:'19185661231'
+			// }).then(res => {
+			// 	that.login(res)
+			// })
+			// // #endif
 		},
 		methods: {
 			...mapActions(['login','logout']),
@@ -101,7 +101,14 @@
 								openIdCode:loginRes.code,
 								phoneCode:e.detail.code
 							}).then(res => {
-								that.login(res)
+								if(res.code==200){
+									that.login(res)
+								}else{
+									uni.showToast({
+										title:res.msg,
+										icon:"none"
+									})
+								}
 							})
 						}
 					});

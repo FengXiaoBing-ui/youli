@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "",
+  "navigationBarTitleText": "线上咨询",
   "enablePullDownRefresh": false,
   "usingComponents": {
     "free-icon-button": "/components/free-ui/free-icon-button",

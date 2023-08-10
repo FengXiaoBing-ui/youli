@@ -65,6 +65,10 @@ function lessonList (data){
 	return request.get(`/module/lesson/list`,data);
 }
 
+function onlineUser (data){
+	return request.get(`/app/user/onlineUser`,data);
+}
+
 
 export default {
 	login,//登录
@@ -83,4 +87,5 @@ export default {
 	aidDetails,//法律援助申请详情
 	feedback,//新增意见反馈
 	lessonList,//课程培训
+	onlineUser,//顾问-匹配在线顾问
 }

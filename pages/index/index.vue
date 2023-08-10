@@ -70,7 +70,7 @@
 				fnList: [{
 						name: "线上咨询",
 						url: require('../../static/index/xianxia.png'),
-						path: "/pages/seek/seek"
+						path: "/pages/chat/chat"
 					},
 					{
 						name: "线下网点",
@@ -88,7 +88,7 @@
 			}
 		},
 		computed: {
-			...mapState(["latlong"])
+			...mapState(["latlong","userInfo"])
 		},
 		onShow() {
 			this.getLocation()
@@ -101,6 +101,36 @@
 		methods: {
 			...mapMutations(["setLatLong"]),
 			jump(path) {
+				let that = this;
+				if(path=='/pages/chat/chat'){
+					this.$http.onlineUser().then( async userRes => {
+						if(userRes.code==500){
+							return uni.showToast({
+								title:userRes.msg,
+								icon:"none"
+							})
+						}
+						const res = await this.$http.createChat({
+							date: new Date(),
+							isRead: 0,
+							text: " ",
+							type: "-1",
+							userIdFrom: that.userInfo.userId,
+							userIdTo: userRes.data.userId,
+						})
+						let params = {
+							to_id:userRes.data.userId,
+							to_name:userRes.data.nickName,
+							to_avatar:userRes.data.avatar,
+							chat_type:"1",
+							chatRoomNumber:res.data
+						}
+						uni.navigateTo({
+							url:path+"?params="+encodeURIComponent(JSON.stringify(params))
+						})
+					})
+					return
+				}
 				uni.navigateTo({
 					url: path
 				})

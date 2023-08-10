@@ -290,7 +290,8 @@
 				if(this.isfocus){
 					h = this.KeyboardHeight + uni.upx2px(105)
 				}
-				return `bottom:${h}px;top:${this.navBarHeight}px;`
+				// return `bottom:${h}px;top:${this.navBarHeight}px;`
+				return `bottom:${h}px`
 			},
 			// 获取操作或者表情列表
 			emoticonOrActionList(){
@@ -324,10 +325,9 @@
 		},
 		onLoad(e) {
 			if(!e.params){
-				return this.backToast()
+				return this.initStart()
 			}
 			this.detail = JSON.parse(decodeURIComponent(e.params))
-			console.log(this.detail);
 			// 初始化
 			this.__init()
 			// 创建聊天对象
@@ -356,14 +356,28 @@
 		},
 		methods: {
 			...mapMutations(['regSendVoiceEvent']),
-			backToast(msg = '非法参数'){
-				uni.showToast({
-					title: msg,
-					icon:"none"
-				});
-				uni.navigateBack({
-					delta: 1,
-				});
+			initStart(){
+				let chatObj = {
+					id:1,
+					name:'线上咨询',
+					avatar:'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100',
+					chat_type:"user"
+				}
+				// 初始化
+				this.__init()
+				// 创建聊天对象
+				this.chat.createChatObject(chatObj)
+				
+				// 获取历史记录
+				// this.list = this.chat.getChatDetail(false,1)
+				
+				// 监听接收聊天信息
+				uni.$on('onMessage',this.onMessage)
+				
+				uni.$on('updateHistory',this.updateHistory)
+				
+				// 监听发送收藏和名片
+				uni.$on('sendItem',this.onSendItem)
 			},
 			onSendItem(e){
 				if(e.sendType === 'fava' || e.sendType === 'card'){
