@@ -6,6 +6,7 @@ class chat {
 		this.socket = null
 		this.reconnectTime = 0
 		this.isOpenReconnect = true
+		this.heartBeatInterval = null
 		// 获取当前用户相关信息
 		let user = uni.getStorageSync('userInfo')
 		this.user = user ? user : {}
@@ -44,6 +45,7 @@ class chat {
 	}
 	// 监听打开
 	onOpen() {
+		this.start()
 		// 用户上线
 		this.isOnline = true
 		// console.log('socket连接成功')
@@ -57,6 +59,7 @@ class chat {
 	}
 	// 监听关闭
 	onClose() {
+		console.log('?????');
 		// 用户下线
 		this.isOnline = false
 		this.socket = null
@@ -67,6 +70,7 @@ class chat {
 	}
 	// 监听连接错误
 	onError() {
+		console.log('?????');
 		// 用户下线
 		this.isOnline = false
 		this.socket = null
@@ -78,20 +82,26 @@ class chat {
 	// 监听接收消息
 	onMessage(data) {
 		let res = JSON.parse(data.data)
-		// console.log('监听接收消息',res)
+		console.log('监听接收消息',res)
 		// 错误
-		switch (res.chat_type) {
+		switch (res.type) {
+			case -2:
+				uni.showToast({
+					title: res.text+'下线',
+					icon: 'none'
+				});
+				break;
 			case -3:
 				uni.showToast({
-					title: res.date,
+					title: res.text+'上线',
 					icon: 'none'
 				});
 				break;
 			// case 'moment': // 朋友圈更新
 			// 	this.handleMoment(res.data)
 			// 	break;
-			case "1": //普通文字消息
-				this.handleOnMessage(res.data)
+			case 1: //普通文字消息
+				this.handleOnMessage(JSON.parse(res.text))
 				break;
 			default:
 				// 处理消息
@@ -107,6 +117,19 @@ class chat {
 		this.updateChatList(data,false)
 		// 全局通知
 		uni.$emit('onMessage',data)
+	}
+	start(){
+		let obj = {
+			date:new Date(),
+			text:"",
+			type:-3,
+			userIdTo:0
+		}
+		this.heartBeatInterval = setInterval(() => {
+			this.socket.send({
+				data: JSON.stringify(obj)
+			})
+		},5000)
 	}
 	//发送消息
 	send(message,onProgress = false,chatRoomNumber){
@@ -134,16 +157,20 @@ class chat {
 				to_id:message.to_id || this.TO.to_id,
 				chat_type:message.chat_type || this.TO.chat_type, 
 				type:message.type, 
-				data, 
+				text:JSON.stringify(message),
 				options:JSON.stringify(message.options)
 			}).then(res=>{
 				// 发送成功
 				message.id = res.id
 				message.sendStatus = 'success'
 				this.socket.send({
-					data:JSON.stringify(message)
-				})
-				
+					data: JSON.stringify({
+						userIdTo: message.to_id || this.TO.to_id, // 接收人/群 id
+						userIdFrom: this.user.userId, // 发送者id
+						text: message, // 消息内容
+						date:new Date().getTime(),
+						type:message.type
+					})				})
 				if(message.type === 'video'){
 					message.options = res.options
 				}
@@ -163,9 +190,8 @@ class chat {
 	}
 	// 添加聊天记录
 	addChatDetail(message,isSend = true){
-		// console.log('添加聊天记录');
 		// 获取对方id
-		let id = message.chat_type === 'user' ? (isSend ? message.to_id : message.from_id) : message.to_id
+		let id = message.chat_type == 1 ? (isSend ? message.to_id : message.from_id) : message.to_id
 		// key值：chatDetail_当前用户id_会话类型_接收人/群id
 		let key = `chatDetail_${this.user.userId}_${message.chat_type}_${id}`
 		// 获取原来的聊天记录
@@ -195,7 +221,7 @@ class chat {
 		let name = ''
 		
 		// 判断私聊还是群聊
-		if(message.chat_type === 'user'){ // 私聊
+		if(message.chat_type == 1){ // 私聊
 			// 聊天对象是否存在
 			isCurrentChat = this.TO ? (isSend ? this.TO.id === message.to_id : this.TO.id === message.from_id) : false
 			
@@ -222,7 +248,7 @@ class chat {
 		if(index === -1){
 			let chatItem = {
 				id, // 接收人/群 id
-				chat_type:message.chat_type, // 接收类型 user单聊 group群聊
+				chat_type:message.chat_type, // 接收类型 1单聊 group群聊
 				avatar, // 接收人/群 头像
 				name, // 接收人/群 昵称
 				update_time:(new Date()).getTime(), // 最后一条消息的时间戳
@@ -267,6 +293,7 @@ class chat {
 		// this.updateBadge(list)
 		
 		// 通知更新vuex中的聊天会话列表
+		console.log(66666,list);
 		uni.$emit('onUpdateChatList',list)
 		return list
 	}
@@ -282,7 +309,7 @@ class chat {
 	// 更新指定历史记录
 	async updateChatDetail(message,k,isSend = true){
 		// 获取对方id
-		let id = message.chat_type === 'user' ? (isSend ? message.to_id : message.from_id) : message.to_id
+		let id = message.chat_type == 1 ? (isSend ? message.to_id : message.from_id) : message.to_id
 		// key值：chatDetail_当前用户id_会话类型_接收人/群id
 		let key = `chatDetail_${this.user.userId}_${message.chat_type}_${id}`
 		// console.log('key值',key)
@@ -322,7 +349,7 @@ class chat {
 	// 获取聊天记录
 	getChatDetail(key = false,chatRoom){
 		$H.chatLog({chatRoomNumber:chatRoom}).then(res => {
-			console.log(res);
+			// console.log(res);
 		})
 		key = key ? key : `chatDetail_${this.user.userId}_${this.TO.chat_type}_${this.TO.to_id}`
 		return this.getStorage(key)
@@ -347,7 +374,7 @@ class chat {
 			data = '[名片]'
 				break;
 		}
-		data = isSend ? data : `${message.from_name}: ${data}`
+		data = isSend ? data : `${message.name}: ${data}`
 		return data
 	}
 	// 数组置顶
@@ -373,7 +400,7 @@ class chat {
 	// 创建聊天对象
 	createChatObject(detail){
 		this.TO = detail
-		// console.log('创建聊天对象',this.TO);
+		console.log('创建聊天对象',this.TO);
 	}
 	// 获取本地存储会话列表
 	getChatList(){

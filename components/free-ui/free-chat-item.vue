@@ -33,7 +33,7 @@
 				
 				<div class="p-2 rounded" :class="labelClass" style="max-width:500rpx;" :style="labelStyle">
 					<!-- 文字 -->
-					<text v-if="item.type === 'text'" class="font-md">{{item.data}}</text>
+					<text v-if="item.type == '1'" class="font-md">{{item.data}}</text>
 					<!-- 表情包 | 图片-->
 					<free-image @longpress="stop" v-else-if="item.type === 'emoticon' || item.type === 'image'" :src="item.data" @click="preview(item.data)" imageClass="rounded" :maxWidth="500" :maxHeight="350"></free-image>
 					
@@ -142,7 +142,7 @@
 			},
 			// 是否需要气泡样式
 			hasLabelClass(){
-				return this.item.type === 'text' || this.item.type === 'audio'
+				return this.item.type == '1' || this.item.type === 'audio'
 			},
 			// 气泡的样式
 			labelClass(){

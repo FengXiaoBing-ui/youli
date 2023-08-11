@@ -55,7 +55,7 @@
 				<view v-else class="flex-shrink">
 					<!-- 发送按钮 -->
 					<free-main-button name="发送" 
-					@click="send('text')"></free-main-button>
+					@click="send(1)"></free-main-button>
 				</view>
 			</view>
 			
@@ -290,8 +290,8 @@
 				if(this.isfocus){
 					h = this.KeyboardHeight + uni.upx2px(105)
 				}
-				// return `bottom:${h}px;top:${this.navBarHeight}px;`
-				return `bottom:${h}px`
+				return `bottom:${h}px;top:0px;`
+				// return `bottom:${h}px`
 			},
 			// 获取操作或者表情列表
 			emoticonOrActionList(){
@@ -392,8 +392,8 @@
 				}
 			},
 			onMessage(message){
-				// console.log('[聊天页] 监听接收聊天信息',message);
-				if((message.from_id === this.detail.id && message.chat_type === 'user') || (message.chat_type === 'group' && message.to_id === this.detail.id)){
+				console.log('[聊天页] 监听接收聊天信息',message);
+				if((message.from_id === this.detail.to_id && message.chat_type == 1) || (message.chat_type === 'group' && message.to_id === this.detail.to_id)){
 					if(message.isremove !== 1){
 						this.list.push(message)
 						// 置于底部
@@ -432,7 +432,7 @@
 					to_id:this.detail.id,
 					to_name:this.detail.name,
 					to_avatar:this.detail.avatar,
-					data:this.detail.chat_type === 'user' ? '你们已经是好友，可以开始聊天了' : '你已经加入群聊，可以开始聊天了'
+					data:this.detail.chat_type == 1 ? '你们已经是好友，可以开始聊天了' : '你已经加入群聊，可以开始聊天了'
 				})
 			},
 			// 打开扩展菜单或者表情包
@@ -444,7 +444,7 @@
 			send(type, data = '',options = {}){
 				// 组织数据格式
 				switch (type){
-					case 'text':
+					case 1:
 					data = data || this.text
 						break;
 				}
@@ -458,7 +458,7 @@
 				this.list.push(message)
 				// 监听上传进度
 				let onProgress = false
-				if(message.type !== 'text' && message.type !== 'emoticon' && message.type !== 'card' && !message.data.startsWith('http')){
+				if(message.type != 1 && message.type !== 'emoticon' && message.type !== 'card' && !message.data.startsWith('http')){
 					onProgress = (progress)=>{
 						// console.log('上传进度：',progress);
 					}
@@ -475,7 +475,7 @@
 					// console.log(err);
 				})
 				// 发送文字成功，清空输入框
-				if (type === 'text') {
+				if (type == 1) {
 					this.text = ''
 				}
 				// 置于底部
@@ -523,7 +523,7 @@
 					})
 				}
 				// #ifndef H5
-				if(item.type === 'text'){
+				if(item.type == 1){
 					menus.unshift({
 						name:"复制",
 						event:'copy',
@@ -665,7 +665,7 @@
 			},
 			// 切换音频录制和文本输入
 			changeVoiceOrText(){
-				this.mode = this.mode !== 'audio' ? 'audio' : 'text'
+				this.mode = this.mode !== 'audio' ? 'audio' : '1'
 			},
 			// 录音相关
 			// #ifdef APP-PLUS
@@ -745,7 +745,7 @@
 				});
 			},
 			focus(e){
-				this.mode = 'text'
+				this.mode = '1'
 				this.isfocus = true
 				this.KeyboardHeight = e.detail.height
 			},
