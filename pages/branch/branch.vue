@@ -9,7 +9,7 @@
 					</view>
 					<view class="flex align-center justify-between margin-tb-sm">
 						<view class="flex-treble">{{ item.address }}</view>
-						<view class="flex-sub">{{ item.distance.m.toString().length>3?item.distance.km+'km':item.distance.m+'m' }}</view>
+						<view class="flex-sub text-right">{{ mkm(item.distance) }}</view>
 					</view>
 					<view class="flex align-center justify-between">
 						<view>营业时间：{{ item.opening }}</view>
@@ -28,7 +28,9 @@
 			return {
 				branchList:[],
 				latitude:"",
-				longitude:""
+				longitude:"",
+				pageSize:100,
+				pageNum:1
 			};
 		},
 		computed:{
@@ -38,13 +40,14 @@
 			this.getAppletList()
 		},
 		methods:{
+			mkm(distance){
+				let m = distance.toFixed(0)
+				return m.toString().length>3?((m/1000).toFixed(2)+'km'):m+'m'
+			},
 			async getAppletList(){
 				let that = this;
-				let res = await this.$http.appletList()
+				let res = await this.$http.appletList({userLatitude:that.latlong.latitude,userLongitude:that.latlong.longitude,pageSize:this.pageSize,pageNum:this.pageNum})
 				console.log(res);
-				res.rows.forEach(item => {
-					item.distance = that.$util.getDistances(that.latlong.latitude,that.latlong.longitude,item.latitude,item.longitude)
-				})
 				this.branchList = res.rows
 			},
 			reservation(item){

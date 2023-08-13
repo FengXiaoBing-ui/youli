@@ -41,8 +41,7 @@
 					<view v-if="mode === 'audio'" class="rounded flex align-center justify-center" style="height: 80rpx;" :class="isRecording?'bg-hover-light':'bg-white'" @touchstart="voiceTouchStart" @touchend="voiceTouchEnd" @touchcancel="voiceTouchCancel" @touchmove="voiceTouchMove">
 						<text class="font">{{isRecording ? '松开 结束':'按住 说话'}}</text>
 					</view>
-					
-					<textarea v-else fixed class="bg-white rounded p-2 font-md" style="height: 80rpx;max-width: 450rpx;" :adjust-position="false" v-model="text" @focus="focus" @blur="blur"/>
+					<textarea v-else fixed class="bg-white rounded p-2 font-md" style="height: 80rpx;max-width: 450rpx;" :adjust-position="false" v-model="text" @blur="blur"/>
 				</view>
 				<!-- 表情 -->
 				<free-icon-button :icon="'\ue605'"
@@ -153,31 +152,38 @@
 				// 模式 text输入文字，emoticon表情，action操作，audio音频
 				mode:"text",
 				// 扩展菜单列表
+				// actionList:[
+				// 	[{
+				// 		name:"相册",
+				// 		icon:"/static/images/extends/pic.png",
+				// 		event:"uploadImage"
+				// 	},{
+				// 		name:"拍摄",
+				// 		icon:"/static/images/extends/video.png",
+				// 		event:"uploadVideo"
+				// 	},{
+				// 		name:"收藏",
+				// 		icon:"/static/images/extends/shoucan.png",
+				// 		event:"openFava"
+				// 	},{
+				// 		name:"名片",
+				// 		icon:"/static/images/extends/man.png",
+				// 		event:"sendCard"
+				// 	},{
+				// 		name:"语音通话",
+				// 		icon:"/static/images/extends/phone.png",
+				// 		event:""
+				// 	},{
+				// 		name:"位置",
+				// 		icon:"/static/images/extends/path.png",
+				// 		event:""
+				// 	}]
+				// ],
 				actionList:[
 					[{
 						name:"相册",
 						icon:"/static/images/extends/pic.png",
 						event:"uploadImage"
-					},{
-						name:"拍摄",
-						icon:"/static/images/extends/video.png",
-						event:"uploadVideo"
-					},{
-						name:"收藏",
-						icon:"/static/images/extends/shoucan.png",
-						event:"openFava"
-					},{
-						name:"名片",
-						icon:"/static/images/extends/man.png",
-						event:"sendCard"
-					},{
-						name:"语音通话",
-						icon:"/static/images/extends/phone.png",
-						event:""
-					},{
-						name:"位置",
-						icon:"/static/images/extends/path.png",
-						event:""
 					}]
 				],
 				emoticonList:[],
@@ -246,6 +252,7 @@
 		},
 		computed: {
 			...mapState({
+				RECORD:state=>state.audio.RECORD,
 				chatList:state=>state.chatList,
 				chat:state=>state.chat,
 				totalNoreadnum:state=>state.totalNoreadnum,
@@ -323,9 +330,9 @@
 				}
 			}
 		},
-		onLoad(e) {
+		async onLoad(e) {
 			if(!e.params){
-				return this.initStart()
+				return
 			}
 			this.detail = JSON.parse(decodeURIComponent(e.params))
 			// 初始化
@@ -333,7 +340,15 @@
 			// 创建聊天对象
 			this.chat.createChatObject(this.detail)
 			// 获取历史记录
-			this.list = this.chat.getChatDetail(false,this.detail.chatRoomNumber)
+			const res = await this.chat.getChatDetail(false,this.detail.chatRoomNumber)
+			
+			let arr = [],rows = []
+			res.rows.forEach((item => {
+				rows.push(JSON.parse(item.text))
+			}))
+			arr = rows.reverse().concat(arr)
+			this.list = arr
+			console.log(7777,this.list);
 			// 监听接收聊天信息
 			uni.$on('onMessage',this.onMessage)
 			
@@ -356,29 +371,6 @@
 		},
 		methods: {
 			...mapMutations(['regSendVoiceEvent']),
-			initStart(){
-				let chatObj = {
-					id:1,
-					name:'线上咨询',
-					avatar:'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100',
-					chat_type:"user"
-				}
-				// 初始化
-				this.__init()
-				// 创建聊天对象
-				this.chat.createChatObject(chatObj)
-				
-				// 获取历史记录
-				// this.list = this.chat.getChatDetail(false,1)
-				
-				// 监听接收聊天信息
-				uni.$on('onMessage',this.onMessage)
-				
-				uni.$on('updateHistory',this.updateHistory)
-				
-				// 监听发送收藏和名片
-				uni.$on('sendItem',this.onSendItem)
-			},
 			onSendItem(e){
 				if(e.sendType === 'fava' || e.sendType === 'card'){
 					this.send(e.type,e.data,e.options)
@@ -425,6 +417,15 @@
 						})
 					}
 				}
+				arr = [
+					[
+						{
+							name:"表情0",
+							icon:"/static/images/emoticon/5497/" + 0 +'.gif',
+							event:"sendEmoticon"
+						}
+					]
+				]
 				this.emoticonList = arr
 				// 初始化会话列表
 				this.chat.initChatListItem({
@@ -699,6 +700,7 @@
 			// #endif
 			// 录音开始
 			async voiceTouchStart(e){ 
+				console.log(this.RECORD);
 				// #ifdef APP-PLUS
 				let status = await this.checkPermission();
 				if (status !== 1) {

@@ -21,7 +21,7 @@
 				<view class="margin-top-sm" style="color: #999999;">
 					本课程面向即将就业的高等院校学生及法律职业从业人士，着重提高法律应用实践能力，为从事法律业务的单位、企业、律所等提供参考标准和依据。</view>
 			</view>
-			<view class="branchBox margin-top" style="padding-bottom: 120rpx;">
+			<view class="branchBox margin-top" style="padding-bottom: 40rpx;">
 				<view
 					style="font-size: 32rpx;font-family: PingFang SC-Bold, PingFang SC;font-weight: bold;color: #1D1D1D;">
 					线下网点
@@ -39,7 +39,7 @@
 						<view class="flex align-center justify-between margin-tb-sm">
 							<view class="flex-treble">{{ item.address }}</view>
 							<view class="flex-sub text-right">
-								{{ item.distance.m.toString().length>3?item.distance.km+'km':item.distance.m+'m' }}
+								{{ mkm(item.distance) }}
 							</view>
 						</view>
 						<view class="flex align-center justify-between">
@@ -69,39 +69,53 @@
 				statusBarHeight: this.StatusBarHeight,
 				fnList: [{
 						name: "线上咨询",
-						url: require('../../static/index/xianxia.png'),
+						url: require('../../static/index/xianshang.png'),
 						path: "/pages/chat/chat"
 					},
 					{
 						name: "线下网点",
-						url: require('../../static/index/xianshang.png'),
+						
+						url: require('../../static/index/xianxia.png'),
 						path: "/pages/branch/branch"
 					},
 					{
-						name: "法律援助",
+						name: "诉讼援助",
 						url: require('../../static/index/susong.png'),
 						path: "/pages/assistApply/assistApply"
 					}
 				],
 				branchList: [],
-				m: ""
+				m: "",
+				pageSize:100,
+				pageNum:1
 			}
 		},
 		computed: {
 			...mapState(["latlong","userInfo"])
 		},
 		onShow() {
-			this.getLocation()
+			if(!this.latlong){
+				this.getLocation()
+			}else{
+				this.getAppletList({userLongitude:this.latlong.longitude,userLatitude:this.latlong.latitude})
+			}
 		},
 		onLoad() {
-			uni.$on("loginSuccess", (res) => {
-				this.getAppletList()
-			})
+			this.getLocation()
 		},
 		methods: {
 			...mapMutations(["setLatLong"]),
+			mkm(distance){
+				let m = distance.toFixed(0)
+				return m.toString().length>3?((m/1000).toFixed(2)+'km'):m+'m'
+			},
 			jump(path) {
 				let that = this;
+				if(!this.userInfo){
+					return uni.switchTab({
+						url:"/pages/my/my"
+					})
+				}
 				if(path=='/pages/chat/chat'){
 					this.$http.onlineUser().then( async userRes => {
 						if(userRes.code==500){
@@ -148,18 +162,16 @@
 					}
 				})
 			},
-			async getAppletList() {
+			async getAppletList(data) {
 				let that = this;
-				let res = await this.$http.appletList()
-				console.log(res);
-				res.rows.forEach(item => {
-					// item.distance = that.$util.getDistances(item.latitude, item.longitude, '26.63604','106.656188')
-					item.distance = that.$util.getDistances(item.latitude, item.longitude, that.latlong
-						.latitude, that.latlong.longitude)
-				})
+				let res = await this.$http.appletList({...data,pageSize:this.pageSize,pageNum:this.pageNum})
+				uni.hideLoading()
 				this.branchList = res.rows
 			},
 			getLocation() {
+				uni.showLoading({
+					title:"定位中"
+				})
 				let that = this;
 				uni.getLocation({
 					type: 'gcj02', // 默认为 wgs84 返回 gps 坐标，gcj02 返回国测局坐标
@@ -168,6 +180,9 @@
 					highAccuracyExpireTime: 4000, // 高精度定位超时时间(ms)，指定时间内返回最高精度，该值3000ms以上高精度定位才有效果
 					timeout: 5,
 					success: res => {
+						uni.showLoading({
+							title:"正在获取附近线下网点"
+						})
 						console.log("获取经纬度成功", res);
 						qqmapsdk.reverseGeocoder({
 							location: {
@@ -175,14 +190,13 @@
 								longitude: res.longitude,
 							},
 							success: function(data){
-								console.log(data);
 							}
 						})
 						that.setLatLong({
 							latitude: res.latitude,
 							longitude: res.longitude
 						})
-						that.getAppletList()
+						that.getAppletList({userLongitude:res.longitude,userLatitude:res.latitude})
 					},
 					fail: err => {
 						console.log("获取经纬度失败", err);

@@ -20,7 +20,7 @@
 		:class="!isself ? 'justify-start' : 'justify-end'">
 			<!-- 好友 -->
 			<template v-if="!isself">
-				<free-avater size="70" :src="item.from_avatar" @click="openUser"></free-avater>
+				<free-avater size="70" :src="item.from_avatar||item.avatar" @click="openUser"></free-avater>
 				
 				<text v-if="hasLabelClass" class="iconfont text-white font-md position-absolute chat-left-icon" :style="shownickname ? 'top:45rpx;':'top:20rpx;'">&#xe609;</text>
 			</template>
@@ -138,7 +138,7 @@
 			},
 			// 显示的时间
 			showTime(){
-				return $T.getChatTime(this.item.create_time,this.pretime)
+				return $T.getChatTime(this.item.create_time || this.item.date || this.item.update_time,new Date(this.pretime).getTime())
 			},
 			// 是否需要气泡样式
 			hasLabelClass(){

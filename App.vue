@@ -5,6 +5,7 @@
 		onLaunch: function() {
 			console.log('App Launch')
 			this.$store.dispatch('initLogin')
+			this.$store.commit('initRECORD')
 		},
 		onShow: function() {
 			console.log('App Show')

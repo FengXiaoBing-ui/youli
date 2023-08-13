@@ -36,19 +36,19 @@
 					<u-form-item labelWidth="95" label="工作单位" prop="workUnit" borderBottom ref="item1">
 						<u--input v-model="formData.workUnit" placeholder="请输入您的工作单位" border="none"></u--input>
 					</u-form-item>
-					<u-form-item labelPosition="top" labelWidth="155" label="案件及申请理由概述" prop="caseText" ref="item1">
-						<u--textarea v-model="formData.caseText" placeholder="请输入案情及申请理由概述" autoHeight></u--textarea>
+					<u-form-item class="fxb" labelPosition="top" labelWidth="155" label="案件及申请理由概述" borderBottom prop="caseText" ref="item1">
+						<u--textarea v-model="formData.caseText" placeholder="请输入案情及申请理由概述" :maxlength="-1" height="80"></u--textarea>
 					</u-form-item>
 				</u--form>
-				<u-checkbox-group class="margin-top-sm" v-model="checkbox" placement="column" @change="checkboxChange">
-					<u-checkbox labelSize="10" labelColor="#FF0000" :customStyle="{marginBottom: '8px'}" v-for="(item, index) in checkboxList" :key="index"
+				<u-checkbox-group v-model="checkbox" placement="column" @change="checkboxChange">
+					<u-checkbox labelSize="10" labelColor="#FF0000" :customStyle="{marginBottom: '8px',marginTop:'13px'}" v-for="(item, index) in checkboxList" :key="index"
 						:label="item.name" :name="item.name">
 					</u-checkbox>
 				</u-checkbox-group>
 				<u-datetime-picker @confirm="confirm" @close="datetimeShow = false" @cancel="datetimeShow = false"
-					ref="datetimePicker" :minDate="1600000000" :show="datetimeShow" v-model="reservationTime" mode="date"
+					ref="datetimePicker" :minDate="0" :show="datetimeShow" v-model="reservationTime" mode="date"
 					:formatter="formatter"></u-datetime-picker>
-				<u-action-sheet :show="showSex" :actions="actions" title="请选择性别" description="如果选择保密会报错"
+				<u-action-sheet :show="showSex" :actions="actions" title="请选择性别"
 					@close="showSex = false" @select="sexSelect">
 				</u-action-sheet>
 				<view @click="submit" class="submit text-center">提交申请</view>
@@ -185,6 +185,7 @@
 			confirm(e) {
 				this.datetimeShow = false
 				this.formData.birth = uni.$u.date(e.value, 'yyyy-mm-dd')
+				this.$refs.uForm.validateField('birth')
 			},
 			submit() {
 				this.$refs.uForm.validate().then(async res => {

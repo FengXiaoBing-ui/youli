@@ -5,14 +5,14 @@
 			<input v-model="title" class="flex-treble" type="text" placeholder="请简短描述您要反馈的主要内容" placeholder-class="text-sm">
 		</view>
 		<view class="flex align-center padding-tb-sm border-bottom">
-			<view class="flex-sub">反馈标题</view>
-			<textarea v-model="text" auto-height class="flex-treble" type="text" placeholder="请简短描述您要反馈的主要内容" placeholder-class="text-sm"></textarea>
+			<view class="flex-sub">反馈内容</view>
+			<textarea v-model="text" auto-height class="flex-treble" type="text" placeholder="请详细描述您要反馈的具体内容" placeholder-class="text-sm"></textarea>
 		</view>
-		<view class="tips">
+		<!-- <view class="tips">
 			规则：<br/>
 			1、反馈标题、反馈内容为必填项，未填写完成点击提交反馈气泡提示“输入内容不完善，请检查”。<br/>
 			2、提交反馈成功气泡提示“您的反馈已收到，我们将尽快处理”，在后台呈现反馈内容。<br/>
-		</view>
+		</view> -->
 		<view class="botBtn" @click="submit">
 			提交反馈
 		</view>

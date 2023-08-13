@@ -86,16 +86,16 @@ class chat {
 		// 错误
 		switch (res.type) {
 			case -2:
-				uni.showToast({
-					title: res.text+'下线',
-					icon: 'none'
-				});
+				// uni.showToast({
+				// 	title: res.text+'下线',
+				// 	icon: 'none'
+				// });
 				break;
 			case -3:
-				uni.showToast({
-					title: res.text+'上线',
-					icon: 'none'
-				});
+				// uni.showToast({
+				// 	title: res.text+'上线',
+				// 	icon: 'none'
+				// });
 				break;
 			// case 'moment': // 朋友圈更新
 			// 	this.handleMoment(res.data)
@@ -114,9 +114,9 @@ class chat {
 		// 添加消息记录到本地存储中
 		let { data } = this.addChatDetail(message,false)
 		// 更新会话列表
-		this.updateChatList(data,false)
+		this.updateChatList(message,false)
 		// 全局通知
-		uni.$emit('onMessage',data)
+		uni.$emit('onMessage',message)
 	}
 	start(){
 		let obj = {
@@ -155,6 +155,8 @@ class chat {
 				date:new Date(),
 				from_id:this.user.userId,
 				to_id:message.to_id || this.TO.to_id,
+				userIdFrom:this.user.userId,
+				userIdTo:message.to_id || this.TO.to_id,
 				chat_type:message.chat_type || this.TO.chat_type, 
 				type:message.type, 
 				text:JSON.stringify(message),
@@ -163,6 +165,7 @@ class chat {
 				// 发送成功
 				message.id = res.id
 				message.sendStatus = 'success'
+				message.chatRoomNumber = chatRoomNumber
 				this.socket.send({
 					data: JSON.stringify({
 						userIdTo: message.to_id || this.TO.to_id, // 接收人/群 id
@@ -189,13 +192,20 @@ class chat {
 		})
 	}
 	// 添加聊天记录
-	addChatDetail(message,isSend = true){
+	async addChatDetail(message,isSend = true){
 		// 获取对方id
 		let id = message.chat_type == 1 ? (isSend ? message.to_id : message.from_id) : message.to_id
 		// key值：chatDetail_当前用户id_会话类型_接收人/群id
 		let key = `chatDetail_${this.user.userId}_${message.chat_type}_${id}`
 		// 获取原来的聊天记录
-		let list = this.getChatDetail(key)
+		const res = await this.getChatDetail(key)
+		
+		let list = [],arr = [],rows = []
+		res.rows.forEach((item => {
+			rows.push(JSON.parse(item.text))
+		}))
+		arr = rows.reverse().concat(arr)
+		list = arr
 		// console.log('获取原来的聊天记录',list)
 		// 标识
 		message.k = 'k'+list.length
@@ -219,7 +229,7 @@ class chat {
 		let id = 0
 		let avatar = ''
 		let name = ''
-		
+		console.log(33333,message);
 		// 判断私聊还是群聊
 		if(message.chat_type == 1){ // 私聊
 			// 聊天对象是否存在
@@ -314,7 +324,14 @@ class chat {
 		let key = `chatDetail_${this.user.userId}_${message.chat_type}_${id}`
 		// console.log('key值',key)
 		// 获取原来的聊天记录
-		let list = this.getChatDetail(key)
+		const res = await this.getChatDetail(key)
+		
+		let list = [],arr = [],rows = []
+		res.rows.forEach((item => {
+			rows.push(JSON.parse(item.text))
+		}))
+		arr = rows.reverse().concat(arr)
+		list = arr
 		// console.log('获取原来的聊天记录',list)
 		// 根据k查找对应聊天记录
 		let index = list.findIndex(item=>item.k === k)
@@ -348,11 +365,9 @@ class chat {
 	}
 	// 获取聊天记录
 	getChatDetail(key = false,chatRoom){
-		$H.chatLog({chatRoomNumber:chatRoom}).then(res => {
-			// console.log(res);
-		})
-		key = key ? key : `chatDetail_${this.user.userId}_${this.TO.chat_type}_${this.TO.to_id}`
-		return this.getStorage(key)
+		// key = key ? key : `chatDetail_${this.user.userId}_${this.TO.chat_type}_${this.TO.to_id}`
+		// return this.getStorage(key)
+		return $H.chatLog({chatRoomNumber:chatRoom||this.TO.chatRoomNumber,pageSize:200,pageNum:1})
 	}
 	// 格式化会话最后一条消息显示
 	formatChatItemData(message,isSend){
@@ -466,7 +481,7 @@ class chat {
 			options:params.options ? params.options : {}, // 其他参数
 			create_time:(new Date()).getTime(), // 创建时间
 			isremove:0, // 是否撤回
-			sendStatus:params.sendStatus ? params.sendStatus : "pending" // 发送状态，success发送成功,fail发送失败,pending发送中
+			sendStatus:"success" // 发送状态，success发送成功,fail发送失败,pending发送中
 		}
 	}
 }

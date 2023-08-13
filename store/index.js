@@ -2,11 +2,13 @@ import Vue from "vue";
 import Vuex from "vuex";
 import Chat from "../common/chat.js"
 import config from "../api/config.js"
+import audio from "./audio.js"
 
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
     modules: {
+		audio
     },
     state: {
 		userInfo:false,
@@ -14,7 +16,7 @@ const store = new Vuex.Store({
 		KeyboardHeight:0,
 		chatList:[],
 		totalNoreadnum:3,
-		latlong:{}
+		latlong:null
     },
     mutations: {
 		setLatLong(state,val){

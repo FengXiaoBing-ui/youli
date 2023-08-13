@@ -69,6 +69,10 @@ function onlineUser (data){
 	return request.get(`/app/user/onlineUser`,data);
 }
 
+function myChatRoom (data){
+	return request.get(`/module/room/myChatRoom`,data);
+}
+
 
 export default {
 	login,//登录
@@ -88,4 +92,5 @@ export default {
 	feedback,//新增意见反馈
 	lessonList,//课程培训
 	onlineUser,//顾问-匹配在线顾问
+	myChatRoom,//我的聊天室
 }

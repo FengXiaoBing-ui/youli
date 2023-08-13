@@ -22,6 +22,11 @@
 				default:"none"
 			}
 		},
+		mounted() {
+			if(!this.src){
+				console.log('fxbfxb',this.src);
+			}
+		},
 		computed: {
 			getStyle() {
 				return `width: ${this.size}rpx;height: ${this.size}rpx;`

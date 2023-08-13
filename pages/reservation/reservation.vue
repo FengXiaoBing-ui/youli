@@ -3,8 +3,8 @@
 		<Box title="线下网点预约" :rightIcon="require('@/static/navbar/reservation.png')">
 			<view class="flex align-center padding-top-lg padding-bottom-sm">
 				<view style="width: 95px;font-size: 30rpx;color: #1D1D1D;">线下网点</view>
-				<view class="text-left" style="width: 360rpx;">{{ info.branchName }}</view>
-				<view style="color: #DBDBDB;font-size: 30rpx;">王刚</view>
+				<view class="text-left" style="width: 360rpx;font-size: 32rpx;">{{ info.branchName }}</view>
+				<!-- <view style="color: #DBDBDB;font-size: 30rpx;">王刚</view> -->
 			</view>
 			<u--form labelPosition="left" :model="formData" :rules="rules" ref="uForm">
 				<u-form-item labelWidth="95" label="预约人员" prop="reservationName" borderBottom ref="item1">
@@ -19,8 +19,10 @@
 						border="none"></u--input>
 					<u-icon slot="right" name="arrow-right" color="#DBDBDB" size="22"></u-icon>
 				</u-form-item>
-				<u-form-item labelWidth="95" label="案情类别" prop="caseCategory" borderBottom ref="item1">
-					<u--input v-model="formData.caseCategory" placeholder="请选择案情类别" border="none"></u--input>
+				<u-form-item labelWidth="95" label="案情类别" prop="caseCategory" borderBottom ref="item1" @click="columnShow = true">
+					<u--input v-model="formData.caseCategory" placeholder="请选择案情类别" disabled disabledColor="#ffffff"
+						border="none"></u--input>
+					<u-icon slot="right" name="arrow-right" color="#DBDBDB" size="22"></u-icon>
 				</u-form-item>
 				<u-form-item labelWidth="95" label="案情描述" prop="caseText" ref="item1">
 					<u--textarea v-model="formData.caseText" placeholder="请先简单描述案情" autoHeight></u--textarea>
@@ -29,9 +31,9 @@
 			<view @click="submit" class="submit text-center">提交预约</view>
 		</Box>
 		<u-datetime-picker @confirm="confirm" @close="datetimeShow = false" @cancel="datetimeShow = false"
-			ref="datetimePicker" :minDate="minDate" :show="datetimeShow" v-model="reservationTime"
-			mode="date" :formatter="formatter"></u-datetime-picker>
-		<!-- <u-picker :show="show" :columns="columns"></u-picker> -->
+			ref="datetimePicker" :minDate="minDate" :show="datetimeShow" v-model="reservationTime" mode="datetime"
+			:formatter="formatter"></u-datetime-picker>
+		<u-picker :show="columnShow" :columns="columns" @cancel="columnShow = false" @confirm="columnsConfirm"></u-picker>
 	</view>
 </template>
 
@@ -39,8 +41,32 @@
 	export default {
 		data() {
 			return {
-				minDate:new Date().getTime(),
-				info:"",
+				minDate: new Date().getTime(),
+				columns: [
+					[
+						'案情类别',
+						'婚姻家庭',
+						'交通事故',
+						'医疗纠纷',
+						'劳动争议',
+						'债权债务',
+						'刑事辩护',
+						'环境保护',
+						'司法救助',
+						'合同纠纷',
+						'公司法律',
+						'知识产权',
+						'侵权维权',
+						'经济金融',
+						'行政纠纷',
+						'房产纠纷',
+						'拆迁安置',
+						'工程建筑',
+						'其他'
+					]
+				],
+				columnShow: false,
+				info: "",
 				datetimeShow: false,
 				pickerShow: false,
 				statusBarHeight: this.StatusBarHeight,
@@ -101,9 +127,15 @@
 			})
 		},
 		methods: {
+			columnsConfirm(e){
+				console.log(e.value[0]);
+				this.formData.caseCategory = e.value[0]
+				this.$refs.uForm.validateField('caseCategory')
+				this.columnShow = false
+			},
 			confirm(e) {
 				this.datetimeShow = false
-				this.formData.reservationTime = uni.$u.date(e.value, 'yyyy-mm-dd')
+				this.formData.reservationTime = uni.$u.date(e.value, 'yyyy-mm-dd-hh-MM')
 			},
 			openDateTime() {
 				this.datetimeShow = true
@@ -118,32 +150,38 @@
 				if (type === 'day') {
 					return `${value}日`
 				}
+				if (type === 'hour') {
+					return `${value}时`
+				}
+				if (type === 'minute') {
+					return `${value}分`
+				}
 				return value
 			},
 			submit() {
-				this.$refs.uForm.validate().then( async res => {
+				this.$refs.uForm.validate().then(async res => {
 					uni.showLoading({
-						title:"预约中..."
+						title: "预约中..."
 					})
 					this.formData.branchId = this.info.id
 					console.log(this.formData);
 					let data = await this.$http.addReservation(this.formData)
 					uni.hideLoading()
-					if(data.code==200){
+					if (data.code == 200) {
 						uni.showToast({
-							title:"预约成功！"
+							title: "预约成功！"
 						})
 						setTimeout(() => {
 							uni.navigateBack()
-						},300)
-					}else{
+						}, 300)
+					} else {
 						uni.showToast({
-							title:data.msg,
-							icon:"none"
+							title: data.msg,
+							icon: "none"
 						})
 					}
 				}).catch(errors => {
-					
+
 				})
 			}
 		}
