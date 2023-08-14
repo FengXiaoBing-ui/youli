@@ -73,6 +73,14 @@ function myChatRoom (data){
 	return request.get(`/module/room/myChatRoom`,data);
 }
 
+function upLoadFile (data){
+	return request.upload(`/thirdParty/oss/upload`,data);
+}
+
+function star (data){
+	return request.post(`/module/star`,data);
+}
+
 
 export default {
 	login,//登录
@@ -93,4 +101,6 @@ export default {
 	lessonList,//课程培训
 	onlineUser,//顾问-匹配在线顾问
 	myChatRoom,//我的聊天室
+	upLoadFile,//上传文件
+	star,//评价
 }

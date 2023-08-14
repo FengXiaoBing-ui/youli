@@ -103,15 +103,17 @@ export default {
 			    uni.showToast({ title: '请先登录', icon: 'none' });
 			    // token不存在时跳转
 			    return uni.reLaunch({
-			        url: '/pages/common/login/login',
+			        url: '/pages/my/my',
 			    });
 			}
-			
+			console.log(data);
 			const uploadTask = uni.uploadFile({
 				url:this.common.baseUrl + url,
-				filePath:data.filePath,
-				name:data.name || "files",
-				header:{ token },
+				filePath:data,
+				name:"file",
+				header:{
+					'Authorization': 'Bearer '+ token
+				},
 				success: (res) => {
 					if(res.statusCode !== 200){
 						result(false)
@@ -120,9 +122,7 @@ export default {
 							icon: 'none'
 						});
 					}
-					let message = JSON.parse(res.data)
-					message.data = 'http://' + message.data
-					result(message.data);
+					result(JSON.parse(res.data));
 				},
 				fail: (err) => {
 					console.log(err);

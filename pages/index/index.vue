@@ -119,34 +119,53 @@
 				if(path=='/pages/chat/chat'){
 					this.$http.onlineUser().then( async userRes => {
 						if(userRes.code==500){
-							return uni.showToast({
-								title:userRes.msg,
-								icon:"none"
+							const offlineRes = await this.$http.createChat()
+							const res = await this.$http.createChat({
+								date: new Date(),
+								isRead: 0,
+								text: " ",
+								type: 10,
+								userIdFrom: that.userInfo.userId,
+								userIdTo: userRes.data.userId,
+							})
+							let params = {
+								to_id:userRes.data.userId,
+								to_name:userRes.data.nickName,
+								to_avatar:userRes.data.avatar,
+								chat_type:"1",
+								chatRoomNumber:res.data
+							}
+							return uni.navigateTo({
+								url:path+"?params="+encodeURIComponent(JSON.stringify(params))
 							})
 						}
-						const res = await this.$http.createChat({
-							date: new Date(),
-							isRead: 0,
-							text: " ",
-							type: "-1",
-							userIdFrom: that.userInfo.userId,
-							userIdTo: userRes.data.userId,
-						})
-						let params = {
-							to_id:userRes.data.userId,
-							to_name:userRes.data.nickName,
-							to_avatar:userRes.data.avatar,
-							chat_type:"1",
-							chatRoomNumber:res.data
-						}
-						uni.navigateTo({
-							url:path+"?params="+encodeURIComponent(JSON.stringify(params))
-						})
+						this.toChat(userRes)
 					})
 					return
 				}
 				uni.navigateTo({
 					url: path
+				})
+			},
+			async toChat(userRes){
+				let that = this;
+				const res = await this.$http.createChat({
+					date: new Date(),
+					isRead: 0,
+					text: " ",
+					type: "-1",
+					userIdFrom: that.userInfo.userId,
+					userIdTo: userRes.data.userId,
+				})
+				let params = {
+					to_id:userRes.data.userId,
+					to_name:userRes.data.nickName,
+					to_avatar:userRes.data.avatar,
+					chat_type:"1",
+					chatRoomNumber:res.data
+				}
+				uni.navigateTo({
+					url:"/pages/chat/chat?params="+encodeURIComponent(JSON.stringify(params))
 				})
 			},
 			cultivate() {

@@ -35,10 +35,10 @@
 					<!-- 文字 -->
 					<text v-if="item.type == '1'" class="font-md">{{item.data}}</text>
 					<!-- 表情包 | 图片-->
-					<free-image @longpress="stop" v-else-if="item.type === 'emoticon' || item.type === 'image'" :src="item.data" @click="preview(item.data)" imageClass="rounded" :maxWidth="500" :maxHeight="350"></free-image>
+					<free-image @longpress="stop" v-else-if="item.type === 'emoticon' || item.type == '2'" :src="item.data" @click="preview(item.data)" imageClass="rounded" :maxWidth="500" :maxHeight="350"></free-image>
 					
 					<!-- 音频 -->
-					<view v-else-if="item.type === 'audio'" 
+					<view v-else-if="item.type === '3'" 
 					class="flex align-center"
 					@tap="openAudio" @longpress="stop">
 						<image v-if="isself" :src=" !audioPlaying ? '/static/audio/audio3.png' : '/static/audio/play.gif'" 
@@ -142,7 +142,7 @@
 			},
 			// 是否需要气泡样式
 			hasLabelClass(){
-				return this.item.type == '1' || this.item.type === 'audio'
+				return this.item.type == '1' || this.item.type === '3'
 			},
 			// 气泡的样式
 			labelClass(){
@@ -154,7 +154,7 @@
 				return c +' '+ this.labelClass
 			},
 			labelStyle(){
-				if (this.item.type === 'audio') {
+				if (this.item.type === '3') {
 					let time = this.item.options.time || 0
 					let width = parseInt(time) / (60/500)
 					width = width < 150 ? 150 : width
@@ -170,7 +170,7 @@
 		},
 		mounted() {
 			// 注册全局事件
-			if (this.item.type === 'audio') {
+			if (this.item.type === '3') {
 				this.audioOn(this.onPlayAudio)
 			}
 			// 监听是否撤回消息
@@ -195,7 +195,7 @@
 		},
 		// 组件销毁
 		destroyed() {
-			if (this.item.type === 'audio') {
+			if (this.item.type === '3') {
 				this.audioOff(this.onPlayAudio)
 			}
 			// 销毁音频

@@ -103,6 +103,9 @@ class chat {
 			case 1: //普通文字消息
 				this.handleOnMessage(JSON.parse(res.text))
 				break;
+			case 2: //普通文字消息
+				this.handleOnMessage(JSON.parse(res.text))
+				break;
 			default:
 				// 处理消息
 				// this.handleOnMessage(res.data)
@@ -376,7 +379,7 @@ class chat {
 			case 'emoticon':
 			data = '[表情]'
 				break;
-			case 'image':
+			case '2':
 			data = '[图片]'
 				break;
 			case 'audio':

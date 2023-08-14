@@ -26,7 +26,6 @@ export default{
 	},
 	// 获取聊天时间（相差300s内的信息不会显示时间）
 	getChatTime(v1,v2){
-		console.log(v1,v2);
 		v1=v1.toString().length<13 ? v1*1000 : v1;
 		v2=v2.toString().length<13 ? v2*1000 : v2;
 		if(((parseInt(v1)-parseInt(v2))/1000) > 300){
