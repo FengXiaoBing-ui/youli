@@ -81,6 +81,14 @@ function star (data){
 	return request.post(`/module/star`,data);
 }
 
+function offlineUser (data){
+	return request.get(`/app/user/offlineUser`,data);
+}
+
+function updateIsOnline (data){
+	return request.get(`/module/room/updateIsOnline`,data);
+}
+
 
 export default {
 	login,//登录
@@ -103,4 +111,6 @@ export default {
 	myChatRoom,//我的聊天室
 	upLoadFile,//上传文件
 	star,//评价
+	offlineUser,//顾问-随机匹配不在线的顾问
+	updateIsOnline,//聊天室号更新IsOnline
 }

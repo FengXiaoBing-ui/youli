@@ -119,19 +119,20 @@
 				if(path=='/pages/chat/chat'){
 					this.$http.onlineUser().then( async userRes => {
 						if(userRes.code==500){
-							const offlineRes = await this.$http.createChat()
+							const offlineRes = await this.$http.offlineUser()
 							const res = await this.$http.createChat({
+								isOnline:1,
 								date: new Date(),
 								isRead: 0,
 								text: " ",
 								type: 10,
 								userIdFrom: that.userInfo.userId,
-								userIdTo: userRes.data.userId,
+								userIdTo: offlineRes.data.userId,
 							})
 							let params = {
-								to_id:userRes.data.userId,
-								to_name:userRes.data.nickName,
-								to_avatar:userRes.data.avatar,
+								to_id:offlineRes.data.userId,
+								to_name:offlineRes.data.nickName,
+								to_avatar:offlineRes.data.avatar,
 								chat_type:"1",
 								chatRoomNumber:res.data
 							}

@@ -143,6 +143,9 @@
 			</view>
 		</u-popup>
 
+		<view v-if="lineUp" class="boxShadow bg-white round padding-lr-lg padding-tb-xs" style="position: fixed;left: 0;bottom: 130rpx;transform: translateX(-20rpx);">
+			您的前面还有{{ lineUp }}人，请稍后
+		</view>
 	</view>
 </template>
 
@@ -301,7 +304,8 @@
 				chat: state => state.chat,
 				totalNoreadnum: state => state.totalNoreadnum,
 				user: state => state.userInfo,
-				KeyboardH: state => state.KeyboardHeight
+				KeyboardH: state => state.KeyboardHeight,
+				lineUp:state => state.lineUp
 			}),
 			// 当前会话配置信息
 			currentChatItem() {
@@ -413,6 +417,8 @@
 			uni.$off('updateHistory', this.updateHistory)
 
 			uni.$off('sendItem', this.onSendItem)
+			
+			this.$http.updateIsOnline({chatRoomNumber:this.detail.chatRoomNumber,isOnline:0})
 		},
 		methods: {
 			...mapMutations(['regSendVoiceEvent']),

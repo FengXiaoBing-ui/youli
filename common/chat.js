@@ -1,4 +1,5 @@
 import $H from "../api/api.js"
+import store from "../store/index.js"
 class chat {
 	constructor(arg) {
 		this.url = arg.url
@@ -64,7 +65,8 @@ class chat {
 		this.isOnline = false
 		this.socket = null
 		if (this.isOpenReconnect) {
-			this.reconnect()
+			// this.reconnect()
+			this.reconnectConfirm()
 		}
 		// console.log('socket连接关闭')
 	}
@@ -75,7 +77,8 @@ class chat {
 		this.isOnline = false
 		this.socket = null
 		if (this.isOpenReconnect) {
-			this.reconnect()
+			// this.reconnect()
+			this.reconnectConfirm()
 		}
 		// console.log('socket连接错误')
 	}
@@ -105,6 +108,9 @@ class chat {
 				break;
 			case 2: //普通文字消息
 				this.handleOnMessage(JSON.parse(res.text))
+				break;
+			case 10: //普通文字消息
+				store.commit("setLineUp",res.text)
 				break;
 			default:
 				// 处理消息

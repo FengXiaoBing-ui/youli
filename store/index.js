@@ -16,7 +16,8 @@ const store = new Vuex.Store({
 		KeyboardHeight:0,
 		chatList:[],
 		totalNoreadnum:3,
-		latlong:null
+		latlong:null,
+		lineUp:0,
     },
     mutations: {
 		setLatLong(state,val){
@@ -30,6 +31,9 @@ const store = new Vuex.Store({
 		},
 		setChat(state,val){
 			state.chat = Object.assign({},val)
+		},
+		setLineUp(state,val){
+			state.lineUp = val
 		}
     },
     actions: {
