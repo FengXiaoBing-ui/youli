@@ -72,19 +72,17 @@ class chat {
 	}
 	// 监听关闭
 	onClose() {
-		console.log('?????');
 		// 用户下线
 		this.isOnline = false
 		this.socket = null
 		if (this.isOpenReconnect) {
-			// this.reconnect()
-			this.reconnectConfirm()
+			this.reconnect()
+			// this.reconnectConfirm()
 		}
 		// console.log('socket连接关闭')
 	}
 	// 监听连接错误
 	onError() {
-		console.log('?????');
 		// 用户下线
 		this.isOnline = false
 		this.socket = null

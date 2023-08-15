@@ -28,7 +28,7 @@
 		<!-- #endif -->
 
 		<!-- 底部输入框 -->
-		<view class="position-fixed left-0 right-0 border-top" :style="'bottom:'+KeyboardHeight+'px;z-index:99'">
+		<view class="position-fixed left-0 right-0 border-top" :style="'bottom:'+KeyboardHeight+'px;'">
 			<view class="flex align-center" style="background-color: #F7F7F6;height: 105rpx;">
 				<free-icon-button v-if="mode === 'audio'" :icon="'\ue607'"
 					@click="changeVoiceOrText"></free-icon-button>
@@ -40,7 +40,7 @@
 						@touchmove="voiceTouchMove">
 						<text class="font">{{isRecording ? '松开 结束':'按住 说话'}}</text>
 					</view>
-					<textarea v-else fixed class="bg-white rounded p-2 font-md" style="height: 80rpx;max-width: 500rpx;"
+					<textarea v-else fixed class="bg-white rounded p-2 font-md" style="height: 80rpx;max-width: 550rpx;"
 						:adjust-position="false" v-model="text" @blur="blur" />
 				</view>
 				<!-- 表情 -->
