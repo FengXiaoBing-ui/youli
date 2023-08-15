@@ -14,7 +14,7 @@
 			:scroll-into-view="scrollIntoView" :scroll-with-animation="true" @click="clickPage">
 
 			<!-- 聊天信息列表组件 -->
-			<view v-for="(item,index) in list" :key="index" :id="'chatItem_'+index">
+			<view class="padding-bottom-xs" v-for="(item,index) in list" :key="index" :id="'chatItem_'+index">
 				<free-chat-item :item="item" :index="index" ref="chatItem"
 					:pretime=" index > 0 ? list[index-1].create_time : 0" @long="long" @preview="previewImage"
 					:shownickname="currentChatItem.shownickname"></free-chat-item>
@@ -28,7 +28,7 @@
 		<!-- #endif -->
 
 		<!-- 底部输入框 -->
-		<view class="position-fixed left-0 right-0 border-top" :style="'bottom:'+KeyboardHeight+'px;'">
+		<view class="position-fixed left-0 right-0 border-top" :style="'bottom:'+KeyboardHeight+'px;z-index:99'">
 			<view class="flex align-center" style="background-color: #F7F7F6;height: 105rpx;">
 				<free-icon-button v-if="mode === 'audio'" :icon="'\ue607'"
 					@click="changeVoiceOrText"></free-icon-button>
@@ -40,11 +40,11 @@
 						@touchmove="voiceTouchMove">
 						<text class="font">{{isRecording ? '松开 结束':'按住 说话'}}</text>
 					</view>
-					<textarea v-else fixed class="bg-white rounded p-2 font-md" style="height: 80rpx;max-width: 450rpx;"
+					<textarea v-else fixed class="bg-white rounded p-2 font-md" style="height: 80rpx;max-width: 500rpx;"
 						:adjust-position="false" v-model="text" @blur="blur" />
 				</view>
 				<!-- 表情 -->
-				<free-icon-button :icon="'\ue605'" @click="openActionOrEmoticon('emoticon')"></free-icon-button>
+				<!-- <free-icon-button :icon="'\ue605'" @click="openActionOrEmoticon('emoticon')"></free-icon-button> -->
 				<template v-if="text.length === 0">
 					<!-- 扩展菜单 -->
 					<free-icon-button :icon="'\ue603'" @click="openActionOrEmoticon('action')"></free-icon-button>
@@ -113,7 +113,8 @@
 
 
 		<!-- 评价 -->
-		<view @click="evaluateShow = true" class="boxShadow bg-white round padding-lr-lg padding-tb-xs" style="position: fixed;left: 0;bottom: 200rpx;transform: translateX(-20rpx);">
+		<view @click="evaluateShow = true" class="boxShadow bg-white round padding-lr-lg padding-tb-xs"
+			style="position: fixed;left: 0;bottom: 400rpx;transform: translateX(-20rpx);z-index: 9;">
 			评价
 		</view>
 		<u-popup :show="evaluateShow" mode="bottom" @close="close" @open="open">
@@ -136,16 +137,36 @@
 					</view>
 					<view class="text-bold margin-top-lg text-xl">3、补充内容</view>
 					<view class="padding-left-lg">
-						<u--textarea v-model="value1" placeholder="请输入内容" ></u--textarea>
+						<u--textarea v-model="value1" placeholder="请输入内容"></u--textarea>
 					</view>
 					<view @click="subStar" class="submit">提交评价</view>
 				</view>
 			</view>
 		</u-popup>
 
-		<view v-if="lineUp" class="boxShadow bg-white round padding-lr-lg padding-tb-xs" style="position: fixed;left: 0;bottom: 130rpx;transform: translateX(-20rpx);">
+		<view v-if="lineUp&&(parseInt(lineUp)>0)" class="boxShadow bg-white round padding-lr-lg padding-tb-xs"
+			style="position: fixed;left: 0;top: 30rpx;transform: translateX(-20rpx);">
 			您的前面还有{{ lineUp }}人，请稍后
 		</view>
+		
+		<!-- 律师卡片 -->
+		<view v-if="lawyerCard" class="boxShadow bg-white round lawyerCard">
+			<view class="w100 flex justify-end padding-right-xs padding-top-xs">
+				<u-icon @click="setLawyerCard(null)" name="close" color="#606060" size="16"></u-icon>
+			</view>
+			<view class="w100 flex justify-between align-stretch padding-lr-lg padding-top-xs padding-bottom">
+				<view class="flex flex-direction flex-treble">
+					<view class="text-bold text-lg">{{ lawyerCard.realName }}</view>
+					<view class="text-gray text-cut2 margin-tb-xs text-sm">擅长领域：{{ lawyerCard.goodAtCase }}</view>
+					<u-rate :count="lvshi.count" v-model="lvshi.value"></u-rate>
+				</view>
+				<view class="flex flex-direction justify-between flex-sub">
+					<view @click="callPhone" style="background: #15E8E0;" class="padding-sm radius text-sm text-white text-center">电话咨询</view>
+					<view @click="replaceLawyer" style="background: #5766F4;" class="padding-sm radius text-sm text-white text-center">更换律师</view>
+				</view>
+			</view>
+		</view>
+		
 	</view>
 </template>
 
@@ -180,14 +201,14 @@
 		},
 		data() {
 			return {
-				value1:"",
-				guwen:{
-					count:5,
-					value:5
+				value1: "",
+				guwen: {
+					count: 5,
+					value: 5
 				},
-				lvshi:{
-					count:5,
-					value:5
+				lvshi: {
+					count: 5,
+					value: 5
 				},
 				evaluateShow: false, //评价是否显示
 				scrollIntoView: "",
@@ -305,7 +326,8 @@
 				totalNoreadnum: state => state.totalNoreadnum,
 				user: state => state.userInfo,
 				KeyboardH: state => state.KeyboardHeight,
-				lineUp:state => state.lineUp
+				lineUp: state => state.lineUp,
+				lawyerCard: state => state.lawyerCard,
 			}),
 			// 当前会话配置信息
 			currentChatItem() {
@@ -413,39 +435,56 @@
 			this.chat.destoryChatObject()
 			// 销毁监听接收聊天消息
 			uni.$off('onMessage', this.onMessage)
-
-			uni.$off('updateHistory', this.updateHistory)
-
-			uni.$off('sendItem', this.onSendItem)
 			
-			this.$http.updateIsOnline({chatRoomNumber:this.detail.chatRoomNumber,isOnline:0})
+			uni.$off('updateHistory', this.updateHistory)
+			
+			uni.$off('sendItem', this.onSendItem)
+			this.$http.updateIsOnline({
+				chatRoomNumber: this.detail.chatRoomNumber,
+				isOnline: 0
+			})
+			if (this.lineUp && (parseInt(this.lineUp) > 0)) {
+				this.chat.exitChat(this.detail)
+				this.setLineUp(0)
+			}
 		},
 		methods: {
-			...mapMutations(['regSendVoiceEvent']),
-			async subStar(){
-				const res = await this.$http.star({
-					platformType:0,
-					starUserId:this.detail.to_id,
-					star:this.guwen.value,
-					text:this.value1
+			...mapMutations(['regSendVoiceEvent', 'setLineUp','setLawyerCard']),
+			callPhone(){
+				uni.makePhoneCall({
+					phoneNumber: this.lawyerCard.phone //仅为示例
+				});
+			},
+			replaceLawyer(){
+				uni.showToast({
+					title:"更换律师",
+					icon:"none"
 				})
-				if(res.code==200){
+			},
+			async subStar() {
+				const res = await this.$http.star({
+					platformType: 0,
+					starUserId: this.detail.to_id,
+					star: this.guwen.value,
+					text: this.value1
+				})
+				if (res.code == 200) {
 					uni.showToast({
-						title:"感谢你的评价",
-						icon:"none"
+						title: "感谢你的评价",
+						icon: "none"
 					})
 					this.close()
-				}else{
+				} else {
 					uni.showToast({
-						title:res.msg,
-						icon:"none"
+						title: res.msg,
+						icon: "none"
 					})
 				}
 			},
-			close(){
+			close() {
 				this.evaluateShow = false
 			},
-			open(){
+			open() {
 				this.evaluateShow = true
 			},
 			onSendItem(e) {
@@ -842,42 +881,59 @@
 </script>
 
 <style scoped lang="scss">
-	/deep/.u-popup__content{
+	/deep/.u-popup__content {
 		background: transparent !important;
 	}
-	/deep/.u-textarea__field{
+
+	/deep/.u-textarea__field {
 		border: 1rpx solid #707070;
 		padding: 5px;
 		border-radius: 5px;
 	}
+	
+	.lawyerCard{
+		position: fixed;
+		left: 50%;
+		bottom: 120rpx;
+		transform: translateX(-50%);
+		width: 90vw;
+		box-sizing: border-box;
+		border-radius: 10rpx;
+	}
+
 	.boxShadow {
 		box-shadow: 0 6rpx 12rpx 2rpx rgba(0, 0, 0, 0.16);
 	}
-	.evaluate{
+
+	.evaluate {
 		height: 70vh;
 		border-radius: 40rpx 40rpx 0 0;
 		padding: 60rpx 0 0 0;
 		box-sizing: border-box;
 	}
-	.title{
+
+	.title {
 		font-size: 36rpx;
 		font-family: PingFang SC-Bold, PingFang SC;
 		font-weight: bold;
 		color: #032466;
 	}
-	.evaluateBox{
+
+	.evaluateBox {
 		margin: 20rpx auto 0 auto;
 		width: 710rpx;
 		height: 60vh;
 		background: #FFFFFF;
-		box-shadow: 0px 3px 6px 1px rgba(0,0,0,0.06);
+		box-shadow: 0px 3px 6px 1px rgba(0, 0, 0, 0.06);
 		box-sizing: border-box;
 	}
-	.submit{
+
+	.submit {
 		margin: 20px auto;
 		width: 466rpx;
 		height: 82rpx;
-		line-height: 82rpx;;
+		line-height: 82rpx;
+		;
 		background: #032466;
 		border-radius: 42rpx;
 		font-size: 28rpx;

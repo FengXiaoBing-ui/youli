@@ -18,6 +18,7 @@ const store = new Vuex.Store({
 		totalNoreadnum:3,
 		latlong:null,
 		lineUp:0,
+		lawyerCard:null
     },
     mutations: {
 		setLatLong(state,val){
@@ -34,6 +35,9 @@ const store = new Vuex.Store({
 		},
 		setLineUp(state,val){
 			state.lineUp = val
+		},
+		setLawyerCard(state,val){
+			state.lawyerCard = val?JSON.parse(val):val
 		}
     },
     actions: {

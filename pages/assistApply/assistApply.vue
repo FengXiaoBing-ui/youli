@@ -1,56 +1,52 @@
 <template>
 	<view class="content">
-		<Box title="法律援助申请" :rightIcon="require('@/static/navbar/assistApply.png')">
+		<Box infoBoxClass="" title="诉讼垫款申请" background="#93A4FF" rightIconHeight="348rpx"
+			:rightIcon="require('@/static/navbar/assistApply.png')">
 			<view style="overflow-y: auto;height: 80vh;">
 				<u--form labelPosition="left" :model="formData" :rules="rules" ref="uForm">
-					<u-form-item labelWidth="95" label="姓名" prop="realName" borderBottom ref="item1">
-						<u--input v-model="formData.realName" placeholder="请输入您的姓名" border="none"></u--input>
-					</u-form-item>
-					<u-form-item labelWidth="95" label="性别" prop="sex" borderBottom ref="item1" @click="showSex = true">
-						<u--input v-model="formData.sex" placeholder="请选择您的性别" disabled disabledColor="#ffffff"
-							border="none"></u--input>
-						<u-icon slot="right" name="arrow-right" color="#DBDBDB" size="22"></u-icon>
-					</u-form-item>
-					<u-form-item labelWidth="95" label="出生日期" prop="birth" borderBottom @click="openDateTime"
-						ref="item1">
-						<u--input v-model="formData.birth" placeholder="请选择出生日期" disabled disabledColor="#ffffff"
-							border="none"></u--input>
-						<u-icon slot="right" name="arrow-right" color="#DBDBDB" size="22"></u-icon>
-					</u-form-item>
-					<u-form-item labelWidth="95" label="民族" prop="nation" borderBottom ref="item1">
-						<u--input v-model="formData.nation" placeholder="请输入您的民族" border="none"></u--input>
-					</u-form-item>
-					<u-form-item labelWidth="95" label="户籍所在地" prop="registeredResidence" borderBottom ref="item1">
-						<u--input v-model="formData.registeredResidence" placeholder="请输入您的户籍所在地"
-							border="none"></u--input>
-					</u-form-item>
-					<u-form-item labelWidth="95" label="居住地" prop="habitation" borderBottom ref="item1">
-						<u--input v-model="formData.habitation" placeholder="请输入您的居住地" border="none"></u--input>
-					</u-form-item>
-					<u-form-item labelWidth="95" label="邮政编号" prop="postalCode" borderBottom ref="item1">
-						<u--input v-model="formData.postalCode" placeholder="请输入邮政编号" border="none"></u--input>
-					</u-form-item>
-					<u-form-item labelWidth="95" label="联系电话" prop="phone" borderBottom ref="item1">
-						<u--input v-model="formData.phone" placeholder="请输入您的联系电话" border="none"></u--input>
-					</u-form-item>
-					<u-form-item labelWidth="95" label="工作单位" prop="workUnit" borderBottom ref="item1">
-						<u--input v-model="formData.workUnit" placeholder="请输入您的工作单位" border="none"></u--input>
-					</u-form-item>
-					<u-form-item class="fxb" labelPosition="top" labelWidth="155" label="案件及申请理由概述" borderBottom prop="caseText" ref="item1">
-						<u--textarea v-model="formData.caseText" placeholder="请输入案情及申请理由概述" :maxlength="-1" height="80"></u--textarea>
-					</u-form-item>
+					<view class="formTitle flex align-center margin-top-lg padding-lr">
+						<view class="margin-left-xs tit">基础信息</view>
+					</view>
+					<view class="padding-lr">
+						<u-form-item labelWidth="95" label="姓名" prop="realName" borderBottom ref="item1">
+							<u--input v-model="formData.realName" placeholder="请输入您的姓名" border="none"></u--input>
+						</u-form-item>
+						<u-form-item labelWidth="95" label="联系电话" prop="phone" borderBottom ref="item1">
+							<u--input v-model="formData.phone" placeholder="请输入您的联系电话" border="none"></u--input>
+						</u-form-item>
+						<u-form-item labelWidth="95" label="居住地址" prop="address" ref="item1">
+							<u--input v-model="formData.address" placeholder="请输入您的居住地址" border="none"></u--input>
+						</u-form-item>
+					</view>
+					<view class="tips flex align-center justify-between">
+						<text class="margin-left-sm">案情描述不会写，法律援助可协助，点击 <text @click="onLineSeek" style="font-size: 32rpx;color: #212E72;">线上咨询</text> 前往</text>
+						<image style="width: 108rpx;height: 82rpx;" src="../../static/index/tips.png" mode=""></image>
+					</view>
+					<view class="formTitle flex align-center margin-top padding-lr">
+						<view class="margin-left-xs tit">案情描述</view>
+					</view>
+					<view class="padding-lr">
+						<u-form-item labelWidth="95" label="案件类型" prop="caseType" borderBottom ref="item1"
+							@click="columnShow = true">
+							<u--input v-model="formData.caseType" placeholder="请选择案件类型" disabled disabledColor="#ffffff"
+								border="none"></u--input>
+							<u-icon slot="right" name="arrow-down" color="#DBDBDB" size="22"></u-icon>
+						</u-form-item>
+						<u-form-item labelWidth="95" label="涉案金额" prop="caseMoney" borderBottom ref="item1">
+							<u--input v-model="formData.caseMoney" placeholder="请输入涉案金额" border="none"></u--input>
+						</u-form-item>
+						<u-form-item labelWidth="95" label="审理阶段" prop="caseStage" borderBottom ref="item1">
+							<u--input v-model="formData.caseStage" placeholder="请输入审理阶段" border="none"></u--input>
+						</u-form-item>
+						<u-form-item class="fxb" labelPosition="top" labelWidth="155" label="案情描述" prop="caseText" ref="item1">
+							<u--textarea v-model="formData.caseText" placeholder="请输入案情描述" :maxlength="-1"
+								height="80"></u--textarea>
+						</u-form-item>
+					</view>
+					
 				</u--form>
-				<u-checkbox-group v-model="checkbox" placement="column" @change="checkboxChange">
-					<u-checkbox labelSize="10" labelColor="#FF0000" :customStyle="{marginBottom: '8px',marginTop:'13px'}" v-for="(item, index) in checkboxList" :key="index"
-						:label="item.name" :name="item.name">
-					</u-checkbox>
-				</u-checkbox-group>
-				<u-datetime-picker @confirm="confirm" @close="datetimeShow = false" @cancel="datetimeShow = false"
-					ref="datetimePicker" :minDate="0" :show="datetimeShow" v-model="reservationTime" mode="date"
-					:formatter="formatter"></u-datetime-picker>
-				<u-action-sheet :show="showSex" :actions="actions" title="请选择性别"
-					@close="showSex = false" @select="sexSelect">
-				</u-action-sheet>
+				<u-picker :show="columnShow" :columns="columns" @cancel="columnShow = false"
+					@confirm="columnsConfirm"></u-picker>
 				<view @click="submit" class="submit text-center">提交申请</view>
 			</view>
 		</Box>
@@ -58,23 +54,35 @@
 </template>
 
 <script>
+	import {
+		mapMutations,
+		mapState
+	} from "vuex"
 	export default {
 		data() {
 			return {
-				checkbox:"",
-				checkboxList: [{
-					name: '本人承诺以上以上所填内容和提交的证件、证明材料均真实。'
-				}],
-				sex:0,
-				showSex: false,
-				actions: [{
-						name: '男',
-						value: 0,
-					},
-					{
-						name: '女',
-						value: 1,
-					}
+				columnShow: false,
+				columns: [
+					[
+						'婚姻家庭',
+						'交通事故',
+						'医疗纠纷',
+						'劳动争议',
+						'债权债务',
+						'刑事辩护',
+						'环境保护',
+						'司法救助',
+						'合同纠纷',
+						'公司法律',
+						'知识产权',
+						'侵权维权',
+						'经济金融',
+						'行政纠纷',
+						'房产纠纷',
+						'拆迁安置',
+						'工程建筑',
+						'其他'
+					]
 				],
 				datetimeShow: false,
 				statusBarHeight: this.StatusBarHeight,
@@ -82,14 +90,11 @@
 				formData: {
 					"realName": "", //姓名
 					"phone": "", //联系电话
-					"birth": "", //出生日期
-					"habitation": "", //居住地
+					"address": "", //居住地址
+					"caseMoney": "", //涉案金额
 					"caseText": "", //案情概述
-					"nation": "", //民族
-					"postalCode": "", //邮政编号
-					"registeredResidence": "", //户籍所在地
-					"sex": "", //性别
-					"workUnit": "" //工作单位
+					"caseStage": "", //审理阶段
+					"caseType": "", //案件类型
 				},
 				rules: {
 					"realName": {
@@ -110,14 +115,14 @@
 							trigger: ['change', 'blur'],
 						}
 					],
-					"birth": {
+					"address": {
 						required: true,
-						message: '请选择出生日期',
+						message: '请输入居住地址',
 						trigger: ['blur', 'change']
 					},
-					"habitation": {
+					"caseMoney": {
 						required: true,
-						message: '请输入居住地',
+						message: '请输入涉案金额',
 						trigger: ['blur', 'change']
 					},
 					"caseText": {
@@ -125,82 +130,85 @@
 						message: '请先简单描述案情',
 						trigger: ['blur', 'change']
 					},
-					"nation": {
+					"caseStage": {
 						required: true,
-						message: '请输入民族',
+						message: '请输入审理阶段',
 						trigger: ['blur', 'change']
 					},
-					"postalCode": {
+					"caseType": {
 						required: true,
-						message: '请输入邮政编号',
-						trigger: ['blur', 'change']
-					},
-					"registeredResidence": {
-						required: true,
-						message: '请输入户籍所在地',
-						trigger: ['blur', 'change']
-					},
-					"sex": {
-						required: true,
-						message: '请选择您的性别',
-						trigger: ['blur', 'change']
-					},
-					"workUnit": {
-						required: true,
-						message: '请输入工作单位',
+						message: '请选择案件类型',
 						trigger: ['blur', 'change']
 					}
 				},
 
 			};
 		},
-		onReady() {
-			// 微信小程序需要用此写法
-			this.$refs.datetimePicker.setFormatter(this.formatter)
+		computed:{
+			...mapState(["userInfo"])
 		},
 		methods: {
-			checkboxChange(n) {
-				console.log('change', n);
+			onLineSeek(){
+				this.$http.onlineUser().then( async userRes => {
+					if(userRes.code==500){
+						const offlineRes = await this.$http.offlineUser()
+						const res = await this.$http.createChat({
+							isOnline:1,
+							date: new Date(),
+							isRead: 0,
+							text: " ",
+							type: 10,
+							userIdFrom: that.userInfo.userId,
+							userIdTo: offlineRes.data.userId,
+						})
+						let params = {
+							to_id:offlineRes.data.userId,
+							to_name:offlineRes.data.nickName,
+							to_avatar:offlineRes.data.avatar,
+							chat_type:"1",
+							chatRoomNumber:res.data
+						}
+						return uni.navigateTo({
+							url:path+"?params="+encodeURIComponent(JSON.stringify(params))
+						})
+					}
+					this.toChat(userRes)
+				})
 			},
-			openDateTime() {
-				this.datetimeShow = true
-			},
-			sexSelect(e) {
-				this.formData.sex = e.name
-				this.sex = e.value
-				this.$refs.uForm.validateField('sex')
-			},
-			formatter(type, value) {
-				if (type === 'year') {
-					return `${value}年`
+			async toChat(userRes){
+				let that = this;
+				const res = await this.$http.createChat({
+					date: new Date(),
+					isRead: 0,
+					text: " ",
+					type: "-1",
+					userIdFrom: that.userInfo.userId,
+					userIdTo: userRes.data.userId,
+				})
+				let params = {
+					to_id:userRes.data.userId,
+					to_name:userRes.data.nickName,
+					to_avatar:userRes.data.avatar,
+					chat_type:"1",
+					chatRoomNumber:res.data
 				}
-				if (type === 'month') {
-					return `${value}月`
-				}
-				if (type === 'day') {
-					return `${value}日`
-				}
-				return value
+				uni.navigateTo({
+					url:"/pages/chat/chat?params="+encodeURIComponent(JSON.stringify(params))
+				})
 			},
-			confirm(e) {
-				this.datetimeShow = false
-				this.formData.birth = uni.$u.date(e.value, 'yyyy-mm-dd')
-				this.$refs.uForm.validateField('birth')
+			columnsConfirm(e) {
+				console.log(e.value[0]);
+				this.formData.caseType = e.value[0]
+				this.$refs.uForm.validateField('caseType')
+				this.columnShow = false
 			},
 			submit() {
 				this.$refs.uForm.validate().then(async res => {
-					if(!this.checkbox){
-						return uni.showToast({
-							title:"请先勾选本人承诺",
-							icon:"none"
-						})
-					}
 					uni.showLoading({
 						title: "申请提交中..."
 					})
-					this.formData.aidStatus = 0
 					console.log(this.formData);
-					let data = await this.$http.aid({...this.formData,sex:this.sex})
+					let data = await this.$http.aid(this.formData)
 					uni.hideLoading()
 					if (data.code == 200) {
 						uni.showToast({
@@ -228,6 +236,11 @@
 		padding: 0 !important;
 		margin-top: 20rpx;
 	}
+	/deep/.u-textarea__field{
+		border: 1rpx solid #F7F7F7;
+		padding: 5px;
+		border-radius: 5px;
+	}
 
 	.submit {
 		width: 466rpx;
@@ -240,5 +253,35 @@
 		font-weight: bold;
 		color: #FFFFFF;
 		margin: 20px auto;
+	}
+
+	.tips {
+		width: 100vw;
+		height: 82rpx;
+		background: #EFF1FF;
+		text{
+			font-size: 24rpx;
+			font-family: PingFang SC-Medium, PingFang SC;
+			font-weight: 500;
+			color: #909090;
+		}
+	}
+
+	.formTitle {
+		&:before {
+			content: '';
+			display: inline-block;
+			width: 5px;
+			height: 15px;
+			background: #93A4FF;
+			border-radius: 0px 0px 0px 0px;
+		}
+
+		.tit {
+			font-size: 32rpx;
+			font-family: PingFang SC-Bold, PingFang SC;
+			font-weight: bold;
+			color: #1D1D1D;
+		}
 	}
 </style>

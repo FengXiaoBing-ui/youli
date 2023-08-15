@@ -18,6 +18,18 @@ class chat {
 			this.connectSocket()
 		}
 	}
+	//退出聊天页
+	exitChat(detail){
+		this.socket.send({
+			data: JSON.stringify({
+				userIdTo: detail.to_id, // 接收人/群 id
+				userIdFrom: this.user.userId, // 发送者id
+				text: '', // 消息内容
+				date:new Date().getTime(),
+				type:-10
+			})
+		})
+	}
 	// 断线重连
 	reconnect() {
 		if (this.isOnline) {
@@ -106,11 +118,14 @@ class chat {
 			case 1: //普通文字消息
 				this.handleOnMessage(JSON.parse(res.text))
 				break;
-			case 2: //普通文字消息
+			case 2: //图片消息
 				this.handleOnMessage(JSON.parse(res.text))
 				break;
-			case 10: //普通文字消息
+			case 10: //排队消息
 				store.commit("setLineUp",res.text)
+				break;
+			case 11: //律师卡片消息
+				store.commit("setLawyerCard",res.text)
 				break;
 			default:
 				// 处理消息

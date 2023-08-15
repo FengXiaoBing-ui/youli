@@ -46,15 +46,15 @@ function reservation (id){
 }
 
 function aid (data){
-	return request.post(`/module/aid`,data);
+	return request.post(`/module/litigationAdvances`,data);
 }
 
 function aidList (data){
-	return request.get(`/module/aid/list`,data);
+	return request.get(`/module/litigationAdvances/list`,data);
 }
 
 function aidDetails (id){
-	return request.get(`/module/aid/${id}`);
+	return request.get(`/module/litigationAdvances/${id}`);
 }
 
 function feedback (data){
