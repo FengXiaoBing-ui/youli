@@ -85,12 +85,12 @@
 								<view class="flex align-center justify-between margin-tb-sm">
 									<view class="flex-treble">{{ JSON.parse(item.data).address }}</view>
 									<view class="flex-sub text-right">
-										
+										100m
 									</view>
 								</view>
 								<view class="flex align-center justify-between">
 									<view>营业时间：{{ JSON.parse(item.data).opening }}</view>
-									<view class="reservation text-white text-center">立即预约</view>
+									<view @click="reservation(JSON.parse(item.data))" class="reservation text-white text-center">立即预约</view>
 								</view>
 							</view>
 						</view>
@@ -243,9 +243,17 @@
 		},
 		methods:{
 			...mapActions(['audioOn','audioEmit','audioOff']),
-			callPhone(){
+			reservation(item) {
+				uni.navigateTo({
+					url: "/pages/reservation/reservation",
+					success(e) {
+						e.eventChannel.emit("info", item)
+					}
+				})
+			},
+			callPhone(phone){
 				uni.makePhoneCall({
-					phoneNumber: this.lawyerCard.phone //仅为示例
+					phoneNumber: phone //仅为示例
 				});
 			},
 			replaceLawyer(){
@@ -363,5 +371,12 @@
 	}
 	.boxShadow {
 		box-shadow: 0 6rpx 12rpx 2rpx rgba(0, 0, 0, 0.16);
+	}
+	.reservation {
+		width: 144rpx;
+		height: 54rpx;
+		line-height: 54rpx;
+		background: #032466;
+		border-radius: 8rpx;
 	}
 </style>
