@@ -9,4 +9,7 @@
 
 	opacity: 0;
 }
+.boxShadow.data-v-5376c07c {
+	box-shadow: 0 6rpx 12rpx 2rpx rgba(0, 0, 0, 0.16);
+}
 

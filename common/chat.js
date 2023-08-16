@@ -125,7 +125,10 @@ class chat {
 				store.commit("setLineUp",res.text)
 				break;
 			case 11: //律师卡片消息
-				store.commit("setLawyerCard",res.text)
+				this.handleOnMessage(JSON.parse(res.text))
+				break;
+			case 12: //线下网点卡片
+				this.handleOnMessage(JSON.parse(res.text))
 				break;
 			default:
 				// 处理消息

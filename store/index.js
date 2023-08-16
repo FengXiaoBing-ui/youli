@@ -21,8 +21,7 @@ const store = new Vuex.Store({
 			longitude:"39.9",
 			latitude:"116.3"
 		},
-		lineUp:0,
-		lawyerCard:null
+		lineUp:0
     },
     mutations: {
 		setLatLong(state,val){
@@ -40,9 +39,6 @@ const store = new Vuex.Store({
 		setLineUp(state,val){
 			state.lineUp = val
 		},
-		setLawyerCard(state,val){
-			state.lawyerCard = val?JSON.parse(val):val
-		}
     },
     actions: {
 		login({state,commit,dispatch},user){

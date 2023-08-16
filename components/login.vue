@@ -25,6 +25,9 @@
 		mapState
 	} from "vuex";
 	export default {
+		options:{
+			styleIsolation:'shared'
+		},
 		data() {
 			return {
 				show: false,

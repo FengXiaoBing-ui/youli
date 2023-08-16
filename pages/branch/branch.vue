@@ -67,7 +67,7 @@
 		width: 144rpx;
 		height: 54rpx;
 		line-height: 54rpx;
-		background: #5675D8;
+		background: #032466;
 		border-radius: 8rpx;
 	}
 	.boxShadow{

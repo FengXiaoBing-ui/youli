@@ -131,10 +131,10 @@
 					<view class="padding-left-lg">
 						<u-rate :count="guwen.count" v-model="guwen.value"></u-rate>
 					</view>
-					<view class="text-bold margin-top-lg text-xl">2、请对XXX律师进行打分</view>
+					<!-- <view class="text-bold margin-top-lg text-xl">2、请对XXX律师进行打分</view>
 					<view class="padding-left-lg">
 						<u-rate :count="lvshi.count" v-model="lvshi.value"></u-rate>
-					</view>
+					</view> -->
 					<view class="text-bold margin-top-lg text-xl">3、补充内容</view>
 					<view class="padding-left-lg">
 						<u--textarea v-model="value1" placeholder="请输入内容"></u--textarea>
@@ -147,24 +147,6 @@
 		<view v-if="lineUp&&(parseInt(lineUp)>0)" class="boxShadow bg-white round padding-lr-lg padding-tb-xs"
 			style="position: fixed;left: 0;top: 30rpx;transform: translateX(-20rpx);">
 			您的前面还有{{ lineUp }}人，请稍后
-		</view>
-		
-		<!-- 律师卡片 -->
-		<view v-if="lawyerCard" class="boxShadow bg-white round lawyerCard">
-			<view class="w100 flex justify-end padding-right-xs padding-top-xs">
-				<u-icon @click="setLawyerCard(null)" name="close" color="#606060" size="16"></u-icon>
-			</view>
-			<view class="w100 flex justify-between align-stretch padding-lr-lg padding-top-xs padding-bottom">
-				<view class="flex flex-direction flex-treble">
-					<view class="text-bold text-lg">{{ lawyerCard.realName }}</view>
-					<view class="text-gray text-cut2 margin-tb-xs text-sm">擅长领域：{{ lawyerCard.goodAtCase }}</view>
-					<u-rate :count="lvshi.count" v-model="lvshi.value"></u-rate>
-				</view>
-				<view class="flex flex-direction justify-between flex-sub">
-					<view @click="callPhone" style="background: #15E8E0;" class="padding-sm radius text-sm text-white text-center">电话咨询</view>
-					<view @click="replaceLawyer" style="background: #5766F4;" class="padding-sm radius text-sm text-white text-center">更换律师</view>
-				</view>
-			</view>
 		</view>
 		
 	</view>
@@ -326,8 +308,7 @@
 				totalNoreadnum: state => state.totalNoreadnum,
 				user: state => state.userInfo,
 				KeyboardH: state => state.KeyboardHeight,
-				lineUp: state => state.lineUp,
-				lawyerCard: state => state.lawyerCard,
+				lineUp: state => state.lineUp
 			}),
 			// 当前会话配置信息
 			currentChatItem() {
@@ -889,16 +870,6 @@
 		border: 1rpx solid #707070;
 		padding: 5px;
 		border-radius: 5px;
-	}
-	
-	.lawyerCard{
-		position: fixed;
-		left: 50%;
-		bottom: 120rpx;
-		transform: translateX(-50%);
-		width: 90vw;
-		box-sizing: border-box;
-		border-radius: 10rpx;
 	}
 
 	.boxShadow {

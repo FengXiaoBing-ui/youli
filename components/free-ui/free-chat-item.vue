@@ -31,7 +31,7 @@
 					<text class="font-sm text-muted">{{item.from_name}}</text>
 				</view>
 				
-				<div class="p-2 rounded" :class="labelClass" style="max-width:500rpx;" :style="labelStyle">
+				<div class="p-2 rounded" :class="labelClass" style="max-width:600rpx;" :style="labelStyle">
 					<!-- 文字 -->
 					<text v-if="item.type == '1'" class="font-md">{{item.data}}</text>
 					<!-- 表情包 | 图片-->
@@ -71,7 +71,44 @@
 						</view>
 					</view>
 					
+					<!-- 线下网点 -->
+					<view v-else-if="item.type == '12'" @tap="" @longpress="">
+						<view class="w100 margin-top-sm flex justify-between padding-sm" style="background: #F7F8FF;">
+							<view class="w100">
+								<view class="flex align-center">
+									<view>{{ JSON.parse(item.data).branchName }}</view>
+									<view :style="'background:'+(JSON.parse(item.data).rest=='营业中'?'#81D3F8':'#C7C7C7')"
+										class="radius text-white text-xs margin-left-sm" style="padding: 2rpx 4rpx;">
+										{{ JSON.parse(item.data).rest }}
+									</view>
+								</view>
+								<view class="flex align-center justify-between margin-tb-sm">
+									<view class="flex-treble">{{ JSON.parse(item.data).address }}</view>
+									<view class="flex-sub text-right">
+										
+									</view>
+								</view>
+								<view class="flex align-center justify-between">
+									<view>营业时间：{{ JSON.parse(item.data).opening }}</view>
+									<view class="reservation text-white text-center">立即预约</view>
+								</view>
+							</view>
+						</view>
+					</view>
 					
+					<view v-else-if="item.type == '11'" @tap="" @longpress="">
+						<view class="w100 flex justify-between align-stretch">
+							<view class="flex flex-direction flex-treble">
+								<view class="text-bold text-lg">{{ JSON.parse(item.data).realName }}</view>
+								<view class="text-gray text-cut2 margin-tb-xs text-sm">擅长领域：{{ JSON.parse(item.data).goodAtCase }}</view>
+								<u-rate readonly :value="JSON.parse(item.data).star"></u-rate>
+							</view>
+							<view class="flex flex-direction justify-between flex-sub">
+								<view @click="callPhone(JSON.parse(item.data).phone)" style="background: #15E8E0;" class="padding-sm radius text-sm text-white text-center">电话咨询</view>
+								<view @click="replaceLawyer(JSON.parse(item.data).id)" style="background: #5766F4;" class="padding-sm radius text-sm text-white text-center">更换律师</view>
+							</view>
+						</view>
+					</view>
 					
 				</div>
 			</view>
@@ -206,6 +243,17 @@
 		},
 		methods:{
 			...mapActions(['audioOn','audioEmit','audioOff']),
+			callPhone(){
+				uni.makePhoneCall({
+					phoneNumber: this.lawyerCard.phone //仅为示例
+				});
+			},
+			replaceLawyer(){
+				uni.showToast({
+					title:"更换律师",
+					icon:"none"
+				})
+			},
 			stop(){},
 			openUser(){
 				uni.navigateTo({
@@ -312,5 +360,8 @@
 		/* #ifndef APP-PLUS-NVUE */
 		opacity: 0;
 		/* #endif */
+	}
+	.boxShadow {
+		box-shadow: 0 6rpx 12rpx 2rpx rgba(0, 0, 0, 0.16);
 	}
 </style>

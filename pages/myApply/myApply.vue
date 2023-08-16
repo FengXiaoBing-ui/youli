@@ -26,7 +26,7 @@
 		},
 		methods:{
 			async aidList(){
-				let res = await this.$http.aidList({caseStatus:this.statusIndex})
+				let res = await this.$http.aidList({caseStatus:this.statusIndex,userId:uni.getStorageSync('userInfo').userId})
 				this.list = res.rows
 			},
 			details(id){
