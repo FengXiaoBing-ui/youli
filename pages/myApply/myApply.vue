@@ -15,7 +15,7 @@
 	export default {
 		data() {
 			return {
-				options:["申请中","处理中","已完成"],
+				options:["申请中","处理中","不处理","已完成"],
 				status:"申请中",
 				list:[],
 				statusIndex:0,
@@ -26,7 +26,7 @@
 		},
 		methods:{
 			async aidList(){
-				let res = await this.$http.aidList({aidStatus:this.statusIndex})
+				let res = await this.$http.aidList({caseStatus:this.statusIndex})
 				this.list = res.rows
 			},
 			details(id){

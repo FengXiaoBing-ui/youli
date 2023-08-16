@@ -3,7 +3,7 @@
 		<view class="loginBox flex align-center justify-between padding-lr padding-top-xl">
 			<view class="flex align-center">
 				<image style="width: 120rpx;height: 120rpx;" class="round boxShadow" :src="userInfo?userInfo.user.avatar:'../../static/images/userpic.png'" mode="aspectFill"></image>
-				<button v-if="!userInfo" class="loginText margin-left" click="login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">立即登录</button>
+				<button v-if="!userInfo" class="loginText margin-left" @click="login">立即登录</button>
 				<view v-else class="loginText margin-left">{{ userInfo.username }}</view>
 			</view>
 			<view v-if="userInfo" @click="fLogout" class="logout text-sm">
@@ -49,12 +49,17 @@
 				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
 			</view>
 		</view>
+		<loginBtn ref="loginBtn"></loginBtn>
 	</view>
 </template>
 
 <script>
+	import loginBtn from "@/components/login"
 	import {mapActions,mapState} from "vuex";
 	export default {
+		components:{
+			loginBtn
+		},
 		data() {
 			return {
 
@@ -85,44 +90,8 @@
 					url:"/pages/myApply/myApply"
 				})
 			},
-			getPhoneNumber(e) {
-				console.log(e);
-				if(e.detail.code){
-					let that = this
-					uni.showLoading({
-						title:"登录中...",
-						mask:true
-					})
-					uni.login({
-						"provider": "weixin",
-						"onlyAuthorize": true, // 微信登录仅请求授权认证
-						success: function(loginRes) {
-							that.$http.login({
-								openIdCode:loginRes.code,
-								phoneCode:e.detail.code
-							}).then(res => {
-								if(res.code==200){
-									that.login(res)
-								}else{
-									uni.showToast({
-										title:res.msg,
-										icon:"none"
-									})
-								}
-							})
-						}
-					});
-				}else{
-					uni.showToast({
-						title:"已取消登录",
-						icon:"none"
-					})
-				}
-				// uni.getUserProfile({
-				// 	success: function(infoRes) {
-				// 		console.log(infoRes);
-				// 	}
-				// });
+			login(){
+				this.$refs.loginBtn.isToken()
 			},
 			userPolicy() {
 				uni.navigateTo({

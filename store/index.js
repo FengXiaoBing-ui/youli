@@ -3,6 +3,7 @@ import Vuex from "vuex";
 import Chat from "../common/chat.js"
 import config from "../api/config.js"
 import audio from "./audio.js"
+import http from "../api/api.js"
 
 Vue.use(Vuex);
 
@@ -16,7 +17,10 @@ const store = new Vuex.Store({
 		KeyboardHeight:0,
 		chatList:[],
 		totalNoreadnum:3,
-		latlong:null,
+		latlong:{
+			longitude:"39.9",
+			latitude:"116.3"
+		},
 		lineUp:0,
 		lawyerCard:null
     },
@@ -52,6 +56,7 @@ const store = new Vuex.Store({
 			uni.hideLoading()
 		},
 		logout({state,commit,dispatch}){
+			http.logout()
 			uni.clearStorageSync()
 			state.userInfo = null
 			if(state.chat){

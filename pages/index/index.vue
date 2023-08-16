@@ -50,10 +50,13 @@
 				</view>
 			</view>
 		</view>
+
+		<loginBtn ref="loginBtn"></loginBtn>
 	</view>
 </template>
 
 <script>
+	import loginBtn from "@/components/login"
 	import qqMap from "@/qqmap-sdk/qqmap-wx-jssdk.js";
 
 	const qqmapsdk = new qqMap.QQMapWX({
@@ -64,6 +67,9 @@
 		mapState
 	} from "vuex"
 	export default {
+		components:{
+			loginBtn
+		},
 		data() {
 			return {
 				statusBarHeight: this.StatusBarHeight,
@@ -74,54 +80,51 @@
 					},
 					{
 						name: "线下网点",
-						
+
 						url: require('../../static/index/xianxia.png'),
 						path: "/pages/branch/branch"
 					},
 					{
-						name: "诉讼援助",
+						name: "诉讼垫款",
 						url: require('../../static/index/susong.png'),
 						path: "/pages/assistApply/assistApply"
 					}
 				],
 				branchList: [],
 				m: "",
-				pageSize:100,
-				pageNum:1
+				pageSize: 100,
+				pageNum: 1
 			}
 		},
 		computed: {
-			...mapState(["latlong","userInfo"])
+			...mapState(["latlong", "userInfo"])
 		},
 		onShow() {
-			if(!this.latlong){
-				this.getLocation()
-			}else{
-				this.getAppletList({userLongitude:this.latlong.longitude,userLatitude:this.latlong.latitude})
-			}
-		},
-		onLoad() {
 			this.getLocation()
 		},
+		onLoad() {},
 		methods: {
 			...mapMutations(["setLatLong"]),
-			mkm(distance){
+			mkm(distance) {
 				let m = distance.toFixed(0)
-				return m.toString().length>3?((m/1000).toFixed(2)+'km'):m+'m'
+				return m.toString().length > 3 ? ((m / 1000).toFixed(2) + 'km') : m + 'm'
 			},
 			jump(path) {
 				let that = this;
-				if(!this.userInfo){
-					return uni.switchTab({
-						url:"/pages/my/my"
-					})
+				if (!uni.getStorageSync('token')) {
+					this.$refs.loginBtn.isToken()
+					return
 				}
-				if(path=='/pages/chat/chat'){
-					this.$http.onlineUser().then( async userRes => {
-						if(userRes.code==500){
+				if (path == '/pages/chat/chat') {
+					uni.showLoading({
+						title: "正在为你匹配法律顾问...",
+						icon: "none"
+					})
+					this.$http.onlineUser().then(async userRes => {
+						if (userRes.code == 500) {
 							const offlineRes = await this.$http.offlineUser()
 							const res = await this.$http.createChat({
-								isOnline:1,
+								isOnline: 1,
 								date: new Date(),
 								isRead: 0,
 								text: " ",
@@ -130,14 +133,15 @@
 								userIdTo: offlineRes.data.userId,
 							})
 							let params = {
-								to_id:offlineRes.data.userId,
-								to_name:offlineRes.data.nickName,
-								to_avatar:offlineRes.data.avatar,
-								chat_type:"1",
-								chatRoomNumber:res.data
+								to_id: offlineRes.data.userId,
+								to_name: offlineRes.data.nickName,
+								to_avatar: offlineRes.data.avatar,
+								chat_type: "1",
+								chatRoomNumber: res.data
 							}
+							uni.hideLoading()
 							return uni.navigateTo({
-								url:path+"?params="+encodeURIComponent(JSON.stringify(params))
+								url: path + "?params=" + encodeURIComponent(JSON.stringify(params))
 							})
 						}
 						this.toChat(userRes)
@@ -148,7 +152,7 @@
 					url: path
 				})
 			},
-			async toChat(userRes){
+			async toChat(userRes) {
 				let that = this;
 				const res = await this.$http.createChat({
 					date: new Date(),
@@ -159,22 +163,31 @@
 					userIdTo: userRes.data.userId,
 				})
 				let params = {
-					to_id:userRes.data.userId,
-					to_name:userRes.data.nickName,
-					to_avatar:userRes.data.avatar,
-					chat_type:"1",
-					chatRoomNumber:res.data
+					to_id: userRes.data.userId,
+					to_name: userRes.data.nickName,
+					to_avatar: userRes.data.avatar,
+					chat_type: "1",
+					chatRoomNumber: res.data
 				}
+				uni.hideLoading()
 				uni.navigateTo({
-					url:"/pages/chat/chat?params="+encodeURIComponent(JSON.stringify(params))
+					url: "/pages/chat/chat?params=" + encodeURIComponent(JSON.stringify(params))
 				})
 			},
 			cultivate() {
+				if (!uni.getStorageSync('token')) {
+					this.$refs.loginBtn.isToken()
+					return
+				}
 				uni.navigateTo({
 					url: "/pages/cultivate/cultivate"
 				})
 			},
 			reservation(item) {
+				if (!uni.getStorageSync('token')) {
+					this.$refs.loginBtn.isToken()
+					return
+				}
 				uni.navigateTo({
 					url: "/pages/reservation/reservation",
 					success(e) {
@@ -184,14 +197,18 @@
 			},
 			async getAppletList(data) {
 				let that = this;
-				let res = await this.$http.appletList({...data,pageSize:this.pageSize,pageNum:this.pageNum})
+				uni.showLoading({
+					title: "获取附近网点"
+				})
+				let res = await this.$http.appletList({
+					...data,
+					pageSize: this.pageSize,
+					pageNum: this.pageNum
+				})
 				uni.hideLoading()
 				this.branchList = res.rows
 			},
 			getLocation() {
-				uni.showLoading({
-					title:"定位中"
-				})
 				let that = this;
 				uni.getLocation({
 					type: 'gcj02', // 默认为 wgs84 返回 gps 坐标，gcj02 返回国测局坐标
@@ -201,7 +218,7 @@
 					timeout: 5,
 					success: res => {
 						uni.showLoading({
-							title:"正在获取附近线下网点"
+							title: "正在获取附近线下网点"
 						})
 						console.log("获取经纬度成功", res);
 						qqmapsdk.reverseGeocoder({
@@ -209,17 +226,23 @@
 								latitude: res.latitude,
 								longitude: res.longitude,
 							},
-							success: function(data){
-							}
+							success: function(data) {}
 						})
 						that.setLatLong({
 							latitude: res.latitude,
 							longitude: res.longitude
 						})
-						that.getAppletList({userLongitude:res.longitude,userLatitude:res.latitude})
+						that.getAppletList({
+							userLongitude: res.longitude,
+							userLatitude: res.latitude
+						})
 					},
 					fail: err => {
 						console.log("获取经纬度失败", err);
+						that.getAppletList({
+							userLongitude: that.latlong.longitude,
+							userLatitude: that.latlong.latitude
+						})
 					},
 					complete: err => {
 						console.log('???', err);

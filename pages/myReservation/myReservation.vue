@@ -19,8 +19,8 @@
 	export default {
 		data() {
 			return {
-				options:["已确认","预约中"],
-				status:"已确认",
+				options:["预约中","预约成功","预约失败",],
+				status:"预约中",
 				list:[],
 				statusIndex:1,
 			};
@@ -40,7 +40,7 @@
 			},
 			switchStatus(item,index){
 				this.status = item
-				this.statusIndex = (index?0:1)
+				this.statusIndex = index
 				this.getReservationList()
 			}
 		}

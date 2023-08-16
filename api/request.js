@@ -1,4 +1,5 @@
 import config from "./config.js"
+import store from "@/store/index.js"
 export default {
     // 全局配置
     common:{
@@ -43,6 +44,14 @@ export default {
             uni.request({
                 ...options,
                 success: (result) => {
+					if(result.data.code==401){
+						uni.showToast({
+							title:"登录已过期，请重新登录",
+							icon:"none"
+						})
+						store.dispatch('logout')
+						return rej(result.data)
+					}
                     // 返回原始数据
                     if(options.native){
                         return res(result.data)
@@ -67,6 +76,7 @@ export default {
                     res(data)
                 },
                 fail: (error) => {
+					console.log(error);
                     uni.showToast({ title: error.errMsg || '请求失败', icon: 'none' });
                     return rej(error)
                 }

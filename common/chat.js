@@ -13,6 +13,9 @@ class chat {
 		this.user = user ? user : {}
 		// 初始化聊天对象
 		this.TO = false;
+		this.platform = uni.getSystemInfoSync().platform;
+		// 创建背景音频管理器
+		this.bgAudioMannager = uni.getBackgroundAudioManager();
 		// 连接和监听
 		if (this.user.token) {
 			this.connectSocket()
@@ -58,7 +61,6 @@ class chat {
 	}
 	// 监听打开
 	onOpen() {
-		this.start()
 		// 用户上线
 		this.isOnline = true
 		// console.log('socket连接成功')
@@ -139,19 +141,6 @@ class chat {
 		this.updateChatList(message,false)
 		// 全局通知
 		uni.$emit('onMessage',message)
-	}
-	start(){
-		let obj = {
-			date:new Date(),
-			text:"",
-			type:-3,
-			userIdTo:0
-		}
-		this.heartBeatInterval = setInterval(() => {
-			this.socket.send({
-				data: JSON.stringify(obj)
-			})
-		},5000)
 	}
 	//发送消息
 	send(message,onProgress = false,chatRoomNumber){

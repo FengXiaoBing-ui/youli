@@ -17,6 +17,7 @@ Vue.use(uView)
 
 Vue.component("Box",Box)
 
+
 Vue.config.productionTip = false
 
 // #ifdef MP-WEIXIN
