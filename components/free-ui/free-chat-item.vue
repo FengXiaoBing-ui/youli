@@ -11,8 +11,7 @@
 			<text class="font-sm text-light-muted">{{ isself ? '你' : '对方' }}撤回了一条信息</text>
 		</view>
 		<!-- 系统消息 -->
-		<view v-if="item.type === 'system'" ref="isremove"
-		class="flex align-center justify-center pb-4 pt-1">
+		<view v-if="item.type === 'system'" ref="isremove" class="flex align-center justify-center pb-4 pt-1">
 			<text class="font-sm text-light-muted">{{item.data}}</text>
 		</view>
 		<!-- 气泡 -->
@@ -96,6 +95,7 @@
 						</view>
 					</view>
 					
+					<!-- 律师卡片 -->
 					<view v-else-if="item.type == '11'" @tap="" @longpress="">
 						<view class="w100 flex justify-between align-stretch">
 							<view class="flex flex-direction flex-treble">
@@ -104,8 +104,8 @@
 								<u-rate readonly :value="JSON.parse(item.data).star"></u-rate>
 							</view>
 							<view class="flex flex-direction justify-between flex-sub">
-								<view @click="callPhone(JSON.parse(item.data).phone)" style="background: #15E8E0;" class="padding-sm radius text-sm text-white text-center">电话咨询</view>
-								<view @click="replaceLawyer(JSON.parse(item.data).id)" style="background: #5766F4;" class="padding-sm radius text-sm text-white text-center">更换律师</view>
+								<view @click="callPhone(JSON.parse(item.data))" style="background: #15E8E0;" class="padding-sm radius text-sm text-white text-center">电话咨询</view>
+								<view @click="replaceLawyer(JSON.parse(item.data))" style="background: #5766F4;" class="padding-sm radius text-sm text-white text-center">更换律师</view>
 							</view>
 						</view>
 					</view>
@@ -165,7 +165,8 @@
 		},
 		computed: {
 			...mapState({
-				user:state=>state.userInfo
+				user:state=>state.userInfo,
+				chat: state => state.chat
 			}),
 			// 是否是本人
 			isself() {
@@ -251,16 +252,31 @@
 					}
 				})
 			},
-			callPhone(phone){
+			callPhone(item){
+				this.$http.lawyerNumberOfServices(item.id)
 				uni.makePhoneCall({
-					phoneNumber: phone //仅为示例
+					phoneNumber: item.phone //仅为示例
 				});
 			},
-			replaceLawyer(){
-				uni.showToast({
-					title:"更换律师",
-					icon:"none"
+			async replaceLawyer(data){
+				let lawyerArr = uni.getStorageSync('lawyer')?uni.getStorageSync('lawyer'):[]
+				let flag = true
+				lawyerArr.forEach( i => {
+					if(i==data.id){
+						flag = false
+					}
 				})
+				if(flag) lawyerArr.push(data.id)
+				uni.setStorageSync('lawyer',lawyerArr)
+				const res = await this.$http.getLawyer({lawyerPoIds:lawyerArr,goodAtCase:''})
+				if(res.code==200){
+					this.chat.replaceLawyer({...res.data,chatRoomNumber:this.chat.TO.chatRoomNumber})
+				}else{
+					uni.showToast({
+						title:res.msg,
+						icon:"none"
+					})
+				}
 			},
 			stop(){},
 			openUser(){

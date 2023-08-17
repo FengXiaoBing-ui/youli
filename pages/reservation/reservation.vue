@@ -168,6 +168,7 @@
 					let data = await this.$http.addReservation(this.formData)
 					uni.hideLoading()
 					if (data.code == 200) {
+						this.$http.numberOfServices(this.info.id)
 						uni.showToast({
 							title: "预约成功！"
 						})

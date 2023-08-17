@@ -89,6 +89,18 @@ function updateIsOnline (data){
 	return request.get(`/module/room/updateIsOnline`,data);
 }
 
+function getLawyer (data){
+	return request.post(`/module/lawyer/getLawyer`,data);
+}
+
+function numberOfServices (id){
+	return request.get(`/module/branch/numberOfServices/${id}`);
+}
+
+function lawyerNumberOfServices (id){
+	return request.get(`/module/lawyer/numberOfServices/${id}`);
+}
+
 
 export default {
 	login,//登录
@@ -113,4 +125,7 @@ export default {
 	star,//评价
 	offlineUser,//顾问-随机匹配不在线的顾问
 	updateIsOnline,//聊天室号更新IsOnline
+	getLawyer,//律师-随机一个律师
+	numberOfServices,//网点-服务次数
+	lawyerNumberOfServices,//律师-服务次数
 }

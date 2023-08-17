@@ -40,7 +40,7 @@
 						@touchmove="voiceTouchMove">
 						<text class="font">{{isRecording ? '松开 结束':'按住 说话'}}</text>
 					</view>
-					<textarea v-else fixed class="bg-white rounded p-2 font-md" style="height: 80rpx;max-width: 550rpx;"
+					<textarea v-else :disabled="lineUp>0" fixed class="bg-white rounded p-2 font-md" style="height: 80rpx;max-width: 550rpx;"
 						:adjust-position="false" v-model="text" @blur="blur" />
 				</view>
 				<!-- 表情 -->
@@ -113,16 +113,16 @@
 
 
 		<!-- 评价 -->
-		<view @click="evaluateShow = true" class="boxShadow bg-white round padding-lr-lg padding-tb-xs"
+		<!-- <view @click="evaluateShow = true" class="boxShadow bg-white round padding-lr-lg padding-tb-xs"
 			style="position: fixed;left: 0;bottom: 400rpx;transform: translateX(-20rpx);z-index: 9;">
 			评价
-		</view>
-		<u-popup :show="evaluateShow" mode="bottom" @close="close" @open="open">
+		</view> -->
+		<u-popup :show="evaluateShow" :closeOnClickOverlay="false" mode="bottom" @close="close" @open="open">
 			<view class="bg-white evaluate">
 				<view class="flex align-center">
 					<view class="flex-sub"></view>
 					<view class="flex-treble text-center title">请对本次服务做出评价</view>
-					<view class="flex-sub text-right" @click="evaluateShow = false">
+					<view class="flex justify-center flex-sub" @click="evaluateShow = false">
 						<u-icon name="close" color="#606060" size="28"></u-icon>
 					</view>
 				</view>
@@ -192,7 +192,6 @@
 					count: 5,
 					value: 5
 				},
-				evaluateShow: false, //评价是否显示
 				scrollIntoView: "",
 				// 模式 text输入文字，emoticon表情，action操作，audio音频
 				mode: "text",
@@ -308,7 +307,8 @@
 				totalNoreadnum: state => state.totalNoreadnum,
 				user: state => state.userInfo,
 				KeyboardH: state => state.KeyboardHeight,
-				lineUp: state => state.lineUp
+				lineUp: state => state.lineUp,
+				evaluateShow:state => state.evaluateShow
 			}),
 			// 当前会话配置信息
 			currentChatItem() {
@@ -430,7 +430,7 @@
 			}
 		},
 		methods: {
-			...mapMutations(['regSendVoiceEvent', 'setLineUp','setLawyerCard']),
+			...mapMutations(['regSendVoiceEvent', 'setLineUp','setLawyerCard','setEvaluateShow']),
 			callPhone(){
 				uni.makePhoneCall({
 					phoneNumber: this.lawyerCard.phone //仅为示例
@@ -463,10 +463,13 @@
 				}
 			},
 			close() {
-				this.evaluateShow = false
+				this.setEvaluateShow(false)
+				setTimeout(() => {
+					uni.navigateBack()
+				},300)
 			},
 			open() {
-				this.evaluateShow = true
+				this.setEvaluateShow(true)
 			},
 			onSendItem(e) {
 				if (e.sendType === 'fava' || e.sendType === 'card') {

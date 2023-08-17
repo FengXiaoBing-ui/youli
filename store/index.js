@@ -12,6 +12,7 @@ const store = new Vuex.Store({
 		audio
     },
     state: {
+		evaluateShow:false,
 		userInfo:false,
 		chat:null,
 		KeyboardHeight:0,
@@ -39,6 +40,9 @@ const store = new Vuex.Store({
 		setLineUp(state,val){
 			state.lineUp = val
 		},
+		setEvaluateShow(state,val){
+			state.evaluateShow = val
+		}
     },
     actions: {
 		login({state,commit,dispatch},user){

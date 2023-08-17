@@ -33,6 +33,22 @@ class chat {
 			})
 		})
 	}
+	//更换律师
+	replaceLawyer(data){
+		this.socket.send({
+			data: JSON.stringify({
+				userIdTo: this.TO.to_id, // 接收人/群 id
+				userIdFrom: this.user.userId, // 发送者id
+				text: JSON.stringify(data), // 消息内容
+				date:new Date().getTime(),
+				type:11
+			})
+		})
+	}
+	//结束咨询
+	endSeek(data){
+		store.commit('setEvaluateShow',true)
+	}
 	// 断线重连
 	reconnect() {
 		if (this.isOnline) {
@@ -115,6 +131,9 @@ class chat {
 			// case 'moment': // 朋友圈更新
 			// 	this.handleMoment(res.data)
 			// 	break;
+			case 0: //结束咨询
+				this.endSeek()
+				break;
 			case 1: //普通文字消息
 				this.handleOnMessage(JSON.parse(res.text))
 				break;
