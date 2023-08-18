@@ -70,7 +70,7 @@
 .botBtn{
 	width: 466rpx;
 	height: 82rpx;
-	background: #212E72;
+	background: #92A4FE;
 	border-radius: 42rpx;
 	position: absolute;
 	left: 50%;

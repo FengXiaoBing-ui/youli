@@ -31,7 +31,7 @@
   width: 144rpx;
   height: 54rpx;
   line-height: 54rpx;
-  background: #032466;
+  background: #92A4FE;
   border-radius: 8rpx;
 }
 .bgHeader.data-v-57280228 {
@@ -40,7 +40,7 @@
   z-index: 9;
   top: 0;
   left: 0;
-  background-color: #212E72;
+  background-color: #92A4FE;
   height: var(--height);
 }
 .fnList.data-v-57280228 {

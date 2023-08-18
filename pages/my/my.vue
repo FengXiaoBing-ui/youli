@@ -129,7 +129,7 @@
 	width: 178rpx;
 	height: 60rpx;
 	line-height: 60rpx;
-	background: #212E72;
+	background: #92A4FE;
 	border-radius:30rpx;
 	color: white;
 	text-align: center;

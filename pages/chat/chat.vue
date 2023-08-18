@@ -908,7 +908,7 @@
 		height: 82rpx;
 		line-height: 82rpx;
 		;
-		background: #032466;
+		background: #92A4FE;
 		border-radius: 42rpx;
 		font-size: 28rpx;
 		font-family: PingFang SC-Bold, PingFang SC;

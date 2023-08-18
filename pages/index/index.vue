@@ -67,7 +67,7 @@
 		mapState
 	} from "vuex"
 	export default {
-		components:{
+		components: {
 			loginBtn
 		},
 		data() {
@@ -103,6 +103,21 @@
 			this.getLocation()
 		},
 		onLoad() {},
+		onShareAppMessage() { // 分享到微信好友
+			// 更多参数配置，参考文档
+			return {
+				title: '有理法律咨询',
+				path: '/pages/index/index',
+				imageUrl: 'https://haojiuxuan-1313422787.cos.ap-chongqing.myqcloud.com/cos/20230628/20230818/7daf19e8715242e291820bc160907eaf.png',
+			}
+		},
+		onShareTimeline() { // 分享到朋友圈
+			return {
+				title: '有理法律咨询',
+				path: '/pages/index/index',
+				imageUrl: 'https://haojiuxuan-1313422787.cos.ap-chongqing.myqcloud.com/cos/20230628/20230818/7daf19e8715242e291820bc160907eaf.png',
+			}
+		},
 		methods: {
 			...mapMutations(["setLatLong"]),
 			mkm(distance) {
@@ -141,7 +156,8 @@
 							}
 							uni.hideLoading()
 							return uni.navigateTo({
-								url: path + "?params=" + encodeURIComponent(JSON.stringify(params))
+								url: path + "?params=" + encodeURIComponent(JSON.stringify(
+									params))
 							})
 						}
 						this.toChat(userRes)
@@ -262,7 +278,7 @@
 		width: 144rpx;
 		height: 54rpx;
 		line-height: 54rpx;
-		background: #032466;
+		background: #92A4FE;
 		border-radius: 8rpx;
 	}
 
@@ -272,7 +288,7 @@
 		z-index: 9;
 		top: 0;
 		left: 0;
-		background-color: #212E72;
+		background-color: #92A4FE;
 		height: var(--height);
 	}
 

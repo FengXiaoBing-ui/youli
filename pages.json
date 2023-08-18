@@ -49,7 +49,7 @@
             {
                 "navigationBarTitleText": "意见反馈",
                 "enablePullDownRefresh": false,
-				"navigationBarBackgroundColor": "#032466",
+				"navigationBarBackgroundColor": "#92A4FE",
 				"navigationBarTextStyle": "white"
             }
             
@@ -145,7 +145,7 @@
 	"uniIdRouter": {},
 	"tabBar":{
 		"color":"#C9C9C9",
-		"selectedColor":"#212E72",
+		"selectedColor":"#92A4FE",
 		"borderStyle":"black",
 		"backgroundColor":"#F7F7F7",
 		"list":[

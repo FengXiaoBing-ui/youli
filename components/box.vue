@@ -26,7 +26,7 @@
 			},
 			background:{
 				type:String,
-				default:"#212E72"
+				default:"#92A4FE"
 			},
 			rightIconHeight:{
 				type:String,
