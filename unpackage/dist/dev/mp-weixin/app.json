@@ -14,7 +14,8 @@
     "pages/cultivate/cultivate",
     "pages/assistApply/assistApply",
     "pages/assistDetails/assistDetails",
-    "pages/branch/branch"
+    "pages/branch/branch",
+    "pages/userInfo/userInfo"
   ],
   "subPackages": [],
   "window": {

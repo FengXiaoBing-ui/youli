@@ -31,7 +31,7 @@
 			<view @click="submit" class="submit text-center">提交预约</view>
 		</Box>
 		<u-datetime-picker @confirm="confirm" @close="datetimeShow = false" @cancel="datetimeShow = false"
-			ref="datetimePicker" :minDate="minDate" :show="datetimeShow" v-model="reservationTime" mode="datetime"
+			ref="datetimePicker" :minDate="minDate" :show="datetimeShow" v-model="reservationTime" mode="date"
 			:formatter="formatter"></u-datetime-picker>
 		<u-picker :show="columnShow" :columns="columns" @cancel="columnShow = false" @confirm="columnsConfirm"></u-picker>
 	</view>
@@ -135,7 +135,7 @@
 			},
 			confirm(e) {
 				this.datetimeShow = false
-				this.formData.reservationTime = uni.$u.date(e.value, 'yyyy-mm-dd-hh-MM')
+				this.formData.reservationTime = uni.$u.date(e.value, 'yyyy-mm-dd')
 			},
 			openDateTime() {
 				this.datetimeShow = true
@@ -149,12 +149,6 @@
 				}
 				if (type === 'day') {
 					return `${value}日`
-				}
-				if (type === 'hour') {
-					return `${value}时`
-				}
-				if (type === 'minute') {
-					return `${value}分`
 				}
 				return value
 			},
@@ -173,7 +167,9 @@
 							title: "预约成功！"
 						})
 						setTimeout(() => {
-							uni.navigateBack()
+							uni.redirectTo({
+								url:"/pages/myReservation/myReservation"
+							})
 						}, 300)
 					} else {
 						uni.showToast({

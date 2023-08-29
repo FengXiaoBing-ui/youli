@@ -19,6 +19,8 @@
 				status:"申请中",
 				list:[],
 				statusIndex:0,
+				pageNum:1,
+				pageSize:1000
 			};
 		},
 		onLoad() {
@@ -26,7 +28,12 @@
 		},
 		methods:{
 			async aidList(){
-				let res = await this.$http.aidList({caseStatus:this.statusIndex,userId:uni.getStorageSync('userInfo').userId})
+				let res = await this.$http.aidList({
+					caseStatus:this.statusIndex,
+					userId:uni.getStorageSync('userInfo').userId,
+					pageNum:this.pageNum,
+					pageSize:this.pageSize
+					})
 				this.list = res.rows
 			},
 			details(id){

@@ -22,7 +22,9 @@
 				options:["预约中","预约成功","预约失败",],
 				status:"预约中",
 				list:[],
-				statusIndex:1,
+				statusIndex:0,
+				pageNum:1,
+				pageSize:1000
 			};
 		},
 		onLoad() {
@@ -30,7 +32,12 @@
 		},
 		methods:{
 			async getReservationList(){
-				let res = await this.$http.reservationList({userId:uni.getStorageSync('userInfo').userId,reservationStatus:this.statusIndex})
+				let res = await this.$http.reservationList({
+					userId:uni.getStorageSync('userInfo').userId,
+					reservationStatus:this.statusIndex,
+					pageNum:this.pageNum,
+					pageSize:this.pageSize
+					})
 				this.list = res.rows
 			},
 			details(id){

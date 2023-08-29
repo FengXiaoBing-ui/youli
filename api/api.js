@@ -101,6 +101,14 @@ function lawyerNumberOfServices (id){
 	return request.get(`/module/lawyer/numberOfServices/${id}`);
 }
 
+function appGetInfo (data){
+	return request.get(`/getInfo`,data);
+}
+
+function profile (data){
+	return request.put(`/system/user/profile`,data);
+}
+
 
 export default {
 	login,//登录
@@ -128,4 +136,6 @@ export default {
 	getLawyer,//律师-随机一个律师
 	numberOfServices,//网点-服务次数
 	lawyerNumberOfServices,//律师-服务次数
+	appGetInfo,//获取用户信息
+	profile,//修改用户信息
 }

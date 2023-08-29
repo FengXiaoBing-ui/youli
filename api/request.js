@@ -97,6 +97,13 @@ export default {
         options.method = 'POST'
         return this.request(options)
     },
+	// put请求
+	put(url,data = {},options = {}){
+	    options.url = url
+	    options.data = data
+	    options.method = 'PUT'
+	    return this.request(options)
+	},
     // delete请求
     del(url,data = {},options = {}){
         options.url = url

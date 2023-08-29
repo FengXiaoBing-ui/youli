@@ -2,7 +2,7 @@
 	<view class="content padding-lr-sm">
 		<view class="loginBox flex align-center justify-between padding-lr padding-top-xl">
 			<view class="flex align-center">
-				<image style="width: 120rpx;height: 120rpx;" class="round boxShadow" :src="userInfo?userInfo.user.avatar:'../../static/images/userpic.png'" mode="aspectFill"></image>
+				<image @click="goUserInfo" style="width: 120rpx;height: 120rpx;" class="round boxShadow" :src="userInfo?userInfo.user.avatar:'../../static/images/userpic.png'" mode="aspectFill"></image>
 				<button v-if="!userInfo" class="loginText margin-left" @click="login">立即登录</button>
 				<view v-else class="loginText margin-left">{{ userInfo.username }}</view>
 			</view>
@@ -34,7 +34,7 @@
 				</view>
 				<u-icon name="arrow-right" color="#DBDBDB" size="22"></u-icon>
 			</view>
-			<view @click="privacyAgreements" class="flex justify-between align-center padding-tb-sm">
+			<view @click="privacyAgreements" class="flex justify-between align-center border-bottom padding-tb-sm">
 				<view class="flex align-center">
 					<image style="width: 26rpx;height: 32rpx;" src="@/static/my/组 432@2x.png" mode=""></image>
 					<view class="margin-left-xs">隐私政策</view>
@@ -80,6 +80,11 @@
 		},
 		methods: {
 			...mapActions(['login','logout']),
+			goUserInfo(){
+				uni.navigateTo({
+					url:"/pages/userInfo/userInfo"
+				})
+			},
 			myReservation(){
 				uni.navigateTo({
 					url:"/pages/myReservation/myReservation"

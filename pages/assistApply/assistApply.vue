@@ -158,7 +158,7 @@
 							isRead: 0,
 							text: " ",
 							type: 10,
-							userIdFrom: that.userInfo.userId,
+							userIdFrom: this.userInfo.userId,
 							userIdTo: offlineRes.data.userId,
 						})
 						let params = {
@@ -169,20 +169,19 @@
 							chatRoomNumber:res.data
 						}
 						return uni.navigateTo({
-							url:path+"?params="+encodeURIComponent(JSON.stringify(params))
+							url:"/pages/chat/chat?params="+encodeURIComponent(JSON.stringify(params))
 						})
 					}
 					this.toChat(userRes)
 				})
 			},
 			async toChat(userRes){
-				let that = this;
 				const res = await this.$http.createChat({
 					date: new Date(),
 					isRead: 0,
 					text: " ",
 					type: "-1",
-					userIdFrom: that.userInfo.userId,
+					userIdFrom: this.userInfo.userId,
 					userIdTo: userRes.data.userId,
 				})
 				let params = {
@@ -197,7 +196,6 @@
 				})
 			},
 			columnsConfirm(e) {
-				console.log(e.value[0]);
 				this.formData.caseType = e.value[0]
 				this.$refs.uForm.validateField('caseType')
 				this.columnShow = false
@@ -212,10 +210,12 @@
 					uni.hideLoading()
 					if (data.code == 200) {
 						uni.showToast({
-							title: "申请成功！"
+							title: "提交成功！"
 						})
 						setTimeout(() => {
-							uni.navigateBack()
+							uni.redirectTo({
+								url:"/pages/myApply/myApply"
+							})
 						}, 300)
 					} else {
 						uni.showToast({
