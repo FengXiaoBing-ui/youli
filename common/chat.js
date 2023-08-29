@@ -45,6 +45,38 @@ class chat {
 			})
 		})
 	}
+	//更换顾问
+	async replaceConsultant(data){
+		uni.showModal({
+			title:"顾问正在为您更换其他顾问，是否确认更换",
+			success: async (element)=> {
+				if(element.confirm){
+					const res = await $H.createChat({
+						date: new Date(),
+						isRead: 0,
+						text: " ",
+						type: "-1",
+						userIdFrom: uni.getStorageSync('userInfo').userId,
+						userIdTo: data.to_id,
+					})
+					let params = {
+						to_id:data.to_id,
+						to_name:data.to_name,
+						to_avatar:data.to_avatar,
+						chat_type:"1",
+						chatRoomNumber:res.data
+					}
+					return uni.redirectTo({
+						url:"/pages/chat/chat?params="+encodeURIComponent(JSON.stringify(params))
+					})
+				}
+				if(element.cancel){
+					this.endSeek()
+				}
+			}
+		})
+
+	}
 	//结束咨询
 	endSeek(data){
 		store.commit('setEvaluateShow',true)
@@ -148,6 +180,9 @@ class chat {
 				break;
 			case 12: //线下网点卡片
 				this.handleOnMessage(JSON.parse(res.text))
+				break;
+			case 13: //换法律顾问
+				this.replaceConsultant(JSON.parse(res.text))
 				break;
 			default:
 				// 处理消息

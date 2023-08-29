@@ -1,6 +1,9 @@
 <template>
 	<view class="content padding-lr-xs">
 		<Box title="咨询" :rightIcon="require('@/static/navbar/seek.png')">
+			<view class="w100 flex justify-center align-center padding-tb">
+				<view class="padding-lr" @click="switchStatus(item,index)" :class="item==status?'active':'noActive'" v-for="(item,index) in options" :key="index">{{ item }}</view>
+			</view>
 			<view class="w100 padding-sm radius bg-white" style="height: 80vh;overflow-y: auto;">
 				<view @click="goChat(item)" class="flex align-center padding-tb-sm" v-for="item in chatList" :key="item.updateTime">
 					<image style="width: 100rpx;height: 100rpx;" class="radius" :src="JSON.parse(item.text).to_avatar" mode="aspectFill"></image>
@@ -15,7 +18,12 @@
 	export default {
 		data() {
 			return {
-				chatList:[]
+				chatList:[],
+				options:["咨询中","已完成"],
+				status:"咨询中",
+				statusIndex:0,
+				pageSize: 100,
+				pageNum: 1
 			};
 		},
 		onShow() {
@@ -27,9 +35,20 @@
 			this.allUser()
 		},
 		methods:{
+			switchStatus(item,index){
+				this.status = item
+				this.statusIndex = index
+				if(index==0){
+					this.allUser()
+				}else{
+					this.chatList = []
+				}
+			},
 			async allUser(){
 				const res = await this.$http.myChatRoom({
-					userId:uni.getStorageSync('userInfo').userId
+					userId:uni.getStorageSync('userInfo').userId,
+					pageSize: this.pageSize,
+					pageNum: this.pageNum
 				})
 				this.chatList = res.data
 			},
@@ -57,6 +76,17 @@
 	}
 </script>
 
-<style lang="scss">
-
+<style lang="scss" scoped>
+.active{
+	font-size: 28rpx;
+	font-family: PingFang SC-Bold, PingFang SC;
+	font-weight: bold;
+	color: #212E72;
+}
+.noActive{
+	font-size: 28rpx;
+	font-family: PingFang SC-Medium, PingFang SC;
+	font-weight: 500;
+	color: #606060;
+}
 </style>
