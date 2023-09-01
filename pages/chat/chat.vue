@@ -814,7 +814,7 @@
 				// #endif
 				// 初始化
 				this.isRecording = true
-				this.RecordingStartY = e.changedTouches[0].screenY
+				this.RecordingStartY = e.changedTouches[0].clientY
 				this.unRecord = false
 				// 开始录音
 				this.RECORD.start({
@@ -839,7 +839,7 @@
 				this.unRecord = true
 			},
 			voiceTouchMove(e) {
-				let Y = Math.abs(e.changedTouches[0].screenY - this.RecordingStartY)
+				let Y = Math.abs(e.changedTouches[0].clientY - this.RecordingStartY)
 				this.unRecord = (Y >= 50)
 			},
 			// 打开聊天信息设置

@@ -2,9 +2,9 @@
 	<view class="content padding-lr-sm">
 		<view class="loginBox flex align-center justify-between padding-lr padding-top-xl">
 			<view class="flex align-center">
-				<image @click="goUserInfo" style="width: 120rpx;height: 120rpx;" class="round boxShadow" :src="userInfo?userInfo.user.avatar:'../../static/images/userpic.png'" mode="aspectFill"></image>
+				<image @click="goUserInfo" style="width: 110rpx;height: 110rpx;" class="round boxShadow" :src="userInfo?userInfo.user.avatar:'../../static/images/userpic.png'" mode="aspectFill"></image>
 				<button v-if="!userInfo" class="loginText margin-left" @click="login">立即登录</button>
-				<view v-else class="loginText margin-left">{{ userInfo.username }}</view>
+				<view v-else class="loginText margin-left-sm" style="word-wrap: break-word;">{{ userInfo.user.nickName }}</view>
 			</view>
 			<view v-if="userInfo" @click="fLogout" class="logout text-sm">
 				退出登录
@@ -134,7 +134,7 @@
 	}
 }
 .logout{
-	width: 178rpx;
+	width: 158rpx;
 	height: 60rpx;
 	line-height: 60rpx;
 	background: #92A4FE;

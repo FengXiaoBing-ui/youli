@@ -5,9 +5,12 @@
 				<view class="padding-lr" @click="switchStatus(item,index)" :class="item==status?'active':'noActive'" v-for="(item,index) in options" :key="index">{{ item }}</view>
 			</view>
 			<view class="w100 padding-sm radius bg-white" style="height: 80vh;overflow-y: auto;">
-				<view @click="goChat(item)" class="flex align-center padding-tb-sm" v-for="item in chatList" :key="item.updateTime">
-					<image style="width: 100rpx;height: 100rpx;" class="radius" :src="JSON.parse(item.text).to_avatar" mode="aspectFill"></image>
-					<view style="width: 500rpx;" class="margin-left-sm">{{ JSON.parse(item.text).to_name }}</view>
+				<view v-show="chatList.length>0" class="flex align-center padding-tb-sm" v-for="citem in chatList" @click="goChat(citem)">
+					<image style="width: 100rpx;height: 100rpx;" class="radius" :src="userInfo.userId==citem.userIdTo?citem.fromAvatar:citem.toAvatar" mode="aspectFill"></image>
+					<view style="width: 500rpx;" class="margin-left-sm">{{ userInfo.userId==citem.userIdTo?citem.fromNickName:citem.toNickName }}</view>
+				</view>
+				<view v-show="chatList.length<=0" class="w100 text-center">
+					<text @click="toChat" class="active">去咨询</text>
 				</view>
 			</view>
 		</Box>
@@ -15,6 +18,9 @@
 </template>
 
 <script>
+	import {
+		mapState
+	} from "vuex"
 	export default {
 		data() {
 			return {
@@ -34,7 +40,62 @@
 			}
 			this.allUser()
 		},
+		computed: {
+			...mapState(["latlong", "userInfo"])
+		},
 		methods:{
+			toChat(){
+				uni.showLoading({
+					title: "正在为你匹配法律顾问...",
+					icon: "none"
+				})
+				let that = this;
+				this.$http.onlineUser().then(async userRes => {
+					if (userRes.code == 500) {
+						const offlineRes = await this.$http.offlineUser()
+						const res = await this.$http.createChat({
+							isOnline: 1,
+							date: new Date(),
+							isRead: 0,
+							text: " ",
+							type: 10,
+							userIdFrom: that.userInfo.userId,
+							userIdTo: offlineRes.data.userId,
+						})
+						let params = {
+							to_id: offlineRes.data.userId,
+							to_name: offlineRes.data.nickName,
+							to_avatar: offlineRes.data.avatar,
+							chat_type: "1",
+							chatRoomNumber: res.data
+						}
+						uni.hideLoading()
+						return uni.navigateTo({
+							url: "/pages/chat/chat?params=" + encodeURIComponent(JSON.stringify(
+								params))
+						})
+					}
+					const res = await this.$http.createChat({
+						date: new Date(),
+						isRead: 0,
+						text: " ",
+						type: "-1",
+						userIdFrom: that.userInfo.userId,
+						userIdTo: userRes.data.userId,
+					})
+					let params = {
+						to_id: userRes.data.userId,
+						to_name: userRes.data.nickName,
+						to_avatar: userRes.data.avatar,
+						chat_type: "1",
+						chatRoomNumber: res.data
+					}
+					uni.hideLoading()
+					uni.navigateTo({
+						url: "/pages/chat/chat?params=" + encodeURIComponent(JSON.stringify(params))
+					})
+				})
+			},
 			switchStatus(item,index){
 				this.status = item
 				this.statusIndex = index
@@ -53,20 +114,13 @@
 				this.chatList = res.data
 			},
 			async goChat(item){
-				const res = await this.$http.createChat({
-					date: new Date(),
-					isRead: 0,
-					text: " ",
-					type: "-1",
-					userIdFrom: uni.getStorageSync('userInfo').userId,
-					userIdTo: JSON.parse(item.text).to_id,
-				})
+				console.log(7777,item);
 				let params = {
-					to_id:JSON.parse(item.text).to_id,
-					to_name:JSON.parse(item.text).to_name,
-					to_avatar:JSON.parse(item.text).to_avatar,
+					to_id:item.userIdTo,
+					to_name:item.toNickName,
+					to_avatar:item.toAvatar,
 					chat_type:"1",
-					chatRoomNumber:res.data
+					chatRoomNumber:item.chatRoomNumber
 				}
 				uni.navigateTo({
 					url:"/pages/chat/chat?params="+encodeURIComponent(JSON.stringify(params))
