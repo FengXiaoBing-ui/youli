@@ -86,11 +86,13 @@
 				})
 			},
 			myReservation(){
+				this.$refs.loginBtn.isToken()
 				uni.navigateTo({
 					url:"/pages/myReservation/myReservation"
 				})
 			},
 			myApply(){
+				this.$refs.loginBtn.isToken()
 				uni.navigateTo({
 					url:"/pages/myApply/myApply"
 				})
@@ -109,6 +111,7 @@
 				})
 			},
 			feedback() {
+				this.$refs.loginBtn.isToken()
 				uni.navigateTo({
 					url: "/pages/feedBack/feedBack"
 				})
