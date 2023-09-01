@@ -122,7 +122,7 @@
 				<view class="flex align-center">
 					<view class="flex-sub"></view>
 					<view class="flex-treble text-center title">请对本次服务做出评价</view>
-					<view class="flex justify-center flex-sub" @click="evaluateShow = false">
+					<view class="flex justify-center flex-sub" @click="close">
 						<u-icon name="close" color="#606060" size="28"></u-icon>
 					</view>
 				</view>

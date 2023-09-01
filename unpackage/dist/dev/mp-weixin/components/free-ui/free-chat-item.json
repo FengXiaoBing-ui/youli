@@ -1,8 +1,0 @@
-{
-  "component": true,
-  "usingComponents": {
-    "u-rate": "/uni_modules/uview-ui/components/u-rate/u-rate",
-    "free-avater": "/components/free-ui/free-avater",
-    "free-image": "/components/free-ui/free-image"
-  }
-}
