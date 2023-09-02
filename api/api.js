@@ -109,6 +109,18 @@ function profile (data){
 	return request.put(`/system/user/profile`,data);
 }
 
+function saveChatRoom (data){
+	return request.post(`/app/user/save`,data);
+}
+
+function getChatRoom (data){
+	return request.get(`/app/user/get`,data);
+}
+
+function delChatRoom (data){
+	return request.post(`/app/user/remove`,data);
+}
+
 
 export default {
 	login,//登录
@@ -138,4 +150,7 @@ export default {
 	lawyerNumberOfServices,//律师-服务次数
 	appGetInfo,//获取用户信息
 	profile,//修改用户信息
+	saveChatRoom,
+	getChatRoom,
+	delChatRoom,
 }

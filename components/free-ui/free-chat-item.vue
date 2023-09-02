@@ -19,7 +19,7 @@
 		:class="!isself ? 'justify-start' : 'justify-end'">
 			<!-- 好友 -->
 			<template v-if="!isself">
-				<free-avater size="70" :src="item.from_avatar||item.avatar" @click="openUser"></free-avater>
+				<free-avater size="70" :src="chat.TO.to_avatar" @click="openUser"></free-avater>
 				
 				<text v-if="hasLabelClass" class="iconfont text-white font-md position-absolute chat-left-icon" :style="shownickname ? 'top:45rpx;':'top:20rpx;'">&#xe609;</text>
 			</template>

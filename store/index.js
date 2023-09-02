@@ -22,7 +22,8 @@ const store = new Vuex.Store({
 			longitude:"39.9",
 			latitude:"116.3"
 		},
-		lineUp:0
+		lineUp:0,
+		lineUpCount:3,
     },
     mutations: {
 		setLatLong(state,val){

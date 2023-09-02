@@ -53,6 +53,7 @@
 				this.$http.onlineUser().then(async userRes => {
 					if (userRes.code == 500) {
 						const offlineRes = await this.$http.offlineUser()
+						await this.$http.saveChatRoom({adviserId:offlineRes.data.userId,userId:this.userInfo.userId})
 						const res = await this.$http.createChat({
 							isOnline: 1,
 							date: new Date(),

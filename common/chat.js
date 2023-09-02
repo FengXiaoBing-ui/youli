@@ -126,6 +126,7 @@ class chat {
 		this.isOnline = false
 		this.socket = null
 		if (this.isOpenReconnect) {
+			console.log('lllllll');
 			this.reconnect()
 			// this.reconnectConfirm()
 		}
@@ -149,16 +150,16 @@ class chat {
 		// 错误
 		switch (res.type) {
 			case -2:
-				// uni.showToast({
-				// 	title: res.text+'下线',
-				// 	icon: 'none'
-				// });
+				//下线
 				break;
 			case -3:
-				// uni.showToast({
-				// 	title: res.text+'上线',
-				// 	icon: 'none'
-				// });
+				if(this.TO){
+					$H.getChatRoom({adviserId:this.TO.to_id,userId:this.user.userId}).then(paiduiList => {
+						console.log(paiduiList);
+						store.commit('setLineUp',paiduiList.data.userIds.length-store.state.lineUpCount)
+					})
+				}
+				
 				break;
 			// case 'moment': // 朋友圈更新
 			// 	this.handleMoment(res.data)
@@ -472,7 +473,7 @@ class chat {
 		if(this.socket){
 			this.socket.close()
 		}
-		this.isOpenReconnect = false
+		// this.isOpenReconnect = false
 		console.log('关闭成功');
 	}
 	// 销毁聊天对象

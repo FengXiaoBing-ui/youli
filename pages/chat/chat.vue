@@ -308,7 +308,8 @@
 				user: state => state.userInfo,
 				KeyboardH: state => state.KeyboardHeight,
 				lineUp: state => state.lineUp,
-				evaluateShow:state => state.evaluateShow
+				evaluateShow: state => state.evaluateShow,
+				lineUpCount: state => state.lineUpCount 
 			}),
 			// 当前会话配置信息
 			currentChatItem() {
@@ -387,6 +388,11 @@
 				return
 			}
 			this.detail = JSON.parse(decodeURIComponent(e.params))
+			if(this.detail.offline){
+				const paiduiList =  await this.$http.getChatRoom({adviserId:this.detail.to_id,userId:this.user.userId})
+				console.log(paiduiList);
+				this.setLineUp(paiduiList.data.userIds.length-this.lineUpCount)
+			}
 			// 初始化
 			this.__init()
 			// 创建聊天对象
@@ -410,6 +416,7 @@
 			uni.$on('sendItem', this.onSendItem)
 		},
 		destroyed() {
+			this.$http.delChatRoom({adviserId:this.detail.to_id,userId:this.user.userId})
 			// 停止录音
 			this.voiceTouchEnd()
 			// 销毁聊天对象
@@ -428,6 +435,7 @@
 				this.chat.exitChat(this.detail)
 				this.setLineUp(0)
 			}
+			this.chat.close()
 		},
 		methods: {
 			...mapMutations(['regSendVoiceEvent', 'setLineUp','setLawyerCard','setEvaluateShow']),
