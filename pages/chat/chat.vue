@@ -40,7 +40,7 @@
 						@touchmove="voiceTouchMove">
 						<text class="font">{{isRecording ? '松开 结束':'按住 说话'}}</text>
 					</view>
-					<textarea v-else :disabled="lineUp>0" fixed class="bg-white rounded p-2 font-md" style="height: 80rpx;max-width: 550rpx;"
+					<textarea v-else :show-confirm-bar="false" :disabled="lineUp>0" fixed class="bg-white rounded p-2 font-md" style="height: 80rpx;max-width: 550rpx;"
 						:adjust-position="false" v-model="text" @blur="blur" />
 				</view>
 				<!-- 表情 -->
