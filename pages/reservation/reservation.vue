@@ -44,7 +44,6 @@
 				minDate: new Date().getTime(),
 				columns: [
 					[
-						'案情类别',
 						'婚姻家庭',
 						'交通事故',
 						'医疗纠纷',
@@ -117,6 +116,7 @@
 		},
 		onReady() {
 			// 微信小程序需要用此写法
+			this.$refs.uForm.setRules(this.rules)
 			this.$refs.datetimePicker.setFormatter(this.formatter)
 		},
 		onLoad(options) {

@@ -29,6 +29,12 @@
 		},
 		methods:{
 			async submit(){
+				if(this.title==""||this.text==""){
+					return uni.showToast({
+						title:"请输入反馈内容和标题",
+						icon:"none"
+					})
+				}
 				uni.showLoading({
 					title:"提交中..."
 				})

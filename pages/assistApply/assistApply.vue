@@ -33,7 +33,7 @@
 							<u-icon slot="right" name="arrow-down" color="#DBDBDB" size="22"></u-icon>
 						</u-form-item>
 						<u-form-item labelWidth="95" label="涉案金额" prop="caseMoney" borderBottom ref="item1">
-							<u--input v-model="formData.caseMoney" placeholder="请输入涉案金额" border="none"></u--input>
+							<u--input type="digit" v-model="formData.caseMoney" placeholder="请输入涉案金额" border="none"></u--input>
 						</u-form-item>
 						<u-form-item labelWidth="95" label="审理阶段" prop="caseStage" borderBottom ref="item1">
 							<u--input v-model="formData.caseStage" placeholder="请输入审理阶段" border="none"></u--input>
@@ -146,6 +146,10 @@
 		},
 		computed:{
 			...mapState(["userInfo"])
+		},
+		onReady() {
+			// 微信小程序需要用此写法
+			this.$refs.uForm.setRules(this.rules)
 		},
 		methods: {
 			onLineSeek(){
