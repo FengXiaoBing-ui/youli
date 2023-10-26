@@ -435,7 +435,7 @@
 				this.chat.exitChat(this.detail)
 				this.setLineUp(0)
 			}
-			this.chat.close()
+			// this.chat.close()
 		},
 		methods: {
 			...mapMutations(['regSendVoiceEvent', 'setLineUp','setLawyerCard','setEvaluateShow']),
