@@ -15,7 +15,7 @@
 	export default {
 		data() {
 			return {
-				options:["申请中","处理中","不处理","已完成"],
+				options:["申请中","处理中","已完成","不处理"],
 				status:"申请中",
 				list:[],
 				statusIndex:0,
