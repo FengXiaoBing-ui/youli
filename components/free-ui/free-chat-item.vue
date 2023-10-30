@@ -116,8 +116,7 @@
 			<!-- 本人 -->
 			<template v-if="isself">
 				<text v-if="hasLabelClass" class="iconfont text-chat-item font-md position-absolute chat-right-icon" :style="shownickname ? 'top:45rpx;':'top:20rpx;'">&#xe640;</text>
-				<free-avater size="70" :src="item.from_avatar"
-				@click="openUser"></free-avater>
+				<free-avater size="70" :src="user.user.avatar" @click="openUser"></free-avater>
 			</template>
 		</view>
 		
@@ -171,7 +170,7 @@
 			// 是否是本人
 			isself() {
 				// 获取本人id
-				let id = this.user.userId ? this.user.userId : 0
+				let id = this.user.user.userId ? this.user.user.userId : 0
 				return this.item.from_id === id 
 			},
 			// 显示的时间

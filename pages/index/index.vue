@@ -102,7 +102,11 @@
 		onShow() {
 			this.getLocation()
 		},
-		onLoad() {},
+		onLoad() {
+			if(uni.getStorageSync('token')){
+				this.getUserInfo()
+			}
+		},
 		onShareAppMessage() { // 分享到微信好友
 			// 更多参数配置，参考文档
 			return {
@@ -119,7 +123,11 @@
 			}
 		},
 		methods: {
-			...mapMutations(["setLatLong"]),
+			...mapMutations(["setLatLong","setUserInfo"]),
+			async getUserInfo(){
+				const res = await this.$http.appGetInfo({userId:uni.getStorageSync('userInfo').user.userId})
+				this.setUserInfo(res)
+			},
 			mkm(distance) {
 				let m = distance.toFixed(0)
 				return m.toString().length > 3 ? ((m / 1000).toFixed(2) + 'km') : m + 'm'
@@ -138,13 +146,13 @@
 					this.$http.onlineUser().then(async userRes => {
 						if (userRes.code == 500) {
 							const offlineRes = await this.$http.offlineUser()
-							await this.$http.saveChatRoom({adviserId:offlineRes.data.userId,userId:this.userInfo.userId})
+							await this.$http.saveChatRoom({adviserId:offlineRes.data.userId,userId:this.userInfo.user.userId})
 							const res = await this.$http.createChat({
 								date: new Date(),
 								isRead: 0,
 								text: " ",
 								type: 10,
-								userIdFrom: that.userInfo.userId,
+								userIdFrom: that.userInfo.user.userId,
 								userIdTo: offlineRes.data.userId,
 							})
 							let params = {
@@ -175,7 +183,7 @@
 					isRead: 0,
 					text: " ",
 					type: "-1",
-					userIdFrom: that.userInfo.userId,
+					userIdFrom: that.userInfo.user.userId,
 					userIdTo: userRes.data.userId,
 				})
 				let params = {

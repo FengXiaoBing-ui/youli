@@ -34,6 +34,7 @@ const store = new Vuex.Store({
 		},
 		setUserInfo(state,val){
 			state.userInfo = val
+			uni.setStorageSync('userInfo',state.userInfo)
 		},
 		setChat(state,val){
 			state.chat = Object.assign({},val)

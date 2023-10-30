@@ -9,7 +9,7 @@ class chat {
 		this.isOpenReconnect = true
 		this.heartBeatInterval = null
 		// 获取当前用户相关信息
-		let user = uni.getStorageSync('userInfo')
+		let user = uni.getStorageSync('userInfo').user
 		this.user = user ? user : {}
 		// 初始化聊天对象
 		this.TO = false;
@@ -17,7 +17,7 @@ class chat {
 		// 创建背景音频管理器
 		this.bgAudioMannager = uni.getBackgroundAudioManager();
 		// 连接和监听
-		if (this.user.token) {
+		if (uni.getStorageSync('token')) {
 			this.connectSocket()
 		}
 	}
@@ -102,6 +102,7 @@ class chat {
 	}
 	// 连接socket
 	connectSocket() {
+		console.log(888,this.user);
 		this.socket = uni.connectSocket({
 			url: this.url + "/" + this.user.userId,
 			complete: () => {}
@@ -234,8 +235,10 @@ class chat {
 				to_id:message.to_id || this.TO.to_id,
 				userIdFrom:this.user.userId,
 				userIdTo:message.to_id || this.TO.to_id,
+				fromAvatar:message.from_avatar,
+				toAvatar:message.to_avatar,
 				chat_type:message.chat_type || this.TO.chat_type, 
-				type:message.type, 
+				type:message.type,
 				text:JSON.stringify(message),
 				options:JSON.stringify(message.options)
 			}).then(res=>{
@@ -546,8 +549,8 @@ class chat {
 	formatSendData(params){
 		return {
 			id:0, // 唯一id，后端生成，用于撤回指定消息
-			from_avatar:this.user.user.avatar,// 发送者头像
-			from_name:this.user.user.nickName || this.user.username, // 发送者昵称
+			from_avatar:this.user.avatar,// 发送者头像
+			from_name:this.user.nickName || this.user.username, // 发送者昵称
 			from_id:this.user.userId, // 发送者id
 			to_id:params.to_id || this.TO.to_id, // 接收人/群 id
 			to_name:params.to_name || this.TO.to_name, // 接收人/群 名称

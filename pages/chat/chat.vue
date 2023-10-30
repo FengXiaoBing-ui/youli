@@ -389,7 +389,7 @@
 			}
 			this.detail = JSON.parse(decodeURIComponent(e.params))
 			if(this.detail.offline){
-				const paiduiList =  await this.$http.getChatRoom({adviserId:this.detail.to_id,userId:this.user.userId})
+				const paiduiList =  await this.$http.getChatRoom({adviserId:this.detail.to_id,userId:this.user.user.userId})
 				await this.$http.updateIsOnline({
 					chatRoomNumber: this.detail.chatRoomNumber,
 					isOnline: 1
@@ -424,7 +424,7 @@
 			// })
 		},
 		destroyed() {
-			this.$http.delChatRoom({adviserId:this.detail.to_id,userId:this.user.userId})
+			this.$http.delChatRoom({adviserId:this.detail.to_id,userId:this.user.user.userId})
 			// 停止录音
 			this.voiceTouchEnd()
 			// 销毁聊天对象
@@ -636,7 +636,7 @@
 					event: 'delete'
 				}]
 				let item = this.list[this.propIndex]
-				let isSelf = this.user.id === item.from_id
+				let isSelf = this.user.user.id === item.from_id
 				if (isSelf) {
 					menus.push({
 						name: "撤回",
@@ -658,7 +658,7 @@
 			// 操作菜单方法分发
 			clickEvent(event) {
 				let item = this.list[this.propIndex]
-				let isSelf = this.user.id === item.from_id
+				let isSelf = this.user.user.id === item.from_id
 				switch (event) {
 					case 'removeChatItem': // 撤回消息
 						// 拿到当前被操作的信息

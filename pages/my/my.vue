@@ -55,7 +55,7 @@
 
 <script>
 	import loginBtn from "@/components/login"
-	import {mapActions,mapState} from "vuex";
+	import {mapActions,mapState,mapMutations} from "vuex";
 	export default {
 		components:{
 			loginBtn
@@ -69,6 +69,9 @@
 			...mapState(["userInfo"])
 		},
 		onLoad() {
+			if(uni.getStorageSync('token')){
+				this.getUserInfo()
+			}
 			// // #ifndef MP-WEIXIN
 			// let that = this
 			// that.$http.phoneLogin({
@@ -80,6 +83,11 @@
 		},
 		methods: {
 			...mapActions(['login','logout']),
+			...mapMutations(['setUserInfo']),
+			async getUserInfo(){
+				const res = await this.$http.appGetInfo({userId:uni.getStorageSync('userInfo').user.userId})
+				this.setUserInfo(res)
+			},
 			goUserInfo(){
 				uni.navigateTo({
 					url:"/pages/userInfo/userInfo"

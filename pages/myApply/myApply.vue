@@ -30,7 +30,7 @@
 			async aidList(){
 				let res = await this.$http.aidList({
 					caseStatus:this.statusIndex,
-					userId:uni.getStorageSync('userInfo').userId,
+					userId:uni.getStorageSync('userInfo').user.userId,
 					pageNum:this.pageNum,
 					pageSize:this.pageSize
 					})

@@ -32,7 +32,7 @@
 		methods: {
 			...mapMutations(['setUserInfo']),
 			async getUserInfo(){
-				const res = await this.$http.appGetInfo({userId:uni.getStorageSync('userInfo').userId})
+				const res = await this.$http.appGetInfo({userId:uni.getStorageSync('userInfo').user.userId})
 				this.info = res.user
 				this.setUserInfo(res)
 			},

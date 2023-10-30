@@ -6,8 +6,8 @@
 			</view>
 			<view class="w100 padding-sm radius bg-white" style="height: 80vh;overflow-y: auto;">
 				<view v-show="chatList.length>0" class="flex align-center padding-tb-sm" v-for="citem in chatList" @click="goChat(citem)">
-					<image style="width: 100rpx;height: 100rpx;" class="radius" :src="userInfo.userId==citem.userIdTo?citem.fromAvatar:citem.toAvatar" mode="aspectFill"></image>
-					<view style="width: 500rpx;" class="margin-left-sm">{{ userInfo.userId==citem.userIdTo?citem.fromNickName:citem.toNickName }}</view>
+					<image style="width: 100rpx;height: 100rpx;" class="radius" :src="userInfo.user.userId==citem.userIdTo?citem.fromAvatar:citem.toAvatar" mode="aspectFill"></image>
+					<view style="width: 500rpx;" class="margin-left-sm">{{ userInfo.user.userId==citem.userIdTo?citem.fromNickName:citem.toNickName }}</view>
 				</view>
 				<view v-show="chatList.length<=0" class="w100 text-center">
 					<text @click="toChat" class="active">去咨询</text>
@@ -53,7 +53,7 @@
 				this.$http.onlineUser().then(async userRes => {
 					if (userRes.code == 500) {
 						const offlineRes = await this.$http.offlineUser()
-						await this.$http.saveChatRoom({adviserId:offlineRes.data.userId,userId:this.userInfo.userId})
+						await this.$http.saveChatRoom({adviserId:offlineRes.data.userId,userId:this.userInfo.user.userId})
 						const res = await this.$http.createChat({
 							isOnline: 1,
 							date: new Date(),
@@ -104,7 +104,7 @@
 			},
 			async allUser(){
 				const res = await this.$http.myChatRoom({
-					userId:uni.getStorageSync('userInfo').userId,
+					userId:uni.getStorageSync('userInfo').user.userId,
 					pageSize: this.pageSize,
 					pageNum: this.pageNum,
 					state:this.statusIndex
@@ -114,9 +114,9 @@
 			async goChat(item){
 				console.log(7777,item);
 				let params = {
-					to_id:item.userIdTo,
-					to_name:item.toNickName,
-					to_avatar:item.toAvatar,
+					to_id:this.userInfo.user.userId==item.userIdTo?item.userIdFrom:item.userIdTo,
+					to_name:this.userInfo.user.userId==item.userIdTo?item.fromNickName:item.toNickName,
+					to_avatar:this.userInfo.user.userId==item.userIdTo?item.fromAvatar:item.toAvatar,
 					chat_type:"1",
 					chatRoomNumber:item.chatRoomNumber
 				}

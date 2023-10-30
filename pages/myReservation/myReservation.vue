@@ -33,7 +33,7 @@
 		methods:{
 			async getReservationList(){
 				let res = await this.$http.reservationList({
-					userId:uni.getStorageSync('userInfo').userId,
+					userId:uni.getStorageSync('userInfo').user.userId,
 					reservationStatus:this.statusIndex,
 					pageNum:this.pageNum,
 					pageSize:this.pageSize
