@@ -390,7 +390,10 @@
 			this.detail = JSON.parse(decodeURIComponent(e.params))
 			if(this.detail.offline){
 				const paiduiList =  await this.$http.getChatRoom({adviserId:this.detail.to_id,userId:this.user.userId})
-				console.log(paiduiList);
+				await this.$http.updateIsOnline({
+					chatRoomNumber: this.detail.chatRoomNumber,
+					isOnline: 1
+				})
 				this.setLineUp(paiduiList.data.userIds.length-this.lineUpCount)
 			}
 			// 初始化
@@ -414,6 +417,11 @@
 
 			// 监听发送收藏和名片
 			uni.$on('sendItem', this.onSendItem)
+			
+			// this.$http.updateIsOnline({
+			// 	chatRoomNumber: this.detail.chatRoomNumber,
+			// 	isOnline: 1
+			// })
 		},
 		destroyed() {
 			this.$http.delChatRoom({adviserId:this.detail.to_id,userId:this.user.userId})

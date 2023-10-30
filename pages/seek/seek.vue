@@ -100,17 +100,14 @@
 			switchStatus(item,index){
 				this.status = item
 				this.statusIndex = index
-				if(index==0){
-					this.allUser()
-				}else{
-					this.chatList = []
-				}
+				this.allUser()
 			},
 			async allUser(){
 				const res = await this.$http.myChatRoom({
 					userId:uni.getStorageSync('userInfo').userId,
 					pageSize: this.pageSize,
-					pageNum: this.pageNum
+					pageNum: this.pageNum,
+					state:this.statusIndex
 				})
 				this.chatList = res.data
 			},

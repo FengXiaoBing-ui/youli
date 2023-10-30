@@ -140,7 +140,6 @@
 							const offlineRes = await this.$http.offlineUser()
 							await this.$http.saveChatRoom({adviserId:offlineRes.data.userId,userId:this.userInfo.userId})
 							const res = await this.$http.createChat({
-								isOnline: 1,
 								date: new Date(),
 								isRead: 0,
 								text: " ",
@@ -158,8 +157,7 @@
 							}
 							uni.hideLoading()
 							return uni.navigateTo({
-								url: path + "?params=" + encodeURIComponent(JSON.stringify(
-									params))
+								url: path + "?params=" + encodeURIComponent(JSON.stringify(params))
 							})
 						}
 						this.toChat(userRes)

@@ -51,6 +51,14 @@ class chat {
 			title:"顾问正在为您更换其他顾问，是否确认更换",
 			success: async (element)=> {
 				if(element.confirm){
+					if(!data.isOnline){
+						await $H.saveChatRoom({adviserId:data.to_id,userId:uni.getStorageSync('userInfo').userId})
+						console.log(777,this.TO);
+						await $H.updateIsOnline({
+							chatRoomNumber: this.TO.chatRoomNumber,
+							isOnline: 1
+						})
+					}
 					const res = await $H.createChat({
 						date: new Date(),
 						isRead: 0,
