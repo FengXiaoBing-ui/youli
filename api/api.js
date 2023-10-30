@@ -150,7 +150,7 @@ export default {
 	lawyerNumberOfServices,//律师-服务次数
 	appGetInfo,//获取用户信息
 	profile,//修改用户信息
-	saveChatRoom,
-	getChatRoom,
-	delChatRoom,
+	saveChatRoom,//顾问-存
+	getChatRoom,//顾问-取
+	delChatRoom,//顾问-删除
 }
