@@ -16,10 +16,18 @@
 		</view>
 		<view class="padding-lr-sm w100" style="position: relative;"
 			:style="'top:'+(statusBarHeight.top+statusBarHeight.height+170)+'px'">
-			<view @click="cultivate" class="padding-sm w100" style="border-radius: 12rpx;background: #F7F7F7;">
-				<view class="text-bold" style="color: #777777;">课程培训</view>
-				<view class="margin-top-sm" style="color: #999999;">
-					本课程面向即将就业的高等院校学生及法律职业从业人士，着重提高法律应用实践能力，为从事法律业务的单位、企业、律所等提供参考标准和依据。</view>
+			<view class="padding-sm w100" style="border-radius: 12rpx;background: #F7F7F7;">
+				<view class="text-bold flex justify-between align-center">
+					<text>课程培训</text>
+					<text class="padding-tb-sm padding-left-sm" @click="cultivate">更多</text>
+				</view>
+				<view class="flex align-center justify-between">
+					<view class="flex flex-direction align-center flex-sub margin-lr-xs" v-for="(item,index) in movieList" :key="index">
+						 <video style="width:100%;height: 185rpx;" :src="item.lessonUrl" controls></video>
+						 <view class="margin-top-sm text-cut2 w100" style="height: 80rpx;">{{ item.lessonName }}</view>
+					</view>
+				</view>
+				<!-- <view class="margin-top-sm" style="color: #999999;">本课程面向即将就业的高等院校学生及法律职业从业人士，着重提高法律应用实践能力，为从事法律业务的单位、企业、律所等提供参考标准和依据。</view> -->
 			</view>
 			<view class="branchBox margin-top" style="padding-bottom: 40rpx;">
 				<view
@@ -80,7 +88,6 @@
 					},
 					{
 						name: "线下网点",
-
 						url: require('../../static/index/xianxia.png'),
 						path: "/pages/branch/branch"
 					},
@@ -93,7 +100,8 @@
 				branchList: [],
 				m: "",
 				pageSize: 100,
-				pageNum: 1
+				pageNum: 1,
+				movieList:[]
 			}
 		},
 		computed: {
@@ -101,6 +109,7 @@
 		},
 		onShow() {
 			this.getLocation()
+			this.lessonList()
 		},
 		onLoad() {
 			if(uni.getStorageSync('token')){
@@ -124,6 +133,10 @@
 		},
 		methods: {
 			...mapMutations(["setLatLong","setUserInfo"]),
+			async lessonList(){
+				const res = await this.$http.lessonList({pageSize:2,pageNum:1,lessonStatus:0})
+				this.movieList = res.rows
+			},
 			async getUserInfo(){
 				const res = await this.$http.appGetInfo({userId:uni.getStorageSync('userInfo').user.userId})
 				this.setUserInfo(res)

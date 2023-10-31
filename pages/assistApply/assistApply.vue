@@ -210,6 +210,7 @@
 					uni.showLoading({
 						title: "申请提交中..."
 					})
+					this.formData.userId = this.userInfo.user.userId
 					console.log(this.formData);
 					let data = await this.$http.aid(this.formData)
 					uni.hideLoading()

@@ -55,12 +55,11 @@
 						const offlineRes = await this.$http.offlineUser()
 						await this.$http.saveChatRoom({adviserId:offlineRes.data.userId,userId:this.userInfo.user.userId})
 						const res = await this.$http.createChat({
-							isOnline: 1,
 							date: new Date(),
 							isRead: 0,
 							text: " ",
 							type: 10,
-							userIdFrom: that.userInfo.userId,
+							userIdFrom: that.userInfo.user.userId,
 							userIdTo: offlineRes.data.userId,
 						})
 						let params = {
@@ -81,7 +80,7 @@
 						isRead: 0,
 						text: " ",
 						type: "-1",
-						userIdFrom: that.userInfo.userId,
+						userIdFrom: that.userInfo.user.userId,
 						userIdTo: userRes.data.userId,
 					})
 					let params = {

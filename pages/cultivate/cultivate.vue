@@ -27,7 +27,7 @@
 		},
 		methods:{
 			async lessonList(){
-				const res = await this.$http.lessonList()
+				const res = await this.$http.lessonList({lessonStatus:0})
 				this.list = res.rows
 			}
 		}
