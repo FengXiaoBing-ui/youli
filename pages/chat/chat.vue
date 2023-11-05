@@ -131,10 +131,12 @@
 					<view class="padding-left-lg">
 						<u-rate :count="guwen.count" v-model="guwen.value"></u-rate>
 					</view>
-					<!-- <view class="text-bold margin-top-lg text-xl">2、请对XXX律师进行打分</view>
-					<view class="padding-left-lg">
-						<u-rate :count="lvshi.count" v-model="lvshi.value"></u-rate>
-					</view> -->
+					<template v-if="lawyer">
+						<view class="text-bold margin-top-lg text-xl">2、请对{{ lawyer.realName }}进行打分</view>
+						<view class="padding-left-lg">
+							<u-rate :count="lvshi.count" v-model="lvshi.value"></u-rate>
+						</view>
+					</template>
 					<view class="text-bold margin-top-lg text-xl">3、补充内容</view>
 					<view class="padding-left-lg">
 						<u--textarea v-model="value1" placeholder="请输入内容"></u--textarea>
@@ -253,8 +255,8 @@
 					avatar: "",
 					chat_type: "user"
 				},
-
-				isfocus: false
+				isfocus: false,
+				lawyer:null
 			}
 		},
 		mounted() {
@@ -406,6 +408,9 @@
 			let arr = [],
 				rows = []
 			res.rows.forEach((item => {
+				if(item.type==11){
+					this.lawyer = JSON.parse(JSON.parse(item.text).data)
+				}
 				rows.push(JSON.parse(item.text))
 			}))
 			arr = rows.reverse().concat(arr)
@@ -465,12 +470,24 @@
 					star: this.guwen.value,
 					text: this.value1
 				})
+				if(this.lawyer){
+					const lawyerRes = await this.$http.star({
+						platformType: 1,
+						starUserId: this.lawyer.id,
+						star: this.lvshi.value,
+						text: this.value1
+					})
+				}
+				
 				if (res.code == 200) {
 					uni.showToast({
 						title: "感谢你的评价",
 						icon: "none"
 					})
-					this.close()
+					this.send('system', '感谢你的评价', {})
+					setTimeout(() => {
+						this.close()
+					},1000)
 				} else {
 					uni.showToast({
 						title: res.msg,

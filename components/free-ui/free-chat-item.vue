@@ -11,7 +11,7 @@
 			<text class="font-sm text-light-muted">{{ isself ? '你' : '对方' }}撤回了一条信息</text>
 		</view>
 		<!-- 系统消息 -->
-		<view v-if="item.type === 'system'" ref="isremove" class="flex align-center justify-center pb-4 pt-1">
+		<view v-if="item.type === 'system'" ref="isremove" class="flex align-center justify-center round pb-1 pt-1 bg-gray">
 			<text class="font-sm text-light-muted">{{item.data}}</text>
 		</view>
 		<!-- 气泡 -->

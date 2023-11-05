@@ -40,8 +40,8 @@
 				uni.chooseImage({
 					success: async (res)=> {
 						const data = await this.$http.upLoadFile(res.tempFilePaths[0])
-						this.info.avatar = data.data.url
-						if(data.data.url){
+						this.info.avatar = data.data
+						if(data.data){
 							const isPut =  await this.$http.profile(this.info)
 							if(isPut.code==200){
 								uni.showToast({

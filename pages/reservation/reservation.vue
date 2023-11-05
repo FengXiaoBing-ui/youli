@@ -41,7 +41,7 @@
 	export default {
 		data() {
 			return {
-				minDate: new Date().getTime(),
+				minDate: new Date().getTime()+86400000,
 				columns: [
 					[
 						'婚姻家庭',

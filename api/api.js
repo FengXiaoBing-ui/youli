@@ -74,7 +74,7 @@ function myChatRoom (data){
 }
 
 function upLoadFile (data){
-	return request.upload(`/thirdParty/oss/upload`,data);
+	return request.upload(`/core/aliyun/upload`,data);
 }
 
 function star (data){

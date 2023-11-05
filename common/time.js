@@ -55,9 +55,10 @@ export default{
 	},
 	 
 	dateFormat(date, formatStr) {
+		// mons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 		let dateObj = {},
 			rStr = /\{([^}]+)\}/,
-			mons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+			mons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12','13','14','15','16','17','18','19','20','21','22','23','24'];
 		 
 		dateObj["Y"] = date.getFullYear();
 		dateObj["M"] = date.getMonth() + 1;
@@ -67,7 +68,8 @@ export default{
 		dateObj["DD"] = this.parseNumber(dateObj["D"]);
 		dateObj["h"] = date.getHours();
 		dateObj["hh"] = this.parseNumber(dateObj["h"]);
-		dateObj["t"] = dateObj["h"] > 12 ? dateObj["h"] - 12 : dateObj["h"];
+		// dateObj["t"] = dateObj["h"] > 12 ? dateObj["h"] - 12 : dateObj["h"];
+		dateObj["t"] = dateObj["h"] > 24 ? dateObj["h"] - 24 : dateObj["h"];
 		dateObj["tt"] = this.parseNumber(dateObj["t"]);
 		dateObj["A"] = dateObj["h"] > 12 ? '下午' : '上午';
 		dateObj["i"] = date.getMinutes();
