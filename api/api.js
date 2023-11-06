@@ -121,6 +121,10 @@ function delChatRoom (data){
 	return request.post(`/app/user/remove`,data);
 }
 
+function addRoom (data){
+	return request.get(`/module/room`,data);
+}
+
 
 export default {
 	login,//登录
@@ -153,4 +157,5 @@ export default {
 	saveChatRoom,//顾问-存
 	getChatRoom,//顾问-取
 	delChatRoom,//顾问-删除
+	addRoom,//聊天室-追加一人至聊天室
 }

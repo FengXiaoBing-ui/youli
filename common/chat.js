@@ -62,20 +62,24 @@ class chat {
 							isOnline: 1
 						})
 					}
-					const res = await $H.createChat({
-						date: new Date(),
-						isRead: 0,
-						text: " ",
-						type: "-1",
-						userIdFrom: this.user.userId,
-						userIdTo: data.to_id,
+					await $H.addRoom({
+						chatRoomNumber:this.TO.chatRoomNumber,
+						userId:data.to_id,
 					})
+					// const res = await $H.createChat({
+					// 	date: new Date(),
+					// 	isRead: 0,
+					// 	text: " ",
+					// 	type: "-1",
+					// 	userIdFrom: this.user.userId,
+					// 	userIdTo: data.to_id,
+					// })
 					let params = {
 						to_id: data.to_id,
 						to_name: data.to_name,
 						to_avatar: data.to_avatar,
 						chat_type: "1",
-						chatRoomNumber: res.data
+						chatRoomNumber: this.TO.chatRoomNumber
 					}
 					return uni.redirectTo({
 						url: "/pages/chat/chat?params=" + encodeURIComponent(JSON.stringify(
